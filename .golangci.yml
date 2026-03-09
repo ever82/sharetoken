@@ -134,10 +134,11 @@ issues:
         - gofmt
         - goimports
 
-    # 排除 app/app.go 的 gofmt (Ignite 生成的代码)
+    # 排除 app/app.go 的 gofmt/goimports (Ignite 生成的代码)
     - path: app/app.go
       linters:
         - gofmt
+        - goimports
 
     # 排除 cmd/sharetokend/cmd/root.go 的 goimports (Ignite 生成的代码)
     - path: cmd/sharetokend/cmd/root.go
