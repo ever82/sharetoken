@@ -319,6 +319,7 @@ func (nm *NATManager) GetExternalAddress() (string, error) {
 }
 
 // detectExternalIP attempts to detect external IP address
+// nolint:unused // Kept for future use
 func (nm *NATManager) detectExternalIP() (string, error) {
 	nm.upnpMu.RLock()
 	client := nm.upnpClient
