@@ -55,6 +55,65 @@
 
 ---
 
+## Issue #3: ACH-DEV-003 钱包与代币系统
+
+### 延后项
+
+#### 1. 前端钱包运行时集成测试
+
+**原始验收项**:
+- Keplr 钱包实际集成验证（需浏览器环境）
+- WalletConnect 移动端实际集成（需移动设备）
+- 前端钱包 UI 实际测试（需 Vue 运行时）
+
+**当前状态**: ⏭️ 延后实现
+
+**延后原因**:
+- 需要 Node.js 运行时环境
+- Keplr 需要浏览器扩展安装
+- WalletConnect 需要移动设备钱包应用
+- 属于部署后用户体验测试，不影响核心功能
+
+**已完成代码（待运行时测试）**:
+| 文件 | 代码量 | 状态 |
+|------|--------|------|
+| `frontend/src/utils/keplr.js` | 261行 | ✅ 代码完整 |
+| `frontend/src/utils/walletconnect.js` | 292行 | ✅ 代码完整 |
+| `frontend/src/components/Wallet.vue` | 417行 | ✅ 代码完整 |
+| `frontend/test-keplr.html` | 243行 | ✅ 测试页面就绪 |
+
+**前置条件**:
+- [ ] Node.js 环境安装
+- [ ] 前端依赖安装：`npm install`
+- [ ] 前端开发服务器：`npm run serve`
+- [ ] Keplr 浏览器扩展安装
+- [ ] 移动设备钱包（Trust Wallet/Keplr Mobile）
+
+**计划实现阶段**: ACH-DEV-016 测试网部署阶段
+
+**测试步骤（待执行）**:
+```bash
+cd frontend
+npm install
+npm run serve
+# 访问 http://localhost:8080
+# 或打开 test-keplr.html 测试 Keplr 集成
+```
+
+**验收标准（待实现）**:
+- [ ] Keplr 扩展正确识别并添加 ShareToken 链
+- [ ] 前端正确显示钱包地址和余额
+- [ ] 转账交易可成功签名并广播
+- [ ] WalletConnect QR 码可正常扫描连接
+- [ ] 移动端可成功签名交易
+- [ ] 交易历史正确显示
+
+**备注**:
+> 端到端交易已通过 CLI 验证（区块65确认，余额正确更新）。
+> 前端代码完整，API 端点就绪，待部署阶段统一进行前端运行时测试。
+
+---
+
 ## 历史延后项
 
 ### 已解决项
