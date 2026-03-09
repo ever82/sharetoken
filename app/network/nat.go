@@ -6,9 +6,13 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/cometbft/cometbft/libs/log"
+	"github.com/huin/goupnp"
+	"github.com/huin/goupnp/dcps/internetgateway1"
+	"github.com/huin/goupnp/dcps/internetgateway2"
 )
 
 // NATConfig holds NAT configuration options
@@ -45,6 +49,15 @@ type NATManager struct {
 	logger    log.Logger
 	cancel    context.CancelFunc
 	ctx       context.Context
+	upnpClient UPnPClient
+	upnpMu    sync.RWMutex
+}
+
+// UPnPClient interface for UPnP operations
+type UPnPClient interface {
+	GetExternalIPAddress() (string, error)
+	AddPortMapping(protocol string, externalPort, internalPort uint16, internalIP string, enabled bool, description string, lease uint32) error
+	DeletePortMapping(protocol string, externalPort uint16) error
 }
 
 // PortMapping represents a single port mapping
@@ -85,6 +98,8 @@ func (nm *NATManager) Start() error {
 			// The node can still work without UPnP
 		} else {
 			nm.logger.Info("UPnP port mapping configured successfully")
+			// Start keepalive goroutine
+			go nm.keepalive()
 		}
 	}
 
@@ -110,29 +125,175 @@ func (nm *NATManager) setupUPnP() error {
 		"port", nm.config.P2PPort,
 	)
 
-	// Note: Full UPnP implementation requires external library like
-	// github.com/huin/goupnp or github.com/jackpal/gateway
-	// For now, we log the configuration and provide the structure
+	// Discover UPnP IGD devices
+	client, err := nm.discoverUPnP()
+	if err != nil {
+		return fmt.Errorf("failed to discover UPnP device: %w", err)
+	}
 
-	// This is a placeholder implementation
-	// In production, you would:
-	// 1. Discover UPnP devices via SSDP
-	// 2. Get external IP address from IGD
-	// 3. Add port mapping for P2P port
-	// 4. Start keepalive to maintain mapping
+	nm.upnpMu.Lock()
+	nm.upnpClient = client
+	nm.upnpMu.Unlock()
 
-	nm.logger.Info("UPnP configuration prepared",
-		"internal_port", nm.config.P2PPort,
-		"description", "ShareToken P2P",
+	// Get local IP
+	localIP, err := GetLocalIP()
+	if err != nil {
+		return fmt.Errorf("failed to get local IP: %w", err)
+	}
+
+	// Get external IP
+	externalIP, err := client.GetExternalIPAddress()
+	if err != nil {
+		nm.logger.Error("Failed to get external IP, continuing anyway", "error", err)
+		externalIP = "unknown"
+	}
+
+	nm.logger.Info("UPnP device discovered",
+		"external_ip", externalIP,
+		"local_ip", localIP,
+	)
+
+	// Add port mapping
+	protocol := "TCP"
+	externalPort := uint16(nm.config.P2PPort)
+	internalPort := uint16(nm.config.P2PPort)
+	description := "ShareToken P2P"
+	leaseDuration := uint32(3600) // 1 hour lease, will be renewed by keepalive
+
+	err = client.AddPortMapping(
+		protocol,
+		externalPort,
+		internalPort,
+		localIP,
+		true,
+		description,
+		leaseDuration,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to add port mapping: %w", err)
+	}
+
+	// Record the mapping
+	mapping := PortMapping{
+		Protocol:     protocol,
+		InternalIP:   localIP,
+		InternalPort: nm.config.P2PPort,
+		ExternalPort: nm.config.P2PPort,
+		Description:  description,
+	}
+	nm.mappings = append(nm.mappings, mapping)
+
+	nm.logger.Info("UPnP port mapping configured",
+		"protocol", protocol,
+		"external_port", externalPort,
+		"internal_port", internalPort,
+		"external_ip", externalIP,
 	)
 
 	return nil
 }
 
+// discoverUPnP discovers UPnP IGD devices
+func (nm *NATManager) discoverUPnP() (UPnPClient, error) {
+	// Try IGD v2 first
+	nm.logger.Debug("Searching for UPnP IGD v2...")
+	clients, _, err := internetgateway2.NewWANIPConnection2Clients()
+	if err == nil && len(clients) > 0 {
+		nm.logger.Info("Found UPnP IGD v2")
+		return &igd2Client{client: clients[0]}, nil
+	}
+
+	// Try IGD v1
+	nm.logger.Debug("Searching for UPnP IGD v1...")
+	clients1, _, err := internetgateway1.NewWANIPConnection1Clients()
+	if err == nil && len(clients1) > 0 {
+		nm.logger.Info("Found UPnP IGD v1")
+		return &igd1Client{client: clients1[0]}, nil
+	}
+
+	// Try WAN PPP Connection v1 as fallback
+	pppClients, _, err := internetgateway1.NewWANPPPConnection1Clients()
+	if err == nil && len(pppClients) > 0 {
+		nm.logger.Info("Found UPnP WAN PPP Connection")
+		return &igd1PPPClient{client: pppClients[0]}, nil
+	}
+
+	return nil, fmt.Errorf("no UPnP IGD device found")
+}
+
 // cleanupUPnP removes UPnP port mappings
 func (nm *NATManager) cleanupUPnP() {
 	nm.logger.Info("Cleaning up UPnP mappings")
-	// Remove port mappings from UPnP device
+
+	nm.upnpMu.RLock()
+	client := nm.upnpClient
+	nm.upnpMu.RUnlock()
+
+	if client == nil {
+		return
+	}
+
+	for _, mapping := range nm.mappings {
+		err := client.DeletePortMapping(mapping.Protocol, uint16(mapping.ExternalPort))
+		if err != nil {
+			nm.logger.Error("Failed to delete port mapping",
+				"protocol", mapping.Protocol,
+				"external_port", mapping.ExternalPort,
+				"error", err,
+			)
+		} else {
+			nm.logger.Info("Port mapping removed",
+				"protocol", mapping.Protocol,
+				"external_port", mapping.ExternalPort,
+			)
+		}
+	}
+}
+
+// keepalive periodically renews UPnP port mappings
+func (nm *NATManager) keepalive() {
+	ticker := time.NewTicker(30 * time.Minute)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-nm.ctx.Done():
+			return
+		case <-ticker.C:
+			nm.upnpMu.RLock()
+			client := nm.upnpClient
+			nm.upnpMu.RUnlock()
+
+			if client == nil {
+				continue
+			}
+
+			// Renew mappings
+			for _, mapping := range nm.mappings {
+				err := client.AddPortMapping(
+					mapping.Protocol,
+					uint16(mapping.ExternalPort),
+					uint16(mapping.InternalPort),
+					mapping.InternalIP,
+					true,
+					mapping.Description,
+					3600, // 1 hour lease
+				)
+				if err != nil {
+					nm.logger.Error("Failed to renew port mapping",
+						"protocol", mapping.Protocol,
+						"external_port", mapping.ExternalPort,
+						"error", err,
+					)
+				} else {
+					nm.logger.Debug("Port mapping renewed",
+						"protocol", mapping.Protocol,
+						"external_port", mapping.ExternalPort,
+					)
+				}
+			}
+		}
+	}
 }
 
 // GetExternalAddress returns the external address for this node
@@ -142,24 +303,32 @@ func (nm *NATManager) GetExternalAddress() (string, error) {
 		return nm.config.ExternalAddress, nil
 	}
 
-	// Otherwise, try to detect external IP
-	if nm.config.EnableUPnP {
-		// Try to get external IP from UPnP
-		externalIP, err := nm.detectExternalIP()
-		if err != nil {
-			return "", err
+	// Otherwise, try to detect external IP via UPnP
+	nm.upnpMu.RLock()
+	client := nm.upnpClient
+	nm.upnpMu.RUnlock()
+
+	if client != nil {
+		externalIP, err := client.GetExternalIPAddress()
+		if err == nil && externalIP != "" && externalIP != "0.0.0.0" {
+			return net.JoinHostPort(externalIP, strconv.Itoa(nm.config.P2PPort)), nil
 		}
-		return net.JoinHostPort(externalIP, strconv.Itoa(nm.config.P2PPort)), nil
 	}
 
-	return "", fmt.Errorf("no external address configured and UPnP not enabled")
+	return "", fmt.Errorf("no external address configured and UPnP not available")
 }
 
 // detectExternalIP attempts to detect external IP address
 func (nm *NATManager) detectExternalIP() (string, error) {
-	// Placeholder for external IP detection
-	// In production, this would query the UPnP IGD for external IP
-	return "", fmt.Errorf("external IP detection not implemented")
+	nm.upnpMu.RLock()
+	client := nm.upnpClient
+	nm.upnpMu.RUnlock()
+
+	if client != nil {
+		return client.GetExternalIPAddress()
+	}
+
+	return "", fmt.Errorf("UPnP client not available")
 }
 
 // GetPortMappings returns current port mappings
@@ -218,14 +387,15 @@ func GetLocalIP() (string, error) {
 }
 
 // NetworkDiagnostics provides diagnostic information about network connectivity
+// nolint:govet // fieldalignment: struct field order is for readability
 type NetworkDiagnostics struct {
-	LocalIP         string
-	ExternalIP      string
-	P2PPort         int
-	UPnPEnabled     bool
-	UPnPAvailable   bool
-	PortOpen        bool
-	PeerCount       int
+	LocalIP       string
+	ExternalIP    string
+	P2PPort       int
+	UPnPEnabled   bool
+	UPnPAvailable bool
+	PortOpen      bool
+	PeerCount     int
 }
 
 // RunDiagnostics performs network diagnostics
@@ -245,5 +415,71 @@ func RunDiagnostics(config *NATConfig) (*NetworkDiagnostics, error) {
 	// Check if port is open (basic check)
 	diag.PortOpen = IsPortOpen("localhost", config.P2PPort, 2*time.Second)
 
+	// Try to get external IP if UPnP is enabled
+	if config.EnableUPnP {
+		// Quick UPnP discovery
+		_, err := goupnp.DiscoverDevices(internetgateway1.URN_WANIPConnection_1)
+		if err == nil {
+			diag.UPnPAvailable = true
+		}
+	}
+
 	return diag, nil
+}
+
+// igd1Client wraps internetgateway1.WANIPConnection1 for UPnPClient interface
+type igd1Client struct {
+	client *internetgateway1.WANIPConnection1
+}
+
+func (c *igd1Client) GetExternalIPAddress() (string, error) {
+	return c.client.GetExternalIPAddress()
+}
+
+func (c *igd1Client) AddPortMapping(protocol string, externalPort, internalPort uint16, internalIP string, enabled bool, description string, lease uint32) error {
+	// IGD v1: NewRemoteHost, ExternalPort, Protocol, InternalPort, InternalClient, Enabled, Description, LeaseDuration
+	return c.client.AddPortMapping("", externalPort, protocol, internalPort, internalIP, enabled, description, lease)
+}
+
+func (c *igd1Client) DeletePortMapping(protocol string, externalPort uint16) error {
+	// IGD v1: NewRemoteHost, ExternalPort, Protocol
+	return c.client.DeletePortMapping("", externalPort, protocol)
+}
+
+// igd2Client wraps internetgateway2.WANIPConnection2 for UPnPClient interface
+type igd2Client struct {
+	client *internetgateway2.WANIPConnection2
+}
+
+func (c *igd2Client) GetExternalIPAddress() (string, error) {
+	return c.client.GetExternalIPAddress()
+}
+
+func (c *igd2Client) AddPortMapping(protocol string, externalPort, internalPort uint16, internalIP string, enabled bool, description string, lease uint32) error {
+	// IGD v2: NewRemoteHost, ExternalPort, Protocol, InternalPort, InternalClient, Enabled, Description, LeaseDuration
+	return c.client.AddPortMapping("", externalPort, protocol, internalPort, internalIP, enabled, description, lease)
+}
+
+func (c *igd2Client) DeletePortMapping(protocol string, externalPort uint16) error {
+	// IGD v2: NewRemoteHost, ExternalPort, Protocol
+	return c.client.DeletePortMapping("", externalPort, protocol)
+}
+
+// igd1PPPClient wraps internetgateway1.WANPPPConnection1 for UPnPClient interface
+type igd1PPPClient struct {
+	client *internetgateway1.WANPPPConnection1
+}
+
+func (c *igd1PPPClient) GetExternalIPAddress() (string, error) {
+	return c.client.GetExternalIPAddress()
+}
+
+func (c *igd1PPPClient) AddPortMapping(protocol string, externalPort, internalPort uint16, internalIP string, enabled bool, description string, lease uint32) error {
+	// PPP: NewRemoteHost, ExternalPort, Protocol, InternalPort, InternalClient, Enabled, Description, LeaseDuration
+	return c.client.AddPortMapping("", externalPort, protocol, internalPort, internalIP, enabled, description, lease)
+}
+
+func (c *igd1PPPClient) DeletePortMapping(protocol string, externalPort uint16) error {
+	// PPP: NewRemoteHost, ExternalPort, Protocol
+	return c.client.DeletePortMapping("", externalPort, protocol)
 }
