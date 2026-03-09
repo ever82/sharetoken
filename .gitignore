@@ -4,3 +4,39 @@ release/
 .idea/
 .vscode/
 .DS_Store
+bin/sharetokend
+.devnet/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+go.sum
+
+# Frontend
+node_modules/
+dist/
+build/
+*.log
+
+# IDE
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+
+# Test & Coverage
+coverage.out
+*.cover
+
+# Temporary
+tmp/
+temp/
+*.tmp
