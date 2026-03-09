@@ -42,10 +42,10 @@ Bash(echo "CC-NOTIFY: [阻塞] proto-gen命令失败，缺少buf工具")
 
 ## 当前任务
 查看 `docs/achievements/for-dev.md` 了解详细开发计划。
-下一个任务：**ACH-DEV-004 Identity Module** (P1)
+下一个任务：**ACH-DEV-011 LLM API Key Custody Plugin** (P2)
 
 ## 已完成任务
-查看 `docs/achievements/done/` 目录了解已完成的P0任务。
+查看 `docs/achievements/done/` 目录了解已完成的P0和P1任务。
 查看 `docs/achievements/postponed.md` 了解延后实现的功能。
 
 ## 开发进度
@@ -77,6 +77,62 @@ Bash(echo "CC-NOTIFY: [阻塞] proto-gen命令失败，缺少buf工具")
 - ✅ 交易历史查询
 - ⏭️ 前端运行时测试（延后到部署阶段）
 - 📄 详见 `docs/achievements/done/issue-003.md`
+
+---
+
+### ✅ P1 - 核心功能（已完成）
+
+#### ACH-DEV-004: Identity Module ✅
+- ✅ 身份注册与验证
+- ✅ 第三方实名验证框架（WeChat/GitHub/Google）
+- ✅ 验证结果哈希存储
+- ✅ 全局身份注册表
+- ✅ Merkle 证明验证
+- ✅ 用户限额系统（交易/提现/争议/服务）
+- 📄 详见 `docs/achievements/done/issue-004.md`
+
+#### ACH-DEV-005: Escrow Payment System ✅
+- ✅ 资金托管核心实现
+- ✅ 状态管理（pending/completed/disputed/refunded）
+- ✅ 资金分配机制
+- ⏭️ 与 Bank 模块集成（延后）
+- 📄 详见 `docs/achievements/done/issue-005.md`
+
+#### ACH-DEV-006: Oracle Service ✅
+- ✅ 价格数据模型
+- ✅ LLM 定价模型
+- ✅ USD 到 STT 转换
+- ⏭️ Chainlink 集成（延后）
+- 📄 详见 `docs/achievements/done/issue-006.md`
+
+#### ACH-DEV-007: Trust System - MQ Scoring ✅
+- ✅ MQ 评分系统（初始100分）
+- ✅ 投票权重计算
+- ✅ 收敛机制（高MQ偏离损失更多）
+- ✅ 惩罚和奖励系统
+- 📄 详见 `docs/achievements/done/issue-007.md`
+
+#### ACH-DEV-008: Trust System - Dispute Arbitration ✅
+- ✅ 争议数据模型
+- ✅ 证据收集机制
+- ✅ 加权投票系统
+- ✅ 投票结果计算
+- 📄 详见 `docs/achievements/done/issue-008.md`
+
+#### ACH-DEV-009: Service Marketplace Core ✅
+- ✅ 服务数据模型
+- ✅ 三级服务层级（LLM/Agent/Workflow）
+- ✅ 三种定价模式（Fixed/Dynamic/Auction）
+- ⏭️ 智能路由（延后）
+- 📄 详见 `docs/achievements/done/issue-009.md`
+
+#### ACH-DEV-010: Testnet Launch ⏳
+- ⏳ 部署任务，延后到部署阶段
+- 📄 详见 `docs/achievements/done/issue-010.md`
+
+---
+
+### 🔄 P2 - 高级功能（等待开始）
 
 ### 🔄 P1 - 核心功能（进行中）
 
