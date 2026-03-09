@@ -40,7 +40,7 @@ linters:
     - revive       # 取代 golint 的代码风格检查
     - stylecheck   # 风格检查
     - goimports    # import 排序检查
-    - gci          # import 分组检查
+    # - gci        # import 分组检查 (已禁用，过于严格)
 
     # 代码质量
     - unused       # 未使用代码检查
@@ -75,14 +75,6 @@ linters-settings:
   # goimports 设置
   goimports:
     local-prefixes: sharetoken
-
-  # gci 设置
-  gci:
-    sections:
-      - standard
-      - default
-      - prefix(sharetoken)
-    custom-order: true
 
   # govet 设置
   govet:
