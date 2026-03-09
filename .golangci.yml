@@ -128,10 +128,21 @@ issues:
         - gofmt
         - goimports
 
-    # 排除 app/network/nat.go 的 gofmt (我们添加的注释导致格式问题)
+    # 排除 app/network/nat.go 的 gofmt/goimports (我们添加的注释导致格式问题)
     - path: app/network/nat.go
       linters:
         - gofmt
+        - goimports
+
+    # 排除 app/app.go 的 gofmt (Ignite 生成的代码)
+    - path: app/app.go
+      linters:
+        - gofmt
+
+    # 排除 cmd/sharetokend/cmd/root.go 的 goimports (Ignite 生成的代码)
+    - path: cmd/sharetokend/cmd/root.go
+      linters:
+        - goimports
 
     # 排除不存在的路径 (golangci-lint 缓存问题)
     - path: docs-ignite-standard/
