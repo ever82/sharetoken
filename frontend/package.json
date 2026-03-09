@@ -1,0 +1,53 @@
+{
+  "name": "sharetoken-frontend",
+  "version": "1.0.0",
+  "description": "ShareToken Blockchain Frontend with Keplr and WalletConnect integration",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@cosmjs/amino": "^0.31.0",
+    "@cosmjs/cosmwasm-stargate": "^0.31.0",
+    "@cosmjs/crypto": "^0.31.0",
+    "@cosmjs/encoding": "^0.31.0",
+    "@cosmjs/proto-signing": "^0.31.0",
+    "@cosmjs/stargate": "^0.31.0",
+    "@keplr-wallet/types": "^0.12.0",
+    "@walletconnect/client": "^1.8.0",
+    "@walletconnect/qrcode-modal": "^1.8.0",
+    "axios": "^1.5.0",
+    "core-js": "^3.32.0",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4",
+    "vuex": "^4.1.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-eslint": "^5.0.8",
+    "@vue/cli-service": "^5.0.8",
+    "eslint": "^8.47.0",
+    "eslint-plugin-vue": "^9.17.0"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser",
+      "requireConfigFile": false
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
+}

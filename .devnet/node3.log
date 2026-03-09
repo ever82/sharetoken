@@ -1,0 +1,210 @@
+[90m8:26PM[0m [32mINF[0m starting node with ABCI Tendermint in-process [36mmodule=[0mserver
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0mmultiAppConn [36mmodule=[0mproxy [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mconnection=[0mquery [36mimpl=[0mlocalClient [36mmodule=[0mabci-client [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mconnection=[0msnapshot [36mimpl=[0mlocalClient [36mmodule=[0mabci-client [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mconnection=[0mmempool [36mimpl=[0mlocalClient [36mmodule=[0mabci-client [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mconnection=[0mconsensus [36mimpl=[0mlocalClient [36mmodule=[0mabci-client [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0mEventBus [36mmodule=[0mevents [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0mPubSub [36mmodule=[0mpubsub [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0mIndexerService [36mmodule=[0mtxindex [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m ABCI Handshake App Info [36mhash=[0m [36mheight=[0m0 [36mmodule=[0mconsensus [36mprotocol-version=[0m0 [36msoftware-version=[0m
+[90m8:26PM[0m [32mINF[0m ABCI Replay Blocks [36mappHeight=[0m0 [36mmodule=[0mconsensus [36mstateHeight=[0m0 [36mstoreHeight=[0m0
+[90m8:26PM[0m [32mINF[0m InitChain [36mchainID=[0msharetoken-devnet [36minitialHeight=[0m1 [36mmodule=[0mserver
+[90m8:26PM[0m [32mINF[0m initializing blockchain state from genesis.json [36mmodule=[0mserver
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m1/13 [36mmodule=[0mx/crisis [36mname=[0mdistribution/nonnegative-outstanding
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m2/13 [36mmodule=[0mx/crisis [36mname=[0mdistribution/can-withdraw
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m3/13 [36mmodule=[0mx/crisis [36mname=[0mdistribution/reference-count
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m4/13 [36mmodule=[0mx/crisis [36mname=[0mdistribution/module-account
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m5/13 [36mmodule=[0mx/crisis [36mname=[0mstaking/module-accounts
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m6/13 [36mmodule=[0mx/crisis [36mname=[0mstaking/nonnegative-power
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m7/13 [36mmodule=[0mx/crisis [36mname=[0mstaking/positive-delegation
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m8/13 [36mmodule=[0mx/crisis [36mname=[0mstaking/delegator-shares
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m9/13 [36mmodule=[0mx/crisis [36mname=[0mtransfer/total-escrow-per-denom
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m10/13 [36mmodule=[0mx/crisis [36mname=[0mgroup/Group-TotalWeight
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m11/13 [36mmodule=[0mx/crisis [36mname=[0mgov/module-account
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m12/13 [36mmodule=[0mx/crisis [36mname=[0mbank/nonnegative-outstanding
+[90m8:26PM[0m [32mINF[0m asserting crisis invariants [36minv=[0m13/13 [36mmodule=[0mx/crisis [36mname=[0mbank/total-supply
+[90m8:26PM[0m [32mINF[0m asserted all invariants [36mduration=[0m1.88074 [36mheight=[0m0 [36mmodule=[0mx/crisis
+[90m8:26PM[0m [32mINF[0m created new capability [36mmodule=[0mibc [36mname=[0mports/transfer
+[90m8:26PM[0m [32mINF[0m port binded [36mmodule=[0mx/ibc/port [36mport=[0mtransfer
+[90m8:26PM[0m [32mINF[0m claimed capability [36mcapability=[0m1 [36mmodule=[0mtransfer [36mname=[0mports/transfer
+[90m8:26PM[0m [32mINF[0m created new capability [36mmodule=[0mibc [36mname=[0mports/icahost
+[90m8:26PM[0m [32mINF[0m port binded [36mmodule=[0mx/ibc/port [36mport=[0micahost
+[90m8:26PM[0m [32mINF[0m claimed capability [36mcapability=[0m2 [36mmodule=[0micahost [36mname=[0mports/icahost
+[90m8:26PM[0m [32mINF[0m Completed ABCI Handshake - CometBFT and App are synced [36mappHash=[0m [36mappHeight=[0m0 [36mmodule=[0mconsensus
+[90m8:26PM[0m [32mINF[0m Version info [36mabci=[0m1.0.0 [36mblock=[0m11 [36mcommit_hash=[0m [36mmodule=[0mserver [36mp2p=[0m8 [36mtendermint_version=[0m0.37.1
+[90m8:26PM[0m [32mINF[0m This node is not a validator [36maddr=[0m068E2CEA4C00CC07350BE01553BA43BD611DF37B [36mmodule=[0mconsensus [36mpubKey=[0mh4B4osd03+zP40tQLEVxSKjp32vlGMdWsPPMI2JAyLQ=
+[90m8:26PM[0m [32mINF[0m P2P Node ID [36mID=[0m1fb79897545942da5fc8f480d5db1ca51b7ed634 [36mfile=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/node_key.json [36mmodule=[0mp2p
+[90m8:26PM[0m [32mINF[0m Adding persistent peers [36maddrs=[0m["0fa294b81fb254da13364e23f6bf5e1d511315d1@127.0.0.1:26656"] [36mmodule=[0mp2p
+[90m8:26PM[0m [32mINF[0m Adding unconditional peer ids [36mids=[0m[] [36mmodule=[0mp2p
+[90m8:26PM[0m [32mINF[0m Add our address to book [36maddr=[0m{"id":"1fb79897545942da5fc8f480d5db1ca51b7ed634","ip":"0.0.0.0","port":26686} [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0mNode [36mmodule=[0mserver [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m Starting pprof server [36mladdr=[0mlocalhost:6063 [36mmodule=[0mserver
+[90m8:26PM[0m [32mINF[0m serve [36mmodule=[0mrpc-server [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0m"P2P Switch" [36mmodule=[0mp2p [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0mConsensusReactor [36mmodule=[0mconsensus [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m Reactor  [36mmodule=[0mconsensus [36mwaitSync=[0mtrue
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0mEvidence [36mmodule=[0mevidence [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0mStateSync [36mmodule=[0mstatesync [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0mPEX [36mmodule=[0mpex [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mimpl=[0mAddrBook [36mmodule=[0mp2p [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0mReactor [36mmodule=[0mblockchain [36mmsg=[0m{}
+[90m8:26PM[0m [32mINF[0m service start [36mimpl=[0mBlockPool [36mmodule=[0mblockchain [36mmsg=[0m{}
+[90m8:26PM[0m [1m[31mERR[0m[0m Can't add peer's address to addrbook [36merr=[0m"Cannot add non-routable address 0fa294b81fb254da13364e23f6bf5e1d511315d1@127.0.0.1:26656" [36mmodule=[0mp2p
+[90m8:26PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:26PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:26PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:26PM[0m [32mINF[0m starting API server... [36mmodule=[0mapi-server
+[90m8:26PM[0m [32mINF[0m serve [36mmodule=[0mapi-server [36mmsg=[0m{}
+[90m8:26PM[0m [1m[31mERR[0m[0m Error dialing peer [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p
+[90m8:26PM[0m [32mINF[0m Reconnecting to peer [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36mmodule=[0mp2p
+[90m8:26PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m0
+[90m8:26PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m1
+[90m8:26PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m2
+[90m8:27PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m3
+[90m8:27PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m4
+[90m8:27PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:27PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:27PM[0m [32mINF[0m Inbound Peer rejected [36merr=[0m"auth failure: secret conn failed: read tcp 127.0.0.1:26686->127.0.0.1:52044: read: connection reset by peer" [36mmodule=[0mp2p [36mnumPeers=[0m0
+[90m8:27PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m5
+[90m8:27PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m6
+[90m8:27PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m7
+[90m8:27PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m8
+[90m8:27PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m9
+[90m8:27PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:27PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:27PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: read tcp 127.0.0.1:52101->127.0.0.1:26656: read: connection reset by peer" [36mmodule=[0mp2p [36mtries=[0m10
+[90m8:27PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m11
+[90m8:27PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m12
+[90m8:28PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m13
+[90m8:28PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:28PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:28PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m14
+[90m8:28PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m15
+[90m8:28PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m16
+[90m8:28PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m17
+[90m8:28PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m18
+[90m8:28PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:28PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:28PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:28PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m19
+[90m8:28PM[0m [1m[31mERR[0m[0m Failed to reconnect to peer. Beginning exponential backoff [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36melapsed=[0m127816.991368 [36mmodule=[0mp2p
+[90m8:28PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m0
+[90m8:28PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m1
+[90m8:29PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m2
+[90m8:29PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:29PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:29PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m3
+[90m8:29PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:29PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:30PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:30PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:30PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:30PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:30PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:30PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m4
+[90m8:31PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:31PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:31PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:31PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:32PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:32PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:32PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:32PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:32PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:33PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:33PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:33PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:33PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:34PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:34PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:34PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:34PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:34PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:35PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: read tcp 127.0.0.1:52683->127.0.0.1:26656: read: connection reset by peer" [36mmodule=[0mp2p [36mtries=[0m5
+[90m8:35PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:35PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:35PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:35PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:36PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:36PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:36PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:36PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:36PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:37PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:37PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:37PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:37PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:38PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:38PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:38PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:38PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:38PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:39PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:39PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:39PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:39PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:40PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:40PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:40PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:40PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:40PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:41PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:41PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:41PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:41PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:42PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:42PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:42PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:42PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:42PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:43PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:43PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:43PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:43PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:44PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:44PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:44PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:44PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:44PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:45PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:45PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:45PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:45PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:46PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:46PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:46PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:46PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:46PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:47PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:47PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:47PM[0m [32mINF[0m Error reconnecting to peer. Trying again [36maddr=[0m{"id":"0fa294b81fb254da13364e23f6bf5e1d511315d1","ip":"127.0.0.1","port":26656} [36merr=[0m"auth failure: secret conn failed: EOF" [36mmodule=[0mp2p [36mtries=[0m6
+[90m8:47PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:47PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:48PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:48PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:48PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:48PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:48PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:49PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:49PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:49PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:49PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:50PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:50PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:50PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:50PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:50PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:51PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:51PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:51PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:51PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:52PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:52PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:52PM[0m [32mINF[0m Saving AddrBook to file [36mbook=[0m/Users/apple/projects/sharetoken/.devnet/node3/config/addrbook.json [36mmodule=[0mp2p [36msize=[0m0
+[90m8:52PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:52PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:53PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:53PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex
+[90m8:53PM[0m [32mINF[0m Ensure peers [36mmodule=[0mpex [36mnumDialing=[0m0 [36mnumInPeers=[0m0 [36mnumOutPeers=[0m0 [36mnumToDial=[0m10
+[90m8:53PM[0m [32mINF[0m No addresses to dial. Falling back to seeds [36mmodule=[0mpex

@@ -1,0 +1,7 @@
+syntax = "proto3";
+package sharetoken.sharetoken;
+
+option go_package = "sharetoken/x/sharetoken/types";
+
+// Msg defines the Msg service.
+service Msg {}

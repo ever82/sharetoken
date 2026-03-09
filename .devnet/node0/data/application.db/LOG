@@ -1,0 +1,24 @@
+=============== Mar 9, 2026 (CST) ===============
+20:26:41.353241 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+20:26:41.387569 db@open opening
+20:26:41.394000 version@stat F·[] S·0B[] Sc·[]
+20:26:41.409380 db@janitor F·2 G·0
+20:26:41.409626 db@open done T·21.184615ms
+20:36:18.972176 memdb@flush N·39825 S·3MiB
+20:36:19.027393 memdb@flush created L0@3 N·39825 S·2MiB "s/1,v325":"s/p..hts,v456"
+20:36:19.027498 version@stat F·[1] S·2MiB[2MiB] Sc·[0.25]
+20:36:19.031064 memdb@flush committed F·1 T·58.594062ms
+20:36:19.032813 journal@remove removed @1
+20:45:31.271608 memdb@flush N·39515 S·3MiB
+20:45:31.326556 memdb@flush created L0@5 N·39515 S·2MiB "s/284,v39873":"s/p..hts,v39872"
+20:45:31.326649 version@stat F·[2] S·4MiB[4MiB] Sc·[0.50]
+20:45:31.331536 memdb@flush committed F·1 T·59.618789ms
+20:45:31.332847 journal@remove removed @2
+20:45:43.448245 table@compaction L0·2 -> L1·0 S·4MiB Q·80304
+20:45:43.523323 table@build created L1@6 N·34384 S·2MiB "s/1,v325":"s/k..\x00\x01\x9d,v58700"
+20:45:43.575121 table@build created L1@7 N·24225 S·2MiB "s/k..\x00\x01\x9e,v58845":"s/k..뛄,v78733"
+20:45:43.581083 table@build created L1@8 N·1815 S·40KiB "s/k..\xfb\x1e{,v78728":"s/p..hts,v79334"
+20:45:43.581156 version@stat F·[0 3] S·4MiB[0B 4MiB] Sc·[0.00 0.04]
+20:45:43.584567 table@compaction committed F+1 S-203KiB Ke·0 D·18916 T·136.079266ms
+20:45:43.585366 table@remove removed @5
+20:45:43.585921 table@remove removed @3

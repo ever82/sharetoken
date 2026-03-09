@@ -1,0 +1,63 @@
+# EditorConfig 配置文件
+# 维护跨编辑器的代码风格一致性
+# 文档: https://editorconfig.org/
+
+# 根配置文件
+root = true
+
+# 所有文件默认配置
+[*]
+# 缩进风格: 空格
+indent_style = space
+# 缩进大小: 4 个空格
+indent_size = 4
+# 换行符: LF
+end_of_line = lf
+# 字符集: UTF-8
+charset = utf-8
+# 去除行尾空格
+trim_trailing_whitespace = true
+# 文件末尾插入空行
+insert_final_newline = true
+
+# Go 文件配置
+[*.go]
+indent_style = tab
+indent_size = 4
+
+# Makefile 配置
+[Makefile]
+indent_style = tab
+
+# YAML 文件配置
+[*.{yml,yaml}]
+indent_size = 2
+
+# JSON 文件配置
+[*.json]
+indent_size = 2
+
+# Proto 文件配置
+[*.proto]
+indent_size = 2
+
+# Markdown 文件配置
+[*.md]
+indent_size = 2
+trim_trailing_whitespace = false
+
+# Shell 脚本配置
+[*.{sh,bash}]
+indent_size = 4
+
+# JavaScript/TypeScript 配置
+[*.{js,ts,tsx}]
+indent_size = 2
+
+# CSS/HTML 配置
+[*.{css,scss,html}]
+indent_size = 2
+
+# Vue 文件配置
+[*.vue]
+indent_size = 2

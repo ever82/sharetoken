@@ -1,0 +1,23 @@
+version: 1
+accounts:
+- name: alice
+  coins:
+  - 20000stt
+  - 200000000stake
+- name: bob
+  coins:
+  - 10000stt
+  - 100000000stake
+client:
+  openapi:
+    path: docs/static/openapi.yml
+faucet:
+  name: bob
+  coins:
+  - 5stt
+  - 100000stake
+validators:
+- name: alice
+  bonded: 100000000stake
+- name: bob
+  bonded: 100000000stake

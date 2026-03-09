@@ -1,0 +1,12 @@
+syntax = "proto3";
+package sharetoken.sharetoken;
+
+import "gogoproto/gogo.proto";
+import "sharetoken/sharetoken/params.proto";
+
+option go_package = "sharetoken/x/sharetoken/types";
+
+// GenesisState defines the sharetoken module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+}

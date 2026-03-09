@@ -1,0 +1,83 @@
+# Git 属性配置文件
+# 控制行尾自动转换等行为
+# 文档: https://git-scm.com/docs/gitattributes
+
+# 自动处理行尾符
+* text=auto
+
+# Go 源文件
+*.go text eol=lf
+*.go.mod text eol=lf
+*.go.sum text eol=lf
+
+# 配置文件
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.xml text eol=lf
+
+# Proto 文件
+*.proto text eol=lf
+
+# 脚本文件
+*.sh text eol=lf
+*.bash text eol=lf
+*.env text eol=lf
+
+# Markdown
+*.md text eol=lf
+
+# Makefile
+Makefile text eol=lf
+makefile text eol=lf
+
+# 文档
+*.txt text eol=lf
+
+# 许可证文件
+LICENSE text eol=lf
+LICENSE.* text eol=lf
+
+# 忽略二进制文件（不参与 diff）
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary
+*.gz binary
+*.bz2 binary
+*.7z binary
+*.rar binary
+
+# 忽略可执行文件
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+
+# 忽略编译产物
+*.o binary
+*.a binary
+*.obj binary
+
+# 忽略数据库文件
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# 特定路径配置
+# 生成的代码不显示在 diff 中
+*.pb.go linguist-generated=true
+*.pb.gw.go linguist-generated=true
+
+# vendor 目录不参与语言统计
+vendor/** linguist-vendored
+
+# 文档和配置不参与语言统计
+docs/** linguist-documentation
+.github/** linguist-documentation
