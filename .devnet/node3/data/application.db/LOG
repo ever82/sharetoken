@@ -674,3 +674,57 @@
 02:43:48.615705 table@remove removed @270
 02:43:48.615968 table@remove removed @271
 02:43:48.616099 table@remove removed @272
+02:51:51.483074 memdb@flush N·39114 S·3MiB
+02:51:51.535988 memdb@flush created L0@298 N·39114 S·2MiB "s/5262,v823603":"s/p..hts,v823602"
+02:51:51.536183 version@stat F·[1 23] S·47MiB[2MiB 45MiB] Sc·[0.25 0.45]
+02:51:51.539696 memdb@flush committed F·1 T·56.520576ms
+02:51:51.541327 journal@remove removed @273
+02:52:04.015308 table@compaction L0·1 -> L1·22 S·45MiB Q·863726
+02:52:04.101405 table@build created L1@299 N·29185 S·2MiB "s/4952,v773796":"s/k..\xf2\xb2\xec,v796442"
+02:52:04.168011 table@build created L1@300 N·31570 S·2MiB "s/k..fͩ,v44188":"s/k..\xf5\xa3\x87,v393132"
+02:52:04.242130 table@build created L1@301 N·49805 S·2MiB "s/k..B\x89B,v393127":"s/k.._\v9,v323693"
+02:52:04.302710 table@build created L1@302 N·23308 S·2MiB "s/k..\xb8\x9d),v857728":"s/k..\xb0\xb8\xe6,v519780"
+02:52:04.386144 table@build created L1@303 N·23227 S·2MiB "s/k..\xf8\x82\xa8,v510571":"s/k..\xde\xf0P,v682815"
+02:52:04.461558 table@build created L1@304 N·37255 S·2MiB "s/k..\xf7\xe9,,v34266":"s/k..k@\xcf,v353041"
+02:52:04.543265 table@build created L1@305 N·61835 S·2MiB "s/k..\xf8\n6,v353049":"s/k..\x00\x06\x91,v250532"
+02:52:04.607985 table@build created L1@306 N·35974 S·2MiB "s/k..\x00\x06\x92,v250689":"s/k..\xc2T%,v814992"
+02:52:04.677423 table@build created L1@307 N·46779 S·2MiB "s/k..\xa1\xb0\xbc,v814993":"s/k..\x00\a\x1f,v273110"
+02:52:04.743606 table@build created L1@308 N·40590 S·2MiB "s/k..\x00\a ,v273269":"s/k..-\x81\xab,v775340"
+02:52:04.801910 table@build created L1@309 N·14973 S·2MiB "s/k..\xc2{X,v775342":"s/k..\xa6\xd1V,v641587"
+02:52:04.853191 table@build created L1@310 N·15761 S·2MiB "s/k..Ơp,v182955":"s/k..\x13&\f,v597510"
+02:52:04.894850 table@build created L1@311 N·15704 S·2MiB "s/k..\xb5Q\xb5,v108671":"s/k..F\xfed,v200518"
+02:52:04.942280 table@build created L1@312 N·15754 S·2MiB "s/k..\xe1\xee\xd3,v587600":"s/k..j\xdep,v360085"
+02:52:04.998755 table@build created L1@313 N·15718 S·2MiB "s/k..mҳ,v809723":"s/k..`\a\xac,v401587"
+02:52:05.048527 table@build created L1@314 N·15776 S·2MiB "s/k..J\xaeZ,v649142":"s/k..I\x87\x92,v462388"
+02:52:05.086658 table@build created L1@315 N·15747 S·2MiB "s/k..\xb0X\x14,v154769":"s/k..\xb0\x00\x02,v380572"
+02:52:05.129371 table@build created L1@316 N·15575 S·2MiB "s/k..r\xe0\x9c,v382961":"s/k..\x85A_,v479424"
+02:52:05.171599 table@build created L1@317 N·15762 S·2MiB "s/k..=\xfd\xfa,v76843":"s/k..x\xb9\xeb,v382317"
+02:52:05.225094 table@build created L1@318 N·30430 S·2MiB "s/k..\xe6Xb,v45750":"s/k..L\x1f\x94,v185506"
+02:52:05.286028 table@build created L1@319 N·47011 S·2MiB "s/k..I\x97(,v185497":"s/k..\a\x0f\xd8,v497173"
+02:52:05.354605 table@build created L1@320 N·47011 S·2MiB "s/k..\u0091\x95,v497167":"s/k..\xdfb\x86,v802834"
+02:52:05.382664 table@build created L1@321 N·25848 S·741KiB "s/k..#J\t,v802833":"s/p..hts,v862683"
+02:52:05.382782 version@stat F·[0 24] S·47MiB[0B 47MiB] Sc·[0.00 0.47]
+02:52:05.393788 table@compaction committed F~ S-60KiB Ke·0 D·8298 T·1.3783958s
+02:52:05.394542 table@remove removed @298
+02:52:05.395121 table@remove removed @275
+02:52:05.395535 table@remove removed @276
+02:52:05.395888 table@remove removed @277
+02:52:05.396302 table@remove removed @278
+02:52:05.396724 table@remove removed @279
+02:52:05.397085 table@remove removed @280
+02:52:05.397475 table@remove removed @281
+02:52:05.397915 table@remove removed @282
+02:52:05.398297 table@remove removed @283
+02:52:05.398714 table@remove removed @284
+02:52:05.399066 table@remove removed @285
+02:52:05.399390 table@remove removed @286
+02:52:05.399746 table@remove removed @287
+02:52:05.400066 table@remove removed @288
+02:52:05.400396 table@remove removed @289
+02:52:05.400788 table@remove removed @290
+02:52:05.401261 table@remove removed @291
+02:52:05.401584 table@remove removed @292
+02:52:05.401952 table@remove removed @293
+02:52:05.402516 table@remove removed @294
+02:52:05.402855 table@remove removed @295
+02:52:05.403063 table@remove removed @296
