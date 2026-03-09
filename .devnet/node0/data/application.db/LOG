@@ -273,3 +273,39 @@
 01:29:22.595429 table@remove removed @96
 01:29:22.595754 table@remove removed @97
 01:29:22.596038 table@remove removed @98
+01:37:28.074201 memdb@flush N·39112 S·3MiB
+01:37:28.126687 memdb@flush created L0@115 N·39112 S·2MiB "s/3068,v471585":"s/p..hts,v471584"
+01:37:28.126765 version@stat F·[1 13] S·27MiB[2MiB 25MiB] Sc·[0.25 0.26]
+01:37:28.131036 memdb@flush committed F·1 T·56.740274ms
+01:37:28.132234 journal@remove removed @99
+01:37:40.237729 table@compaction L0·1 -> L1·13 S·27MiB Q·511567
+01:37:40.328953 table@build created L1@116 N·15284 S·2MiB "s/1,v325":"s/k..\x8f\xf6\xe5,v502122"
+01:37:40.379710 table@build created L1@117 N·32928 S·2MiB "s/k..ϊ8,v495787":"s/k..\xe3!\xd7,v468221"
+01:37:40.434854 table@build created L1@118 N·34900 S·2MiB "s/k..K!\\,v468220":"s/k..\xe0\x15\xda,v336840"
+01:37:40.488630 table@build created L1@119 N·26916 S·2MiB "s/k..Ϣ\x1c,v78243":"s/k..B\x8e\xc9,v85898"
+01:37:40.558951 table@build created L1@120 N·53919 S·2MiB "s/k..\x12\xc0\xb0,v86039":"s/k..\x05ϫ,v17083"
+01:37:40.639162 table@build created L1@121 N·41450 S·2MiB "s/k..f%\t,v99788":"s/k..\x00\fK,v484213"
+01:37:40.708658 table@build created L1@122 N·32368 S·2MiB "s/k..\x00\fL,v484374":"s/k..116,v479296"
+01:37:40.759606 table@build created L1@123 N·14747 S·2MiB "s/k..117,v479457":"s/k..P\xccv,v477635"
+01:37:40.804111 table@build created L1@124 N·15788 S·2MiB "s/k..\xb8p\x89,v51477":"s/k.. \xf6\x1f,v354063"
+01:37:40.847545 table@build created L1@125 N·15734 S·2MiB "s/k..3g{,v83760":"s/k..\x94Y\x05,v202557"
+01:37:40.889950 table@build created L1@126 N·15556 S·2MiB "s/k..\xd3\u009b,v415564":"s/k..\xa4i2,v134782"
+01:37:40.933079 table@build created L1@127 N·15584 S·2MiB "s/k..J%&,v438271":"s/k..\xe9\x89j,v108082"
+01:37:41.003401 table@build created L1@128 N·44314 S·2MiB "s/k..h\x8b\x01,v336922":"s/k..\x9c9\xef,v325856"
+01:37:41.057122 table@build created L1@129 N·38187 S·1MiB "s/k..\xda\xd1k,v325848":"s/p..hts,v510535"
+01:37:41.057238 version@stat F·[0 14] S·27MiB[0B 27MiB] Sc·[0.00 0.28]
+01:37:41.067358 table@compaction committed F~ S-62KiB Ke·0 D·8355 T·829.583879ms
+01:37:41.068218 table@remove removed @115
+01:37:41.068808 table@remove removed @101
+01:37:41.069181 table@remove removed @102
+01:37:41.069500 table@remove removed @103
+01:37:41.069799 table@remove removed @104
+01:37:41.070041 table@remove removed @105
+01:37:41.070284 table@remove removed @106
+01:37:41.070521 table@remove removed @107
+01:37:41.070907 table@remove removed @108
+01:37:41.071276 table@remove removed @109
+01:37:41.071607 table@remove removed @110
+01:37:41.071912 table@remove removed @111
+01:37:41.072196 table@remove removed @112
+01:37:41.072407 table@remove removed @113

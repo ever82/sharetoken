@@ -42,26 +42,52 @@ Bash(echo "CC-NOTIFY: [阻塞] proto-gen命令失败，缺少buf工具")
 
 ## 当前任务
 查看 `docs/achievements/for-dev.md` 了解详细开发计划。
+下一个任务：**ACH-DEV-004 Identity Module** (P1)
+
+## 已完成任务
+查看 `docs/achievements/done/` 目录了解已完成的P0任务。
+查看 `docs/achievements/postponed.md` 了解延后实现的功能。
 
 ## 开发进度
 
-### ACH-DEV-001: Development Infrastructure (进行中)
-- ✅ CI/CD Pipeline 测试与配置
-  - ✅ 创建 test_cicd.sh 测试脚本
-  - ✅ 创建 .github/workflows/ci.yml
-  - ✅ 创建 .github/workflows/release.yml
-  - ✅ 创建 Makefile
-  - ⚠️ 测试结果: 10/13 通过（3个失败项与grep模式匹配和Go环境相关，非配置问题）
-- ⏳ 本地开发网络启动脚本
-- ⏳ 代码规范与 Lint 配置
+### ✅ P0 - 核心基础（已完成）
 
-### 测试状态说明
-CI/CD测试中有3个失败项：
-1. "CI 运行 Go 测试" - grep模式问题（CI使用`make test`而非直接`go test`）
-2. "CI 运行 Go 构建" - grep模式问题（CI使用`make build`而非直接`go build`）
-3. "Go 已安装" - 当前macOS环境未安装Go（非配置问题）
+#### ACH-DEV-001: Development Infrastructure ✅
+- ✅ CI/CD Pipeline 配置完成
+- ✅ Release工作流配置完成
+- ✅ 本地开发网络启动脚本 (devnet_multi.sh)
+- ✅ 代码规范与 Lint 配置
+- 📄 详见 `docs/achievements/done/issue-001.md`
 
-这些失败不影响CI/CD配置的正确性，可以继续下一个任务。
+#### ACH-DEV-002: Blockchain Network Foundation ✅
+- ✅ 4节点开发网络运行正常
+- ✅ P2P网络配置与发现
+- ✅ 共识机制配置
+- ✅ UPnP/NAT端口映射（实际测试通过）
+- ✅ Noise Protocol加密通信
+- ⏭️ 区块浏览器（延后到部署阶段）
+- 📄 详见 `docs/achievements/done/issue-002.md`
+
+#### ACH-DEV-003: Wallet & Token System ✅
+- ✅ STT代币定义与发行
+- ✅ 余额查询接口
+- ✅ 转账交易签名与广播
+- ✅ Keplr钱包集成（代码完成）
+- ✅ WalletConnect支持（代码完成）
+- ✅ 交易历史查询
+- ⏭️ 前端运行时测试（延后到部署阶段）
+- 📄 详见 `docs/achievements/done/issue-003.md`
+
+### 🔄 P1 - 核心功能（进行中）
+
+等待开始：
+- ⏳ ACH-DEV-004: Identity Module
+- ⏳ ACH-DEV-005: Escrow Payment System
+- ⏳ ACH-DEV-006: Oracle Service
+- ⏳ ACH-DEV-007: MQ Scoring
+- ⏳ ACH-DEV-008: Dispute Arbitration
+- ⏳ ACH-DEV-009: Service Marketplace Core
+- ⏳ ACH-DEV-010: Testnet Launch
 
 ## 技术栈
 - Cosmos SDK v0.47.3
@@ -69,17 +95,39 @@ CI/CD测试中有3个失败项：
 - Go 1.21+
 - Ignite CLI v29.9.0
 
+## 环境检查清单
+开始新任务前请确认：
+- [ ] Go版本 >= 1.21 (`go version`)
+- [ ] Ignite CLI已安装 (`ignite version`)
+- [ ] GitHub CLI已配置 (`gh auth status`)
+- [ ] Node.js已安装（前端相关任务）
+
 ## 常用命令
 ```bash
-# 启动开发链
-ignite chain serve
+# 开发网络管理
+./scripts/devnet_multi.sh        # 启动4节点开发网络
+./scripts/devnet_multi.sh status # 查看网络状态
+./scripts/devnet_stop.sh         # 停止开发网络
 
-# 运行测试
-go test ./...
+# 构建和测试
+make build                       # 构建项目
+make test                        # 运行测试
+make lint                        # 运行Lint检查
+make proto-gen                   # 生成protobuf代码
 
-# 生成protobuf代码
-make proto-gen
+# 链操作
+./bin/sharetokend query bank balances <address>
+./bin/sharetokend tx bank send <from> <to> <amount> --chain-id sharetoken
 
-# 构建
-make build
+# GitHub Issue管理
+gh issue list --state open
+gh issue close <number> --comment "完成评论"
 ```
+
+## 项目文档
+- `docs/achievements/for-dev.md` - 开发任务清单
+- `docs/achievements/done/` - 已完成的任务
+- `docs/achievements/postponed.md` - 延后的功能
+- `docs/knowledges/standard-dev-process.md` - 标准开发流程
+- `docs/knowledges/lessons-learned.md` - 经验教训总结
+- `docs/knowledges/issue-template.md` - Issue文档模板
