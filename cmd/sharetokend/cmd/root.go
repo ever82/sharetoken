@@ -105,7 +105,8 @@ func initRootCmd(
 	// Set config
 	initSDKConfig()
 
-    gentxModule := app.ModuleBasics[genutiltypes.ModuleName].(genutil.AppModuleBasic)
+	// nolint:errcheck // Type assertion is safe for standard module
+	gentxModule := app.ModuleBasics[genutiltypes.ModuleName].(genutil.AppModuleBasic)
 	rootCmd.AddCommand(
 		genutilcli.InitCmd(app.ModuleBasics, app.DefaultNodeHome),
 		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, app.DefaultNodeHome, gentxModule.GenTxValidator),
@@ -207,7 +208,7 @@ func overwriteFlagDefaults(c *cobra.Command, defaults map[string]string) {
 	set := func(s *pflag.FlagSet, key, val string) {
 		if f := s.Lookup(key); f != nil {
 			f.DefValue = val
-			// nolint:gosec // Flag value setting is intentional and safe
+			// nolint:gosec,errcheck // Flag value setting is intentional and safe
 			f.Value.Set(val)
 		}
 	}

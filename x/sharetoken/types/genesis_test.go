@@ -8,11 +8,12 @@ import (
 )
 
 func TestGenesisState_Validate(t *testing.T) {
-    tests := []struct {
-    		desc          string
-    		genState      *types.GenesisState
-    		valid bool
-    } {
+	// nolint:govet // fieldalignment: test struct field order is for readability
+	tests := []struct {
+		desc     string
+		genState *types.GenesisState
+		valid    bool
+	} {
         {
             desc:     "default is valid",
             genState: types.DefaultGenesis(),
