@@ -187,9 +187,16 @@ curl http://localhost:26657/net_info
 ```
 
 ### 5. 区块浏览器集成验证
-**状态: ⏭️ 未测试**
+**状态: ⏭️ 延后实现**
 
-**原因**: 需要部署到公共网络或配置Big Dipper等区块浏览器
+**原因**: 需要部署公共测试网后配置
+
+**前置条件**:
+- 公共种子节点部署（云服务器）
+- 域名和SSL配置
+- Big Dipper/Ping.Pub 安装
+
+**延后说明**: 详见 `docs/achievements/postponed.md`
 
 **API端点准备**:
 - RPC: http://localhost:26657
@@ -206,7 +213,7 @@ curl http://localhost:26657/net_info
 | P2P消息广播 | ✅ 基础通过 | P2P连接正常，区块同步正常 |
 | UPnP端口映射 | ✅ 通过 | 实际测试通过，支持IGD v1/v2 |
 | Noise Protocol | ✅ 默认启用 | CometBFT内置 |
-| 区块浏览器 | ⏭️ 未测试 | 需部署后配置 |
+| 区块浏览器 | ⏭️ 延后 | 详见 postponed.md |
 
 ### 已修复问题 ✅
 1. ~~devnet_multi.sh启动失败~~ - **已修复**：
@@ -216,8 +223,8 @@ curl http://localhost:26657/net_info
    - 为所有节点创建验证人和gentx
 
 ### 待修复问题
-1. UPnP完整实现（SSDP发现、IGD交互）- 需真实网络环境
-2. 部署公共测试网后配置区块浏览器
+1. ~~UPnP完整实现（SSDP发现、IGD交互）~~ - ✅ 已解决
+2. ~~部署公共测试网后配置区块浏览器~~ - ⏭️ 延后实现（详见 postponed.md）
 
 ---
 
@@ -240,4 +247,5 @@ curl http://localhost:26657/net_info
 4. ✅ Noise Protocol加密默认启用
 5. ✅ UPnP完整实现并实际测试通过（SSDP发现、端口映射、保活机制）
 
-**遗留项**: 无 - 所有验收项已完成
+**遗留项**:
+- ⏭️ 区块浏览器需部署公共网络后配置（已记录到 postponed.md，计划ACH-DEV-016阶段实现）
