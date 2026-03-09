@@ -14,12 +14,14 @@ func RegisterOpenAPIService(appName string, router *mux.Router) {
 	// Serve a simple OpenAPI spec endpoint
 	router.HandleFunc("/openapi.yml", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/yaml")
+		// nolint:errcheck // OpenAPI spec is a constant, write will not fail
 		w.Write([]byte(openAPISpec))
 	}).Methods("GET")
 
 	// Serve Swagger UI (optional, for development)
 	router.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
+		// nolint:errcheck // Swagger UI is a constant, write will not fail
 		w.Write([]byte(swaggerUI))
 	}).Methods("GET")
 }

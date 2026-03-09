@@ -190,6 +190,7 @@ func IsPortOpen(host string, port int, timeout time.Duration) bool {
 	if err != nil {
 		return false
 	}
+	// nolint:errcheck // Connection close error doesn't affect the port check result
 	conn.Close()
 	return true
 }

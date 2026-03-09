@@ -35,18 +35,14 @@ linters:
     - staticcheck  # 静态分析检查
     - gosimple     # 简化代码建议
     - ineffassign  # 无效赋值检查
-    - typecheck    # 类型检查
 
     # 代码风格
-    - golint       # Go lint 风格检查
+    - revive       # 取代 golint 的代码风格检查
     - stylecheck   # 风格检查
     - goimports    # import 排序检查
     - gci          # import 分组检查
 
     # 代码质量
-    - deadcode     # 死代码检查
-    - structcheck  # 未使用结构体字段检查
-    - varcheck     # 未使用变量检查
     - unused       # 未使用代码检查
 
     # 安全与正确性
@@ -64,6 +60,11 @@ linters:
     - scopelint    # 已弃用
     - interfacer   # 已弃用
     - exhaustive   # 可能过于严格
+    - deadcode     # 已弃用，由 unused 替代
+    - structcheck  # 已弃用
+    - varcheck     # 已弃用
+    - golint       # 已弃用，由 revive 替代
+    - typecheck    # 这不是一个 linter
 
 linters-settings:
   # gofmt 设置
@@ -93,9 +94,9 @@ linters-settings:
     check-type-assertions: true
     check-blank: true
 
-  # golint 设置
-  golint:
-    min-confidence: 0.8
+  # revive 设置 (取代 golint)
+  revive:
+    confidence: 0.8
 
   # prealloc 设置
   prealloc:
@@ -122,7 +123,7 @@ issues:
       linters:
         - gofmt
         - goimports
-        - golint
+        - revive
 
     # 排除测试文件某些检查
     - path: _test\.go
@@ -132,7 +133,7 @@ issues:
 
     # 允许某些常见模式
     - linters:
-        - golint
+        - revive
       text: "should have comment"
 
     - linters:

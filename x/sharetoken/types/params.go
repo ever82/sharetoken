@@ -1,7 +1,7 @@
 package types
 
 import (
-	
+	"fmt"
 
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v2"
@@ -42,6 +42,9 @@ func (p Params) Validate() error {
 
 // String implements the Stringer interface.
 func (p Params) String() string {
-	out, _ := yaml.Marshal(p)
+	out, err := yaml.Marshal(p)
+	if err != nil {
+		return fmt.Sprintf("error marshaling params: %v", err)
+	}
 	return string(out)
 }
