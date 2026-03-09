@@ -1,0 +1,33 @@
+syntax = "proto3";
+package sharetoken.identity;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/identity/identity.proto";
+import "sharetoken/identity/limit.proto";
+
+option go_package = "github.com/ShareToken/sharetoken/x/identity/types";
+
+// GenesisState defines the identity module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module.
+  Params params = 1 [(gogoproto.nullable) = false];
+
+  // identities is the list of registered identities
+  repeated Identity identities = 2 [(gogoproto.nullable) = false];
+
+  // limit_configs is the list of user limit configurations
+  repeated LimitConfig limit_configs = 3 [(gogoproto.nullable) = false];
+}
+
+// Params defines the parameters for the identity module.
+message Params {
+  // verification_required indicates if verification is required
+  bool verification_required = 1;
+
+  // allowed_providers is the list of allowed verification providers
+  repeated string allowed_providers = 2;
+
+  // default_limits is the default limit configuration
+  DefaultLimitConfig default_limits = 3 [(gogoproto.nullable) = false];
+}

@@ -1,0 +1,118 @@
+syntax = "proto3";
+package sharetoken.identity;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/ShareToken/sharetoken/x/identity/types";
+
+// LimitConfig stores user limits configuration
+message LimitConfig {
+  // address is the user's blockchain address
+  string address = 1;
+
+  // transaction_limit stores transaction related limits
+  TransactionLimit tx_limit = 2 [(gogoproto.nullable) = false];
+
+  // withdrawal_limit stores withdrawal related limits
+  WithdrawalLimit withdrawal_limit = 3 [(gogoproto.nullable) = false];
+
+  // dispute_limit stores dispute related limits
+  DisputeLimit dispute_limit = 4 [(gogoproto.nullable) = false];
+
+  // service_limit stores service usage limits
+  ServiceLimit service_limit = 5 [(gogoproto.nullable) = false];
+
+  // updated_at is the Unix timestamp of last update
+  uint64 updated_at = 6;
+}
+
+// TransactionLimit defines transaction related limits
+message TransactionLimit {
+  // max_single is the maximum amount for a single transaction (in ustt)
+  string max_single = 1;
+
+  // max_daily is the maximum daily transaction amount (in ustt)
+  string max_daily = 2;
+
+  // max_monthly is the maximum monthly transaction amount (in ustt)
+  string max_monthly = 3;
+
+  // daily_tx_count is current daily transaction count
+  uint64 daily_tx_count = 4;
+
+  // monthly_tx_count is current monthly transaction count
+  uint64 monthly_tx_count = 5;
+
+  // daily_spent is amount spent today (in ustt)
+  string daily_spent = 6;
+
+  // monthly_spent is amount spent this month (in ustt)
+  string monthly_spent = 7;
+
+  // last_reset_day is Unix timestamp of last daily reset
+  uint64 last_reset_day = 8;
+
+  // last_reset_month is Unix timestamp of last monthly reset
+  uint64 last_reset_month = 9;
+}
+
+// WithdrawalLimit defines withdrawal related limits
+message WithdrawalLimit {
+  // max_daily is the maximum daily withdrawal amount (in ustt)
+  string max_daily = 1;
+
+  // cooldown_hours is the cooldown period between withdrawals (in hours)
+  uint64 cooldown_hours = 2;
+
+  // last_withdrawal_time is Unix timestamp of last withdrawal
+  uint64 last_withdrawal_time = 3;
+
+  // daily_withdrawn is amount withdrawn today (in ustt)
+  string daily_withdrawn = 4;
+
+  // last_reset_day is Unix timestamp of last daily reset
+  uint64 last_reset_day = 5;
+}
+
+// DisputeLimit defines dispute related limits
+message DisputeLimit {
+  // max_active_disputes is the maximum number of active disputes
+  uint64 max_active_disputes = 1;
+
+  // current_active is the current number of active disputes
+  uint64 current_active = 2;
+}
+
+// ServiceLimit defines service usage limits
+message ServiceLimit {
+  // max_concurrent is the maximum concurrent service calls
+  uint64 max_concurrent = 1;
+
+  // rate_limit_per_minute is the rate limit per minute
+  uint64 rate_limit_per_minute = 2;
+
+  // current_concurrent is the current concurrent service calls
+  uint64 current_concurrent = 3;
+
+  // requests_last_minute is the count of requests in the last minute
+  uint64 requests_last_minute = 4;
+
+  // last_rate_reset is Unix timestamp of last rate limit reset
+  uint64 last_rate_reset = 5;
+}
+
+// DefaultLimitConfig stores default limit values
+message DefaultLimitConfig {
+  // default_tx_limit is the default transaction limit
+  TransactionLimit default_tx_limit = 1 [(gogoproto.nullable) = false];
+
+  // default_withdrawal_limit is the default withdrawal limit
+  WithdrawalLimit default_withdrawal_limit = 2 [(gogoproto.nullable) = false];
+
+  // default_dispute_limit is the default dispute limit
+  DisputeLimit default_dispute_limit = 3 [(gogoproto.nullable) = false];
+
+  // default_service_limit is the default service limit
+  ServiceLimit default_service_limit = 4 [(gogoproto.nullable) = false];
+}

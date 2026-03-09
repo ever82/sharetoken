@@ -1,0 +1,103 @@
+syntax = "proto3";
+package sharetoken.identity;
+
+import "amino/amino.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/identity/identity.proto";
+import "sharetoken/identity/limit.proto";
+
+option go_package = "github.com/ShareToken/sharetoken/x/identity/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Parameters queries the parameters of the module.
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (cosmos.query.v1.module_query) = "true";
+    option (google.api.http).get = "/ShareToken/sharetoken/identity/params";
+  }
+
+  // Identity queries an identity by address.
+  rpc Identity(QueryIdentityRequest) returns (QueryIdentityResponse) {
+    option (cosmos.query.v1.module_query) = "true";
+    option (google.api.http).get = "/ShareToken/sharetoken/identity/{address}";
+  }
+
+  // Identities queries all identities.
+  rpc Identities(QueryIdentitiesRequest) returns (QueryIdentitiesResponse) {
+    option (cosmos.query.v1.module_query) = "true";
+    option (google.api.http).get = "/ShareToken/sharetoken/identity/identities";
+  }
+
+  // LimitConfig queries a user's limit configuration.
+  rpc LimitConfig(QueryLimitConfigRequest) returns (QueryLimitConfigResponse) {
+    option (cosmos.query.v1.module_query) = "true";
+    option (google.api.http).get = "/ShareToken/sharetoken/identity/{address}/limits";
+  }
+
+  // IsVerified checks if an address is verified.
+  rpc IsVerified(QueryIsVerifiedRequest) returns (QueryIsVerifiedResponse) {
+    option (cosmos.query.v1.module_query) = "true";
+    option (google.api.http).get = "/ShareToken/sharetoken/identity/{address}/verified";
+  }
+}
+
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params holds all the parameters of this module.
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryIdentityRequest is request type for the Query/Identity RPC method.
+message QueryIdentityRequest {
+  // address is the blockchain address to query
+  string address = 1;
+}
+
+// QueryIdentityResponse is response type for the Query/Identity RPC method.
+message QueryIdentityResponse {
+  // identity is the identity information
+  Identity identity = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryIdentitiesRequest is request type for the Query/Identities RPC method.
+message QueryIdentitiesRequest {
+  // pagination defines an optional pagination for the request.
+  cosmos.query.v1.PageRequest pagination = 1;
+}
+
+// QueryIdentitiesResponse is response type for the Query/Identities RPC method.
+message QueryIdentitiesResponse {
+  // identities is the list of identities
+  repeated Identity identities = 1 [(gogoproto.nullable) = false];
+  // pagination defines the pagination in the response.
+  cosmos.query.v1.PageResponse pagination = 2;
+}
+
+// QueryLimitConfigRequest is request type for the Query/LimitConfig RPC method.
+message QueryLimitConfigRequest {
+  // address is the blockchain address to query
+  string address = 1;
+}
+
+// QueryLimitConfigResponse is response type for the Query/LimitConfig RPC method.
+message QueryLimitConfigResponse {
+  // limit_config is the limit configuration
+  LimitConfig limit_config = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryIsVerifiedRequest is request type for the Query/IsVerified RPC method.
+message QueryIsVerifiedRequest {
+  // address is the blockchain address to query
+  string address = 1;
+}
+
+// QueryIsVerifiedResponse is response type for the Query/IsVerified RPC method.
+message QueryIsVerifiedResponse {
+  // is_verified indicates if the address is verified
+  bool is_verified = 1;
+}

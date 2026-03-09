@@ -1,0 +1,121 @@
+syntax = "proto3";
+package sharetoken.identity;
+
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/identity/identity.proto";
+import "sharetoken/identity/limit.proto";
+import "sharetoken/identity/genesis.proto";
+
+option go_package = "github.com/ShareToken/sharetoken/x/identity/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // UpdateParams defines a governance operation for updating the module parameters.
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+
+  // RegisterIdentity registers a new identity.
+  rpc RegisterIdentity(MsgRegisterIdentity) returns (MsgRegisterIdentityResponse);
+
+  // VerifyIdentity verifies an identity with third-party provider.
+  rpc VerifyIdentity(MsgVerifyIdentity) returns (MsgVerifyIdentityResponse);
+
+  // UpdateLimitConfig updates user's limit configuration.
+  rpc UpdateLimitConfig(MsgUpdateLimitConfig) returns (MsgUpdateLimitConfigResponse);
+
+  // ResetDailyLimits resets daily limits (called by end blocker).
+  rpc ResetDailyLimits(MsgResetDailyLimits) returns (MsgResetDailyLimitsResponse);
+}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the new parameters to set.
+  Params params = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgUpdateParamsResponse is the Msg/UpdateParams response type.
+message MsgUpdateParamsResponse {}
+
+// MsgRegisterIdentity is the Msg/RegisterIdentity request type.
+message MsgRegisterIdentity {
+  option (cosmos.msg.v1.signer) = "address";
+
+  // address is the blockchain address
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // did is the Decentralized Identifier (optional)
+  string did = 2;
+
+  // metadata_hash is hash of encrypted metadata
+  string metadata_hash = 3;
+}
+
+// MsgRegisterIdentityResponse is the Msg/RegisterIdentity response type.
+message MsgRegisterIdentityResponse {
+  // merkle_root is the generated merkle root
+  string merkle_root = 1;
+}
+
+// MsgVerifyIdentity is the Msg/VerifyIdentity request type.
+message MsgVerifyIdentity {
+  option (cosmos.msg.v1.signer) = "address";
+
+  // address is the blockchain address
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // provider is the verification provider (wechat/github/google)
+  string provider = 2;
+
+  // verification_hash is the hash of verification result
+  string verification_hash = 3;
+
+  // proof is the verification proof from provider
+  string proof = 4;
+}
+
+// MsgVerifyIdentityResponse is the Msg/VerifyIdentity response type.
+message MsgVerifyIdentityResponse {
+  // is_verified indicates if verification succeeded
+  bool is_verified = 1;
+
+  // updated_merkle_root is the updated merkle root
+  string updated_merkle_root = 2;
+}
+
+// MsgUpdateLimitConfig is the Msg/UpdateLimitConfig request type.
+message MsgUpdateLimitConfig {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address that controls the limits (defaults to x/gov).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // target_address is the address whose limits to update
+  string target_address = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // new_config is the new limit configuration
+  LimitConfig new_config = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgUpdateLimitConfigResponse is the Msg/UpdateLimitConfig response type.
+message MsgUpdateLimitConfigResponse {}
+
+// MsgResetDailyLimits is the Msg/ResetDailyLimits request type.
+message MsgResetDailyLimits {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address that controls the module.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// MsgResetDailyLimitsResponse is the Msg/ResetDailyLimits response type.
+message MsgResetDailyLimitsResponse {
+  // reset_count is the number of users whose limits were reset
+  uint64 reset_count = 1;
+}

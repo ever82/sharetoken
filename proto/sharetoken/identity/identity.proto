@@ -1,0 +1,34 @@
+syntax = "proto3";
+package sharetoken.identity;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/ShareToken/sharetoken/x/identity/types";
+
+// Identity represents a user's on-chain identity
+message Identity {
+  // address is the blockchain address
+  string address = 1;
+
+  // did is the Decentralized Identifier
+  string did = 2;
+
+  // verification_hash is the hash of verification result (not plaintext)
+  string verification_hash = 3;
+
+  // verification_provider is the provider used (wechat/github/google)
+  string verification_provider = 4;
+
+  // registration_time is the Unix timestamp of registration
+  uint64 registration_time = 5;
+
+  // is_verified indicates if identity is verified
+  bool is_verified = 6;
+
+  // merkle_root is the root hash of the identity merkle tree
+  string merkle_root = 7;
+
+  // metadata_hash is hash of additional encrypted metadata
+  string metadata_hash = 8;
+}
