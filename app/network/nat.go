@@ -12,6 +12,7 @@ import (
 )
 
 // NATConfig holds NAT configuration options
+// nolint:govet // fieldalignment: struct field order is for readability
 type NATConfig struct {
 	// Enable UPnP port mapping
 	EnableUPnP bool `mapstructure:"enable_upnp"`
@@ -37,6 +38,7 @@ func DefaultNATConfig() *NATConfig {
 }
 
 // NATManager handles NAT traversal including UPnP
+// nolint:govet // fieldalignment: struct field order is for readability
 type NATManager struct {
 	config    *NATConfig
 	mappings  []PortMapping
@@ -46,6 +48,7 @@ type NATManager struct {
 }
 
 // PortMapping represents a single port mapping
+// nolint:govet // fieldalignment: struct field order is for readability
 type PortMapping struct {
 	Protocol     string
 	InternalIP   string

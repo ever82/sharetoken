@@ -43,6 +43,7 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 func (am AppModule) RegisterStoreDecoder(_ sdk.StoreDecoderRegistry) {}
 
 // ProposalContents doesn't return any content functions for governance proposals.
+// nolint:staticcheck // WeightedProposalContent is deprecated but kept for compatibility
 func (AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalContent {
 	return nil
 }

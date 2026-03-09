@@ -208,6 +208,7 @@ func init() {
 // App extends an ABCI application, but with most of its parameters exported.
 // They are exported for convenience in creating helper functions, as object
 // capabilities aren't needed for testing.
+// nolint:govet // fieldalignment: struct field order is for readability
 type App struct {
 	*baseapp.BaseApp
 
