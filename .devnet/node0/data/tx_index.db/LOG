@@ -15,3 +15,8 @@
 01:33:34.139783 version@stat F·[2] S·1MiB[1MiB] Sc·[0.50]
 01:33:34.147352 memdb@flush committed F·1 T·54.264872ms
 01:33:34.148629 journal@remove removed @2
+02:27:40.082036 memdb@flush N·46255 S·3MiB
+02:27:40.136668 memdb@flush created L0@7 N·46255 S·775KiB "blo..\x01\xcc~,v92719":"blo..\xe0\xf3J,v138955"
+02:27:40.136752 version@stat F·[3] S·2MiB[2MiB] Sc·[0.75]
+02:27:40.140291 memdb@flush committed F·1 T·57.967213ms
+02:27:40.143331 journal@remove removed @4
