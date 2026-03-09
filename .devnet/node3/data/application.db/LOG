@@ -239,3 +239,37 @@
 01:21:08.197900 table@remove removed @82
 01:21:08.198286 table@remove removed @83
 01:21:08.198586 table@remove removed @84
+01:29:09.970623 memdb@flush N·39084 S·3MiB
+01:29:10.036059 memdb@flush created L0@100 N·39084 S·2MiB "s/2825,v432514":"s/p..hts,v432513"
+01:29:10.036171 version@stat F·[1 12] S·25MiB[2MiB 23MiB] Sc·[0.25 0.23]
+01:29:10.039608 memdb@flush committed F·1 T·68.846158ms
+01:29:10.040657 journal@remove removed @85
+01:29:22.234151 table@compaction L0·1 -> L1·12 S·25MiB Q·472464
+01:29:22.309930 table@build created L1@101 N·15941 S·2MiB "s/1,v325":"s/k..\x84\xe2\x8a,v394573"
+01:29:22.383349 table@build created L1@102 N·42844 S·2MiB "s/k..(\x1e=,v404219":"s/k..\xc3\xf9\x80,v158457"
+01:29:22.460754 table@build created L1@103 N·23343 S·2MiB "s/k..[PI,v418393":"s/k..#\xd5:,v57828"
+01:29:22.533041 table@build created L1@104 N·33494 S·2MiB "s/k..ue\xcd,v19641":"s/k..\x8f\xe4@,v253530"
+01:29:22.609440 table@build created L1@105 N·49207 S·2MiB "s/k..7\xaav,v253536":"s/k..dʞ,v418264"
+01:29:22.673776 table@build created L1@106 N·43656 S·2MiB "s/k..\xf8CU,v418265":"s/k..\x1a\xd3\x7f,v131675"
+01:29:22.721734 table@build created L1@107 N·18814 S·2MiB "s/k..:Pb,v131677":"s/k..\x81\xb4\x14,v427329"
+01:29:22.759646 table@build created L1@108 N·15719 S·2MiB "s/k..\x83\xae\xa2,v385667":"s/k..zg\xb4,v346292"
+01:29:22.796869 table@build created L1@109 N·15805 S·2MiB "s/k..\x82H?,v463355":"s/k..\xa0\xba\x0f,v228994"
+01:29:22.837950 table@build created L1@110 N·15650 S·2MiB "s/k..\xb8\fj,v408987":"s/k..\xd5=\xc6,v180461"
+01:29:22.876519 table@build created L1@111 N·15576 S·2MiB "s/k..Ŀj,v468157":"s/k..Ch\xb9,v361356"
+01:29:22.934841 table@build created L1@112 N·42098 S·2MiB "s/k..n\x90\x87,v30007":"s/k..\\\xa8\xd6,v303458"
+01:29:22.976545 table@build created L1@113 N·34771 S·1MiB "s/k..L\xa3\x9a,v303448":"s/p..hts,v471423"
+01:29:22.976661 version@stat F·[0 13] S·25MiB[0B 25MiB] Sc·[0.00 0.26]
+01:29:22.980805 table@compaction committed F~ S-62KiB Ke·0 D·8290 T·746.613852ms
+01:29:22.981641 table@remove removed @100
+01:29:22.982067 table@remove removed @87
+01:29:22.982427 table@remove removed @88
+01:29:22.982799 table@remove removed @89
+01:29:22.983253 table@remove removed @90
+01:29:22.983662 table@remove removed @91
+01:29:22.984070 table@remove removed @92
+01:29:22.984376 table@remove removed @93
+01:29:22.984748 table@remove removed @94
+01:29:22.985138 table@remove removed @95
+01:29:22.985493 table@remove removed @96
+01:29:22.985895 table@remove removed @97
+01:29:22.986195 table@remove removed @98

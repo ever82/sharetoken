@@ -21,3 +21,8 @@
 01:00:24.176778 table@compaction committed F-1 S-1MiB Ke·0 D·4312 T·54.610576ms
 01:00:24.177356 table@remove removed @5
 01:00:24.177633 table@remove removed @3
+01:34:51.692505 memdb@flush N·5395 S·3MiB
+01:34:51.719244 memdb@flush created L0@8 N·5395 S·912KiB "abc..158,v10791":"val..238,v16183"
+01:34:51.719307 version@stat F·[1 1] S·1MiB[912KiB 739KiB] Sc·[0.25 0.01]
+01:34:51.722536 memdb@flush committed F·1 T·29.971847ms
+01:34:51.724172 journal@remove removed @4
