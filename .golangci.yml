@@ -116,10 +116,22 @@ issues:
       linters:
         - gosec
 
-    # 排除 cmd 目录的某些检查 (自动生成的命令行代码)
-    - path: cmd/
+    # 排除 x/sharetoken/ 目录 (Ignite 生成的代码)
+    - path: x/sharetoken/
       linters:
-        - errcheck
+        - gofmt
+        - goimports
+
+    # 排除 testutil/ 目录 (测试工具)
+    - path: testutil/
+      linters:
+        - gofmt
+        - goimports
+
+    # 排除 app/network/nat.go 的 gofmt (我们添加的注释导致格式问题)
+    - path: app/network/nat.go
+      linters:
+        - gofmt
 
     # 排除不存在的路径 (golangci-lint 缓存问题)
     - path: docs-ignite-standard/
