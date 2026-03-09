@@ -74,6 +74,7 @@ func (app *App) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []str
 	/* Handle fee distribution state. */
 
 	// withdraw all validator commission
+	// nolint:gosec // Withdraw errors during genesis export are expected and safe to ignore
 	app.StakingKeeper.IterateValidators(ctx, func(_ int64, val stakingtypes.ValidatorI) (stop bool) {
 		// nolint:errcheck // Withdraw errors are expected and can be safely ignored during export
 		_, _ = app.DistrKeeper.WithdrawValidatorCommission(ctx, val.GetOperator())

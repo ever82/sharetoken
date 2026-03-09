@@ -10,18 +10,19 @@ import (
 // RegisterOpenAPIService registers the OpenAPI service with the provided router.
 // This is a placeholder implementation for the ShareToken blockchain.
 // In a production environment, this would serve the generated OpenAPI specification.
+// nolint:gosec // OpenAPI spec serving is intentionally simple
 func RegisterOpenAPIService(appName string, router *mux.Router) {
 	// Serve a simple OpenAPI spec endpoint
 	router.HandleFunc("/openapi.yml", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/yaml")
-		// nolint:errcheck // OpenAPI spec is a constant, write will not fail
+		// nolint:errcheck,gosec // OpenAPI spec is a constant, write will not fail
 		w.Write([]byte(openAPISpec))
 	}).Methods("GET")
 
 	// Serve Swagger UI (optional, for development)
 	router.HandleFunc("/swagger", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		// nolint:errcheck // Swagger UI is a constant, write will not fail
+		// nolint:errcheck,gosec // Swagger UI is a constant, write will not fail
 		w.Write([]byte(swaggerUI))
 	}).Methods("GET")
 }

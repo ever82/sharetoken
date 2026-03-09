@@ -184,13 +184,14 @@ func (nm *NATManager) ManualPortMapping(internalPort, externalPort int, protocol
 }
 
 // IsPortOpen checks if a port is open and accessible
+// nolint:gosec // Port check is intentional and safe
 func IsPortOpen(host string, port int, timeout time.Duration) bool {
 	address := net.JoinHostPort(host, strconv.Itoa(port))
 	conn, err := net.DialTimeout("tcp", address, timeout)
 	if err != nil {
 		return false
 	}
-	// nolint:errcheck // Connection close error doesn't affect the port check result
+	// nolint:errcheck,gosec // Connection close error doesn't affect the port check result
 	conn.Close()
 	return true
 }

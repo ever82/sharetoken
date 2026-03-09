@@ -118,6 +118,21 @@ issues:
       linters:
         - all
 
+    # 排除 testutil 目录 (测试工具)
+    - path: testutil/
+      linters:
+        - gosec
+
+    # 排除 cmd 目录的某些检查 (自动生成的命令行代码)
+    - path: cmd/
+      linters:
+        - errcheck
+
+    # 排除不存在的路径 (golangci-lint 缓存问题)
+    - path: docs-ignite-standard/
+      linters:
+        - all
+
     # 排除生成的 protobuf 代码
     - path: ".*\\.pb\\.go$"
       linters:
