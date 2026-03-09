@@ -65,6 +65,7 @@ linters:
     - varcheck     # 已弃用
     - golint       # 已弃用，由 revive 替代
     - typecheck    # 这不是一个 linter
+    - gci          # import 分组检查过于严格
 
 linters-settings:
   # gofmt 设置
