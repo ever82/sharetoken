@@ -1,5 +1,5 @@
 <template>
-  <div class="market">
+  <div class="market-view">
     <h1>服务市场</h1>
     <p class="subtitle">发现和使用 AI 服务</p>
 
@@ -29,7 +29,7 @@
 </template>
 
 <style scoped>
-.market {
+.market-view {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;

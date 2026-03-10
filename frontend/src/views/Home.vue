@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="home-view">
     <div class="hero">
       <h1>欢迎来到 ShareToken</h1>
       <p>去中心化的 AI 服务市场</p>
@@ -26,7 +26,7 @@
 </template>
 
 <style scoped>
-.home {
+.home-view {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
