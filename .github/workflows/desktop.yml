@@ -53,7 +53,10 @@ jobs:
           if [ "${{ matrix.platform }}" = "win" ]; then
             OUTPUT="bin/sharetokend.exe"
           fi
+          export GOOS=${{ matrix.platform == 'win' && 'windows' || matrix.platform == 'mac' && 'darwin' || 'linux' }}
+          export GOARCH=${{ matrix.arch == 'arm64' && 'arm64' || 'amd64' }}
           go build -ldflags "-X main.Version=$VERSION -X main.Commit=$COMMIT" -o "$OUTPUT" ./cmd/sharetokend
+          file "bin/sharetokend*" || true
         shell: bash
 
       - name: Build Frontend
