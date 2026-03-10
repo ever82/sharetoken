@@ -71,7 +71,7 @@ func (k Keeper) DeleteAPIKey(ctx sdk.Context, id string) {
 func (k Keeper) GetAllAPIKeys(ctx sdk.Context) []types.APIKey {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, types.APIKeyPrefix)
-	defer iterator.Close()
+	defer iterator.Close() //nolint:errcheck
 
 	var apiKeys []types.APIKey
 	for ; iterator.Valid(); iterator.Next() {

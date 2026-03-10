@@ -22,7 +22,10 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey) *Keeper {
 func (k Keeper) SetService(ctx sdk.Context, service types.Service) {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetServiceKey(service.ID)
-	value, _ := json.Marshal(service)
+	value, err := json.Marshal(service)
+	if err != nil {
+		panic(err)
+	}
 	store.Set(key, value)
 }
 
@@ -34,6 +37,8 @@ func (k Keeper) GetService(ctx sdk.Context, id string) (types.Service, bool) {
 		return types.Service{}, false
 	}
 	var service types.Service
-	json.Unmarshal(value, &service)
+	if err := json.Unmarshal(value, &service); err != nil {
+		return types.Service{}, false
+	}
 	return service, true
 }
