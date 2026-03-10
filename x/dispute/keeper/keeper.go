@@ -263,5 +263,5 @@ func (k *DisputeKeeper) RegisterJuror(address string) {
 
 // generateDisputeID generates a unique dispute ID
 func generateDisputeID() string {
-	return fmt.Sprintf("DISPUTE-%d-%d", time.Now().Unix(), rand.Intn(10000))
+	return fmt.Sprintf("DISPUTE-%d-%d", time.Now().Unix(), rand.Intn(10000)) //nolint:gosec
 }
