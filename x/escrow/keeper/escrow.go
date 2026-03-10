@@ -98,7 +98,7 @@ func (k Keeper) GetEscrowsByRequester(ctx sdk.Context, requester string) []types
 	store := ctx.KVStore(k.storeKey)
 	prefix := append(types.EscrowByRequesterKey, []byte(requester)...)
 	iterator := sdk.KVStorePrefixIterator(store, prefix)
-	defer iterator.Close()
+	defer iterator.Close() //nolint:errcheck
 
 	var escrows []types.Escrow
 	for ; iterator.Valid(); iterator.Next() {
@@ -119,7 +119,7 @@ func (k Keeper) GetEscrowsByProvider(ctx sdk.Context, provider string) []types.E
 	store := ctx.KVStore(k.storeKey)
 	prefix := append(types.EscrowByProviderKey, []byte(provider)...)
 	iterator := sdk.KVStorePrefixIterator(store, prefix)
-	defer iterator.Close()
+	defer iterator.Close() //nolint:errcheck
 
 	var escrows []types.Escrow
 	for ; iterator.Valid(); iterator.Next() {
@@ -139,7 +139,7 @@ func (k Keeper) GetEscrowsByProvider(ctx sdk.Context, provider string) []types.E
 func (k Keeper) GetAllEscrows(ctx sdk.Context) []types.Escrow {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, types.EscrowKey)
-	defer iterator.Close()
+	defer iterator.Close() //nolint:errcheck
 
 	var escrows []types.Escrow
 	for ; iterator.Valid(); iterator.Next() {

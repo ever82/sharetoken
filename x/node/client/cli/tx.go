@@ -214,7 +214,7 @@ func GetCmdInitializeRole() *cobra.Command {
 			}
 
 			// Get custom config if provided
-			configPath, _ := cmd.Flags().GetString("config-file")
+			configPath, _ := cmd.Flags().GetString("config-file") //nolint:errcheck
 			var customConfig *types.RoleConfig
 			if configPath != "" {
 				data, err := os.ReadFile(configPath)
@@ -285,7 +285,7 @@ while others require a restart. This command will tell you if a restart is neede
 			}
 
 			// Get custom config if provided
-			configPath, _ := cmd.Flags().GetString("config-file")
+			configPath, _ := cmd.Flags().GetString("config-file") //nolint:errcheck
 			var customConfig *types.RoleConfig
 			if configPath != "" {
 				data, err := os.ReadFile(configPath)
@@ -298,7 +298,7 @@ while others require a restart. This command will tell you if a restart is neede
 				}
 			}
 
-			force, _ := cmd.Flags().GetBool("force")
+			force, _ := cmd.Flags().GetBool("force") //nolint:errcheck
 
 			if requiresRestart {
 				// Request switch for next restart
@@ -353,7 +353,7 @@ func GetCmdUpdateConfig() *cobra.Command {
 				return err
 			}
 
-			configPath, _ := cmd.Flags().GetString("config-file")
+			configPath, _ := cmd.Flags().GetString("config-file") //nolint:errcheck
 			if configPath == "" {
 				return fmt.Errorf("--config-file is required")
 			}
@@ -394,7 +394,7 @@ func GetCmdUpdateConfig() *cobra.Command {
 	}
 
 	cmd.Flags().String("config-file", "", "Path to new configuration JSON file (required)")
-	cmd.MarkFlagRequired("config-file")
+	cmd.MarkFlagRequired("config-file") //nolint:errcheck
 
 	return cmd
 }

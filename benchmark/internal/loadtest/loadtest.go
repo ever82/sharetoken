@@ -111,7 +111,7 @@ func (lt *LoadTester) executeTransaction(account string) {
 	case "marketplace":
 		success = lt.simulateMarketplace(account)
 	case "mixed":
-		if rand.Float32() < 0.5 {
+		if rand.Float32() < 0.5 { //nolint:gosec
 			success = lt.simulateTransfer(account)
 		} else {
 			success = lt.simulateMarketplace(account)
@@ -131,12 +131,12 @@ func (lt *LoadTester) simulateTransfer(from string) bool {
 	// In real implementation, this would call the blockchain
 	
 	// Simulate occasional failures (2% failure rate)
-	if rand.Float32() < 0.02 {
+	if rand.Float32() < 0.02 { //nolint:gosec
 		return false
 	}
 	
 	// Simulate processing time
-	time.Sleep(time.Duration(rand.Int63n(50)+10) * time.Millisecond)
+	time.Sleep(time.Duration(rand.Int63n(50)+10) * time.Millisecond) //nolint:gosec
 	
 	return true
 }
