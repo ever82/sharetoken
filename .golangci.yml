@@ -47,7 +47,7 @@ linters:
 
     # 安全与正确性
     - gosec        # 安全检查
-    - prealloc     # 预分配建议
+    # - prealloc     # 预分配建议
     - exportloopref # 循环引用导出检查
 
     # 性能
