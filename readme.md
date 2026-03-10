@@ -38,39 +38,77 @@ ShareToken 是一个**去中心化的 AI 服务市场**，让您能够：
 
 ## 安装指南
 
-### 第一步：下载项目
+### 方法一：下载预编译版本（推荐）
+
+根据您的系统选择对应版本下载：
+
+**macOS (Intel):**
+```bash
+# 下载最新版本
+curl -LO https://github.com/ever82/sharetoken/releases/latest/download/sharetoken_darwin_amd64.tar.gz
+
+# 解压
+tar -xzf sharetoken_darwin_amd64.tar.gz
+
+# 移动到系统目录（可选）
+sudo mv sharetokend /usr/local/bin/
+
+# 验证安装
+sharetokend version
+```
+
+**macOS (Apple Silicon M1/M2/M3):**
+```bash
+curl -LO https://github.com/ever82/sharetoken/releases/latest/download/sharetoken_darwin_arm64.tar.gz
+tar -xzf sharetoken_darwin_arm64.tar.gz
+sudo mv sharetokend /usr/local/bin/
+sharetokend version
+```
+
+**Linux:**
+```bash
+curl -LO https://github.com/ever82/sharetoken/releases/latest/download/sharetoken_linux_amd64.tar.gz
+tar -xzf sharetoken_linux_amd64.tar.gz
+sudo mv sharetokend /usr/local/bin/
+sharetokend version
+```
+
+> 📦 所有预编译版本可在 [Releases 页面](https://github.com/ever82/sharetoken/releases) 下载
+
+---
+
+### 方法二：从源码构建（开发者）
+
+如果需要修改代码或参与开发，可以从源码构建：
 
 ```bash
-# 克隆项目到本地
+# 1. 克隆项目
 git clone https://github.com/ever82/sharetoken.git
 cd sharetoken
-```
 
-### 第二步：安装依赖
-
-```bash
-# 安装 Go 依赖
-go mod download
-
-# 构建区块链节点
+# 2. 安装依赖并构建
 make build
 
-# 安装前端依赖
+# 3. 验证构建
+./bin/sharetokend version
+```
+
+---
+
+### 安装前端界面（可选）
+
+如果需要使用图形界面，安装前端依赖：
+
+```bash
 cd frontend
 npm install
-cd ..
+npm run serve
+# 访问 http://localhost:8080
 ```
 
-**预期输出：**
-```
-Building sharetokend...
-✓ Build complete: ./bin/sharetokend
+---
 
-Installing frontend dependencies...
-✓ Dependencies installed
-```
-
-### 第三步：启动本地网络
+### 启动本地网络
 
 ```bash
 # 一键启动 4 节点开发网络

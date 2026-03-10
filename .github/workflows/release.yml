@@ -1,0 +1,142 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # macOS AMD64
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            binary: sharetokend
+            archive: sharetoken_darwin_amd64.tar.gz
+          # macOS ARM64 (Apple Silicon)
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            binary: sharetokend
+            archive: sharetoken_darwin_arm64.tar.gz
+          # Linux AMD64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            binary: sharetokend
+            archive: sharetoken_linux_amd64.tar.gz
+          # Linux ARM64
+          - os: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            binary: sharetokend
+            archive: sharetoken_linux_arm64.tar.gz
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          COMMIT=$(git rev-parse --short HEAD)
+          LDFLAGS="-X main.Version=$VERSION -X main.Commit=$COMMIT"
+          go build -ldflags "$LDFLAGS" -o ${{ matrix.binary }} ./cmd/sharetokend
+
+      - name: Package binary
+        run: |
+          tar -czf ${{ matrix.archive }} ${{ matrix.binary }}
+          echo "Archive created: ${{ matrix.archive }}"
+          ls -lh ${{ matrix.archive }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.archive }}
+          path: ${{ matrix.archive }}
+
+  create-release:
+    name: Create GitHub Release
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          merge-multiple: true
+
+      - name: List artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          ls -lh ./artifacts/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./artifacts/*.tar.gz
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            ## ShareToken ${{ github.ref_name }}
+
+            ### 安装方法
+
+            **macOS (Intel):**
+            ```bash
+curl -LO https://github.com/ever82/sharetoken/releases/download/${{ github.ref_name }}/sharetoken_darwin_amd64.tar.gz
+tar -xzf sharetoken_darwin_amd64.tar.gz
+sudo mv sharetokend /usr/local/bin/
+```
+
+            **macOS (Apple Silicon):**
+            ```bash
+curl -LO https://github.com/ever82/sharetoken/releases/download/${{ github.ref_name }}/sharetoken_darwin_arm64.tar.gz
+tar -xzf sharetoken_darwin_arm64.tar.gz
+sudo mv sharetokend /usr/local/bin/
+```
+
+            **Linux:**
+            ```bash
+curl -LO https://github.com/ever82/sharetoken/releases/download/${{ github.ref_name }}/sharetoken_linux_amd64.tar.gz
+tar -xzf sharetoken_linux_amd64.tar.gz
+sudo mv sharetokend /usr/local/bin/
+```
+
+            ### 验证安装
+            ```bash
+sharetokend version
+```
+
+            ### 快速开始
+            1. 创建钱包: `sharetokend keys add mywallet`
+            2. 查看余额: `sharetokend query bank balances <address>`
+            3. 发送交易: `sharetokend tx bank send ...`
+
+            更多详情请查看 [README.md](https://github.com/ever82/sharetoken/blob/main/readme.md)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
