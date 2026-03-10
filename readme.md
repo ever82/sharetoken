@@ -73,7 +73,21 @@ sudo mv sharetokend /usr/local/bin/
 sharetokend version
 ```
 
+**Windows (PowerShell):**
+```powershell
+# 下载最新版本
+Invoke-WebRequest -Uri https://github.com/ever82/sharetoken/releases/latest/download/sharetoken_windows_amd64.zip -OutFile sharetoken_windows_amd64.zip
+
+# 解压
+Expand-Archive -Path sharetoken_windows_amd64.zip -DestinationPath .\
+
+# 运行
+.\sharetokend.exe version
+```
+
 > 📦 所有预编译版本可在 [Releases 页面](https://github.com/ever82/sharetoken/releases) 下载
+
+> **注意：** Windows 版本需要开启开发者模式或使用 WSL2 运行完整功能。部分脚本功能可能需要 Git Bash 或 PowerShell。
 
 ---
 

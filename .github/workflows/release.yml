@@ -36,6 +36,12 @@ jobs:
             goos: linux
             goarch: arm64
             archive: sharetoken_linux_arm64.tar.gz
+          - target: windows-amd64
+            os: windows-latest
+            goos: windows
+            goarch: amd64
+            binary: sharetokend.exe
+            archive: sharetoken_windows_amd64.zip
 
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +50,8 @@ jobs:
         with:
           go-version: '1.21'
 
-      - name: Build
+      - name: Build (Unix)
+        if: runner.os != 'Windows'
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
@@ -53,8 +60,23 @@ jobs:
           COMMIT=$(git rev-parse --short HEAD)
           go build -ldflags "-X main.Version=$VERSION -X main.Commit=$COMMIT" -o sharetokend ./cmd/sharetokend
 
-      - name: Package
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          $Version = $env:GITHUB_REF -replace 'refs/tags/',''
+          $Commit = git rev-parse --short HEAD
+          go build -ldflags "-X main.Version=$Version -X main.Commit=$Commit" -o sharetokend.exe ./cmd/sharetokend
+
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
         run: tar -czf ${{ matrix.archive }} sharetokend
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path sharetokend.exe -DestinationPath ${{ matrix.archive }}
 
       - uses: actions/upload-artifact@v4
         with:
@@ -79,7 +101,9 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: artifacts/*.tar.gz
+          files: |
+            artifacts/*.tar.gz
+            artifacts/*.zip
           draft: false
           prerelease: false
           generate_release_notes: true
