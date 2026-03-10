@@ -8,83 +8,34 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// LimitConfig stores user limits configuration
-type LimitConfig struct {
-	Address         string           `json:"address"`
-	TxLimit         TransactionLimit `json:"tx_limit"`
-	WithdrawalLimit WithdrawalLimit  `json:"withdrawal_limit"`
-	DisputeLimit    DisputeLimit     `json:"dispute_limit"`
-	ServiceLimit    ServiceLimit     `json:"service_limit"`
-	UpdatedAt       int64            `json:"updated_at"`
-}
-
-// TransactionLimit defines transaction related limits
-type TransactionLimit struct {
-	MaxSingle      sdk.Coin `json:"max_single"`
-	MaxDaily       sdk.Coin `json:"max_daily"`
-	MaxMonthly     sdk.Coin `json:"max_monthly"`
-	DailyTxCount   uint64   `json:"daily_tx_count"`
-	MonthlyTxCount uint64   `json:"monthly_tx_count"`
-	DailySpent     sdk.Coin `json:"daily_spent"`
-	MonthlySpent   sdk.Coin `json:"monthly_spent"`
-	LastResetDay   int64    `json:"last_reset_day"`
-	LastResetMonth int64    `json:"last_reset_month"`
-}
-
-// WithdrawalLimit defines withdrawal related limits
-type WithdrawalLimit struct {
-	MaxDaily           sdk.Coin `json:"max_daily"`
-	CooldownHours      uint64   `json:"cooldown_hours"`
-	LastWithdrawalTime int64    `json:"last_withdrawal_time"`
-	DailyWithdrawn     sdk.Coin `json:"daily_withdrawn"`
-	LastResetDay       int64    `json:"last_reset_day"`
-}
-
-// DisputeLimit defines dispute related limits
-type DisputeLimit struct {
-	MaxActiveDisputes uint64 `json:"max_active_disputes"`
-	CurrentActive     uint64 `json:"current_active"`
-}
-
-// ServiceLimit defines service usage limits
-type ServiceLimit struct {
-	MaxConcurrent      uint64 `json:"max_concurrent"`
-	RateLimitPerMinute uint64 `json:"rate_limit_per_minute"`
-	CurrentConcurrent  uint64 `json:"current_concurrent"`
-	RequestsLastMinute uint64 `json:"requests_last_minute"`
-	LastRateReset      int64  `json:"last_rate_reset"`
-}
-
-// DefaultLimitConfig stores default limit values
-type DefaultLimitConfig struct {
-	DefaultTxLimit         TransactionLimit `json:"default_tx_limit"`
-	DefaultWithdrawalLimit WithdrawalLimit  `json:"default_withdrawal_limit"`
-	DefaultDisputeLimit    DisputeLimit     `json:"default_dispute_limit"`
-	DefaultServiceLimit    ServiceLimit     `json:"default_service_limit"`
-}
-
-// DefaultCoin returns a default coin for limit initialization
-func DefaultCoin() sdk.Coin {
+// StringCoin helpers for working with string-based coins
+func zeroCoin() sdk.Coin {
 	return sdk.NewCoin("ustt", sdk.ZeroInt())
+}
+
+// DefaultCoin returns a default coin string for limit initialization
+func DefaultCoin() string {
+	return sdk.NewCoin("ustt", sdk.ZeroInt()).String()
 }
 
 // DefaultDefaultLimitConfig returns default limit configuration
 func DefaultDefaultLimitConfig() DefaultLimitConfig {
+	now := uint64(time.Now().Unix())
 	return DefaultLimitConfig{
 		DefaultTxLimit: TransactionLimit{
-			MaxSingle:      sdk.NewCoin("ustt", sdk.NewInt(1000000000)),   // 1000 STT
-			MaxDaily:       sdk.NewCoin("ustt", sdk.NewInt(10000000000)),  // 10000 STT
-			MaxMonthly:     sdk.NewCoin("ustt", sdk.NewInt(100000000000)), // 100000 STT
+			MaxSingle:      sdk.NewCoin("ustt", sdk.NewInt(1000000000)).String(),   // 1000 STT
+			MaxDaily:       sdk.NewCoin("ustt", sdk.NewInt(10000000000)).String(),  // 10000 STT
+			MaxMonthly:     sdk.NewCoin("ustt", sdk.NewInt(100000000000)).String(), // 100000 STT
 			DailySpent:     DefaultCoin(),
 			MonthlySpent:   DefaultCoin(),
-			LastResetDay:   time.Now().Unix(),
-			LastResetMonth: time.Now().Unix(),
+			LastResetDay:   now,
+			LastResetMonth: now,
 		},
 		DefaultWithdrawalLimit: WithdrawalLimit{
-			MaxDaily:       sdk.NewCoin("ustt", sdk.NewInt(5000000000)), // 5000 STT
+			MaxDaily:       sdk.NewCoin("ustt", sdk.NewInt(5000000000)).String(), // 5000 STT
 			CooldownHours:  24,
 			DailyWithdrawn: DefaultCoin(),
-			LastResetDay:   time.Now().Unix(),
+			LastResetDay:   now,
 		},
 		DefaultDisputeLimit: DisputeLimit{
 			MaxActiveDisputes: 5,
@@ -93,7 +44,7 @@ func DefaultDefaultLimitConfig() DefaultLimitConfig {
 		DefaultServiceLimit: ServiceLimit{
 			MaxConcurrent:      10,
 			RateLimitPerMinute: 60,
-			LastRateReset:      time.Now().Unix(),
+			LastRateReset:      now,
 		},
 	}
 }
@@ -101,7 +52,7 @@ func DefaultDefaultLimitConfig() DefaultLimitConfig {
 // NewLimitConfig creates a new limit config with default values
 func NewLimitConfig(address string) LimitConfig {
 	defaults := DefaultDefaultLimitConfig()
-	now := time.Now().Unix()
+	now := uint64(time.Now().Unix())
 
 	return LimitConfig{
 		Address: address,
@@ -147,39 +98,54 @@ func (lc LimitConfig) ValidateBasic() error {
 	return nil
 }
 
+// parseCoin parses a coin string
+func parseCoin(s string) sdk.Coin {
+	coin, err := sdk.ParseCoinNormalized(s)
+	if err != nil {
+		return zeroCoin()
+	}
+	return coin
+}
+
 // CheckTransactionLimit checks if a transaction amount is within limits
 func (lc *LimitConfig) CheckTransactionLimit(amount sdk.Coin) error {
 	// Reset counters if needed
 	lc.resetTxCountersIfNeeded()
 
+	maxSingle := parseCoin(lc.TxLimit.MaxSingle)
+	maxDaily := parseCoin(lc.TxLimit.MaxDaily)
+	maxMonthly := parseCoin(lc.TxLimit.MaxMonthly)
+	dailySpent := parseCoin(lc.TxLimit.DailySpent)
+	monthlySpent := parseCoin(lc.TxLimit.MonthlySpent)
+
 	// Check single transaction limit
-	if amount.IsGTE(lc.TxLimit.MaxSingle) {
+	if amount.IsGTE(maxSingle) {
 		return LimitError{
 			LimitType:   "transaction_single",
 			Current:     amount.String(),
-			Max:         lc.TxLimit.MaxSingle.String(),
+			Max:         maxSingle.String(),
 			Description: "transaction amount exceeds single transaction limit",
 		}
 	}
 
 	// Check daily limit
-	newDailySpent := lc.TxLimit.DailySpent.Add(amount)
-	if newDailySpent.IsGTE(lc.TxLimit.MaxDaily) {
+	newDailySpent := dailySpent.Add(amount)
+	if newDailySpent.IsGTE(maxDaily) {
 		return LimitError{
 			LimitType:   "transaction_daily",
 			Current:     newDailySpent.String(),
-			Max:         lc.TxLimit.MaxDaily.String(),
+			Max:         maxDaily.String(),
 			Description: "transaction would exceed daily limit",
 		}
 	}
 
 	// Check monthly limit
-	newMonthlySpent := lc.TxLimit.MonthlySpent.Add(amount)
-	if newMonthlySpent.IsGTE(lc.TxLimit.MaxMonthly) {
+	newMonthlySpent := monthlySpent.Add(amount)
+	if newMonthlySpent.IsGTE(maxMonthly) {
 		return LimitError{
 			LimitType:   "transaction_monthly",
 			Current:     newMonthlySpent.String(),
-			Max:         lc.TxLimit.MaxMonthly.String(),
+			Max:         maxMonthly.String(),
 			Description: "transaction would exceed monthly limit",
 		}
 	}
@@ -192,13 +158,15 @@ func (lc *LimitConfig) RecordTransaction(amount sdk.Coin) {
 	lc.resetTxCountersIfNeeded()
 	lc.TxLimit.DailyTxCount++
 	lc.TxLimit.MonthlyTxCount++
-	lc.TxLimit.DailySpent = lc.TxLimit.DailySpent.Add(amount)
-	lc.TxLimit.MonthlySpent = lc.TxLimit.MonthlySpent.Add(amount)
+	dailySpent := parseCoin(lc.TxLimit.DailySpent).Add(amount)
+	monthlySpent := parseCoin(lc.TxLimit.MonthlySpent).Add(amount)
+	lc.TxLimit.DailySpent = dailySpent.String()
+	lc.TxLimit.MonthlySpent = monthlySpent.String()
 }
 
 // resetTxCountersIfNeeded resets daily/monthly counters if needed
 func (lc *LimitConfig) resetTxCountersIfNeeded() {
-	now := time.Now().Unix()
+	now := uint64(time.Now().Unix())
 	nowDay := now / 86400
 	nowMonth := now / (86400 * 30)
 
@@ -222,26 +190,29 @@ func (lc *LimitConfig) CheckWithdrawalLimit(amount sdk.Coin) error {
 	// Reset counters if needed
 	lc.resetWithdrawalCountersIfNeeded()
 
+	maxDaily := parseCoin(lc.WithdrawalLimit.MaxDaily)
+	dailyWithdrawn := parseCoin(lc.WithdrawalLimit.DailyWithdrawn)
+
 	// Check cooldown
 	now := time.Now().Unix()
 	cooldownSeconds := int64(lc.WithdrawalLimit.CooldownHours) * 3600
-	if now-lc.WithdrawalLimit.LastWithdrawalTime < cooldownSeconds {
-		remaining := cooldownSeconds - (now - lc.WithdrawalLimit.LastWithdrawalTime)
+	if int64(lc.WithdrawalLimit.LastWithdrawalTime) > 0 && now-int64(lc.WithdrawalLimit.LastWithdrawalTime) < cooldownSeconds {
+		remaining := cooldownSeconds - (now - int64(lc.WithdrawalLimit.LastWithdrawalTime))
 		return LimitError{
 			LimitType:   "withdrawal_cooldown",
-			Current:     fmt.Sprintf("%d seconds since last withdrawal", now-lc.WithdrawalLimit.LastWithdrawalTime),
+			Current:     fmt.Sprintf("%d seconds since last withdrawal", now-int64(lc.WithdrawalLimit.LastWithdrawalTime)),
 			Max:         fmt.Sprintf("%d seconds cooldown", cooldownSeconds),
 			Description: fmt.Sprintf("cooldown period not met, remaining: %d seconds", remaining),
 		}
 	}
 
 	// Check daily limit
-	newDailyWithdrawn := lc.WithdrawalLimit.DailyWithdrawn.Add(amount)
-	if newDailyWithdrawn.IsGTE(lc.WithdrawalLimit.MaxDaily) {
+	newDailyWithdrawn := dailyWithdrawn.Add(amount)
+	if newDailyWithdrawn.IsGTE(maxDaily) {
 		return LimitError{
 			LimitType:   "withdrawal_daily",
 			Current:     newDailyWithdrawn.String(),
-			Max:         lc.WithdrawalLimit.MaxDaily.String(),
+			Max:         maxDaily.String(),
 			Description: "withdrawal would exceed daily limit",
 		}
 	}
@@ -252,13 +223,14 @@ func (lc *LimitConfig) CheckWithdrawalLimit(amount sdk.Coin) error {
 // RecordWithdrawal records a completed withdrawal
 func (lc *LimitConfig) RecordWithdrawal(amount sdk.Coin) {
 	lc.resetWithdrawalCountersIfNeeded()
-	lc.WithdrawalLimit.LastWithdrawalTime = time.Now().Unix()
-	lc.WithdrawalLimit.DailyWithdrawn = lc.WithdrawalLimit.DailyWithdrawn.Add(amount)
+	lc.WithdrawalLimit.LastWithdrawalTime = uint64(time.Now().Unix())
+	dailyWithdrawn := parseCoin(lc.WithdrawalLimit.DailyWithdrawn).Add(amount)
+	lc.WithdrawalLimit.DailyWithdrawn = dailyWithdrawn.String()
 }
 
 // resetWithdrawalCountersIfNeeded resets daily counters if needed
 func (lc *LimitConfig) resetWithdrawalCountersIfNeeded() {
-	now := time.Now().Unix()
+	now := uint64(time.Now().Unix())
 	nowDay := now / 86400
 
 	lastDay := lc.WithdrawalLimit.LastResetDay / 86400
@@ -337,7 +309,7 @@ func (lc *LimitConfig) ReleaseServiceCall() {
 
 // resetServiceCountersIfNeeded resets rate limit counters if needed
 func (lc *LimitConfig) resetServiceCountersIfNeeded() {
-	now := time.Now().Unix()
+	now := uint64(time.Now().Unix())
 	nowMinute := now / 60
 
 	lastMinute := lc.ServiceLimit.LastRateReset / 60
@@ -345,32 +317,4 @@ func (lc *LimitConfig) resetServiceCountersIfNeeded() {
 		lc.ServiceLimit.RequestsLastMinute = 0
 		lc.ServiceLimit.LastRateReset = now
 	}
-}
-
-// String implements stringer interface
-func (lc LimitConfig) String() string {
-	return fmt.Sprintf(`
-LimitConfig for %s:
-  Transaction:
-    Single: %s
-    Daily: %s
-    Monthly: %s
-    Daily Count: %d
-    Monthly Count: %d
-  Withdrawal:
-    Daily: %s
-    Cooldown: %d hours
-  Dispute:
-    Max Active: %d
-    Current Active: %d
-  Service:
-    Max Concurrent: %d
-    Rate Limit: %d/min
-    Current Concurrent: %d
-`, lc.Address,
-		lc.TxLimit.MaxSingle.String(), lc.TxLimit.MaxDaily.String(), lc.TxLimit.MaxMonthly.String(),
-		lc.TxLimit.DailyTxCount, lc.TxLimit.MonthlyTxCount,
-		lc.WithdrawalLimit.MaxDaily.String(), lc.WithdrawalLimit.CooldownHours,
-		lc.DisputeLimit.MaxActiveDisputes, lc.DisputeLimit.CurrentActive,
-		lc.ServiceLimit.MaxConcurrent, lc.ServiceLimit.RateLimitPerMinute, lc.ServiceLimit.CurrentConcurrent)
 }

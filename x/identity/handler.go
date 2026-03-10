@@ -1,6 +1,8 @@
 package identity
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"sharetoken/x/identity/keeper"
@@ -16,35 +18,35 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 
 		switch msg := msg.(type) {
 		case *types.MsgRegisterIdentity:
-			res, err := msgServer.RegisterIdentity(ctx, msg)
+			res, err := msgServer.RegisterIdentity(ctx.Context(), msg)
 			if err != nil {
 				return nil, err
 			}
 			return sdk.WrapServiceResult(ctx, res, nil)
 
 		case *types.MsgVerifyIdentity:
-			res, err := msgServer.VerifyIdentity(ctx, msg)
+			res, err := msgServer.VerifyIdentity(ctx.Context(), msg)
 			if err != nil {
 				return nil, err
 			}
 			return sdk.WrapServiceResult(ctx, res, nil)
 
 		case *types.MsgUpdateLimitConfig:
-			res, err := msgServer.UpdateLimitConfig(ctx, msg)
+			res, err := msgServer.UpdateLimitConfig(ctx.Context(), msg)
 			if err != nil {
 				return nil, err
 			}
 			return sdk.WrapServiceResult(ctx, res, nil)
 
 		case *types.MsgResetDailyLimits:
-			res, err := msgServer.ResetDailyLimits(ctx, msg)
+			res, err := msgServer.ResetDailyLimits(ctx.Context(), msg)
 			if err != nil {
 				return nil, err
 			}
 			return sdk.WrapServiceResult(ctx, res, nil)
 
 		default:
-			return nil, sdk.ErrUnknownRequest("unrecognized %s message type: %T", types.ModuleName, msg)
+			return nil, fmt.Errorf("unrecognized %s message type: %T", types.ModuleName, msg)
 		}
 	}
 }

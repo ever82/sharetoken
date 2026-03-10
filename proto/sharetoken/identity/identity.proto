@@ -4,7 +4,7 @@ package sharetoken.identity;
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/ShareToken/sharetoken/x/identity/types";
+option go_package = "sharetoken/x/identity/types";
 
 // Identity represents a user's on-chain identity
 message Identity {

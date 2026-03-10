@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"sharetoken/x/identity/types"
@@ -20,18 +22,16 @@ func NewMsgServerImpl(keeper *Keeper) types.MsgServer {
 var _ types.MsgServer = &msgServer{}
 
 // RegisterIdentity implements MsgServer
-func (k msgServer) RegisterIdentity(ctx sdk.Context, msg *types.MsgRegisterIdentity) (*types.MsgRegisterIdentityResponse, error) {
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, err
-	}
+func (k msgServer) RegisterIdentity(ctx context.Context, msg *types.MsgRegisterIdentity) (*types.MsgRegisterIdentityResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	err := k.Keeper.RegisterIdentity(ctx, msg.Address, msg.DID, msg.MetadataHash)
+	err := k.Keeper.RegisterIdentity(sdkCtx, msg.Address, msg.Did, msg.MetadataHash)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get the created identity to return merkle root
-	identity, found := k.GetIdentity(ctx, msg.Address)
+	identity, found := k.GetIdentity(sdkCtx, msg.Address)
 	if !found {
 		return nil, types.ErrIdentityNotFound.Wrap(msg.Address)
 	}
@@ -42,18 +42,16 @@ func (k msgServer) RegisterIdentity(ctx sdk.Context, msg *types.MsgRegisterIdent
 }
 
 // VerifyIdentity implements MsgServer
-func (k msgServer) VerifyIdentity(ctx sdk.Context, msg *types.MsgVerifyIdentity) (*types.MsgVerifyIdentityResponse, error) {
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, err
-	}
+func (k msgServer) VerifyIdentity(ctx context.Context, msg *types.MsgVerifyIdentity) (*types.MsgVerifyIdentityResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	err := k.Keeper.VerifyIdentity(ctx, msg.Address, msg.Provider, msg.VerificationHash, msg.Proof)
+	err := k.Keeper.VerifyIdentity(sdkCtx, msg.Address, msg.Provider, msg.VerificationHash, msg.Proof)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get the updated identity to return merkle root
-	identity, found := k.GetIdentity(ctx, msg.Address)
+	identity, found := k.GetIdentity(sdkCtx, msg.Address)
 	if !found {
 		return nil, types.ErrIdentityNotFound.Wrap(msg.Address)
 	}
@@ -65,18 +63,16 @@ func (k msgServer) VerifyIdentity(ctx sdk.Context, msg *types.MsgVerifyIdentity)
 }
 
 // UpdateLimitConfig implements MsgServer
-func (k msgServer) UpdateLimitConfig(ctx sdk.Context, msg *types.MsgUpdateLimitConfig) (*types.MsgUpdateLimitConfigResponse, error) {
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, err
-	}
+func (k msgServer) UpdateLimitConfig(ctx context.Context, msg *types.MsgUpdateLimitConfig) (*types.MsgUpdateLimitConfigResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Check if caller is authority
-	caller := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
-	if !k.IsAuthority(ctx, caller) {
+	caller := sdk.AccAddress(sdkCtx.BlockHeader().ProposerAddress)
+	if !k.IsAuthority(sdkCtx, caller) {
 		return nil, types.ErrUnauthorized.Wrap("only authority can update limits")
 	}
 
-	err := k.Keeper.UpdateLimitConfig(ctx, msg.TargetAddress, msg.NewConfig)
+	err := k.Keeper.UpdateLimitConfig(sdkCtx, msg.TargetAddress, msg.NewConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -85,18 +81,16 @@ func (k msgServer) UpdateLimitConfig(ctx sdk.Context, msg *types.MsgUpdateLimitC
 }
 
 // ResetDailyLimits implements MsgServer
-func (k msgServer) ResetDailyLimits(ctx sdk.Context, msg *types.MsgResetDailyLimits) (*types.MsgResetDailyLimitsResponse, error) {
-	if err := msg.ValidateBasic(); err != nil {
-		return nil, err
-	}
+func (k msgServer) ResetDailyLimits(ctx context.Context, msg *types.MsgResetDailyLimits) (*types.MsgResetDailyLimitsResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Check if caller is authority
-	caller := sdk.AccAddress(ctx.BlockHeader().ProposerAddress)
-	if !k.IsAuthority(ctx, caller) {
+	caller := sdk.AccAddress(sdkCtx.BlockHeader().ProposerAddress)
+	if !k.IsAuthority(sdkCtx, caller) {
 		return nil, types.ErrUnauthorized.Wrap("only authority can reset limits")
 	}
 
-	resetCount := k.Keeper.ResetDailyLimits(ctx)
+	resetCount := k.Keeper.ResetDailyLimits(sdkCtx)
 
 	return &types.MsgResetDailyLimitsResponse{
 		ResetCount: resetCount,
@@ -104,13 +98,14 @@ func (k msgServer) ResetDailyLimits(ctx sdk.Context, msg *types.MsgResetDailyLim
 }
 
 // UpdateParams implements MsgServer (governance)
-func (k msgServer) UpdateParams(ctx sdk.Context, msg *types.MsgUpdateParams) (*types.MsgUpdateParamsResponse, error) {
+func (k msgServer) UpdateParams(ctx context.Context, msg *types.MsgUpdateParams) (*types.MsgUpdateParamsResponse, error) {
 	// Only governance can update params
 	if msg.Authority != k.GetAuthority() {
 		return nil, types.ErrUnauthorized.Wrap("only governance can update params")
 	}
 
-	k.Keeper.SetParams(ctx, msg.Params)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	k.Keeper.SetParams(sdkCtx, msg.Params)
 
 	return &types.MsgUpdateParamsResponse{}, nil
 }

@@ -9,7 +9,7 @@ import "sharetoken/identity/genesis.proto";
 import "sharetoken/identity/identity.proto";
 import "sharetoken/identity/limit.proto";
 
-option go_package = "github.com/ShareToken/sharetoken/x/identity/types";
+option go_package = "sharetoken/x/identity/types";
 
 // Query defines the gRPC querier service.
 service Query {

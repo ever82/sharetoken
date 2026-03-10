@@ -55,24 +55,12 @@ func validateAllowedProviders(i interface{}) error {
 	return nil
 }
 
-// Identity represents a user's on-chain identity
-type Identity struct {
-	Address              string `json:"address"`
-	DID                  string `json:"did"`
-	VerificationHash     string `json:"verification_hash"`
-	VerificationProvider string `json:"verification_provider"`
-	RegistrationTime     int64  `json:"registration_time"`
-	IsVerified           bool   `json:"is_verified"`
-	MerkleRoot           string `json:"merkle_root"`
-	MetadataHash         string `json:"metadata_hash"`
-}
-
 // NewIdentity creates a new identity
 func NewIdentity(address, did string) *Identity {
 	return &Identity{
 		Address:          address,
-		DID:              did,
-		RegistrationTime: time.Now().Unix(),
+		Did:              did,
+		RegistrationTime: uint64(time.Now().Unix()),
 		IsVerified:       false,
 	}
 }
@@ -90,8 +78,8 @@ func (i Identity) ValidateBasic() error {
 	}
 
 	// Validate DID if provided
-	if i.DID != "" && !isValidDID(i.DID) {
-		return ErrInvalidDID.Wrap(i.DID)
+	if i.Did != "" && !isValidDID(i.Did) {
+		return ErrInvalidDID.Wrap(i.Did)
 	}
 
 	return nil
@@ -102,7 +90,7 @@ func (i *Identity) GenerateMerkleRoot() string {
 	// Create data hash
 	data := fmt.Sprintf("%s:%s:%s:%s:%d",
 		i.Address,
-		i.DID,
+		i.Did,
 		i.VerificationHash,
 		i.VerificationProvider,
 		i.RegistrationTime,
@@ -149,20 +137,6 @@ func IsValidProvider(provider string) bool {
 	return false
 }
 
-// GenesisState defines the identity module's genesis state
-type GenesisState struct {
-	Params       Params        `json:"params"`
-	Identities   []Identity    `json:"identities"`
-	LimitConfigs []LimitConfig `json:"limit_configs"`
-}
-
-// Params defines the parameters for the identity module
-type Params struct {
-	VerificationRequired bool               `json:"verification_required"`
-	AllowedProviders     []string           `json:"allowed_providers"`
-	DefaultLimits        DefaultLimitConfig `json:"default_limits"`
-}
-
 // DefaultParams returns default parameters
 func DefaultParams() Params {
 	return Params{
@@ -178,15 +152,6 @@ func (p Params) Validate() error {
 		return fmt.Errorf("allowed_providers cannot be empty")
 	}
 	return nil
-}
-
-// String implements stringer interface
-func (p Params) String() string {
-	return fmt.Sprintf(`
-Params:
-  Verification Required: %v
-  Allowed Providers: %v
-`, p.VerificationRequired, p.AllowedProviders)
 }
 
 // DefaultGenesis returns the default genesis state

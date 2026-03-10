@@ -9,7 +9,7 @@ import "sharetoken/identity/identity.proto";
 import "sharetoken/identity/limit.proto";
 import "sharetoken/identity/genesis.proto";
 
-option go_package = "github.com/ShareToken/sharetoken/x/identity/types";
+option go_package = "sharetoken/x/identity/types";
 
 // Msg defines the Msg service.
 service Msg {

@@ -72,7 +72,7 @@ func (k Keeper) UpdateLimitConfig(ctx sdk.Context, targetAddress string, newConf
 	}
 
 	// Update timestamp
-	newConfig.UpdatedAt = ctx.BlockTime().Unix()
+	newConfig.UpdatedAt = uint64(ctx.BlockTime().Unix())
 
 	// Store the config
 	k.SetLimitConfig(ctx, newConfig)

@@ -1,47 +1,11 @@
 package types
 
 import (
-	"encoding/json"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Message types for identity module
-const (
-	TypeMsgRegisterIdentity  = "register_identity"
-	TypeMsgVerifyIdentity    = "verify_identity"
-	TypeMsgUpdateLimitConfig = "update_limit_config"
-	TypeMsgResetDailyLimits  = "reset_daily_limits"
-)
-
-// MsgRegisterIdentity defines the message for registering a new identity
-type MsgRegisterIdentity struct {
-	Address      string `json:"address"`
-	DID          string `json:"did"`
-	MetadataHash string `json:"metadata_hash"`
-}
-
-// NewMsgRegisterIdentity creates a new MsgRegisterIdentity
-func NewMsgRegisterIdentity(address, did, metadataHash string) *MsgRegisterIdentity {
-	return &MsgRegisterIdentity{
-		Address:      address,
-		DID:          did,
-		MetadataHash: metadataHash,
-	}
-}
-
-// Route implements sdk.Msg
-func (msg MsgRegisterIdentity) Route() string {
-	return RouterKey
-}
-
-// Type implements sdk.Msg
-func (msg MsgRegisterIdentity) Type() string {
-	return TypeMsgRegisterIdentity
-}
-
 // GetSigners implements sdk.Msg
-func (msg MsgRegisterIdentity) GetSigners() []sdk.AccAddress {
+func (msg *MsgRegisterIdentity) GetSigners() []sdk.AccAddress {
 	addr, err := sdk.AccAddressFromBech32(msg.Address)
 	if err != nil {
 		return nil
@@ -49,60 +13,35 @@ func (msg MsgRegisterIdentity) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{addr}
 }
 
-// GetSignBytes implements sdk.Msg
-func (msg MsgRegisterIdentity) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-	return sdk.MustSortJSON(b)
-}
-
 // ValidateBasic implements sdk.Msg
-func (msg MsgRegisterIdentity) ValidateBasic() error {
+func (msg *MsgRegisterIdentity) ValidateBasic() error {
 	if msg.Address == "" {
-		return ErrInvalidAddress
+		return ErrInvalidAddress.Wrap("address cannot be empty")
 	}
 	_, err := sdk.AccAddressFromBech32(msg.Address)
 	if err != nil {
 		return ErrInvalidAddress.Wrap(err.Error())
 	}
-	if msg.DID != "" && !isValidDID(msg.DID) {
-		return ErrInvalidDID.Wrap(msg.DID)
-	}
 	return nil
 }
 
-// MsgVerifyIdentity defines the message for verifying an identity
-type MsgVerifyIdentity struct {
-	Address          string `json:"address"`
-	Provider         string `json:"provider"`
-	VerificationHash string `json:"verification_hash"`
-	Proof            string `json:"proof"`
+// Type implements sdk.Msg
+func (msg *MsgRegisterIdentity) Type() string {
+	return "RegisterIdentity"
 }
 
-// NewMsgVerifyIdentity creates a new MsgVerifyIdentity
-func NewMsgVerifyIdentity(address, provider, verificationHash, proof string) *MsgVerifyIdentity {
-	return &MsgVerifyIdentity{
-		Address:          address,
-		Provider:         provider,
-		VerificationHash: verificationHash,
-		Proof:            proof,
-	}
+// GetSignBytes implements sdk.Msg
+func (msg *MsgRegisterIdentity) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // Route implements sdk.Msg
-func (msg MsgVerifyIdentity) Route() string {
+func (msg *MsgRegisterIdentity) Route() string {
 	return RouterKey
 }
 
-// Type implements sdk.Msg
-func (msg MsgVerifyIdentity) Type() string {
-	return TypeMsgVerifyIdentity
-}
-
 // GetSigners implements sdk.Msg
-func (msg MsgVerifyIdentity) GetSigners() []sdk.AccAddress {
+func (msg *MsgVerifyIdentity) GetSigners() []sdk.AccAddress {
 	addr, err := sdk.AccAddressFromBech32(msg.Address)
 	if err != nil {
 		return nil
@@ -110,117 +49,74 @@ func (msg MsgVerifyIdentity) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{addr}
 }
 
-// GetSignBytes implements sdk.Msg
-func (msg MsgVerifyIdentity) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-	return sdk.MustSortJSON(b)
-}
-
 // ValidateBasic implements sdk.Msg
-func (msg MsgVerifyIdentity) ValidateBasic() error {
+func (msg *MsgVerifyIdentity) ValidateBasic() error {
 	if msg.Address == "" {
-		return ErrInvalidAddress
+		return ErrInvalidAddress.Wrap("address cannot be empty")
 	}
 	_, err := sdk.AccAddressFromBech32(msg.Address)
 	if err != nil {
 		return ErrInvalidAddress.Wrap(err.Error())
 	}
-	if !IsValidProvider(msg.Provider) {
-		return ErrInvalidProvider.Wrap(msg.Provider)
+	if msg.Provider == "" {
+		return ErrInvalidProvider.Wrap("provider cannot be empty")
 	}
 	return nil
 }
 
-// MsgUpdateLimitConfig defines the message for updating limit configuration
-type MsgUpdateLimitConfig struct {
-	Authority     string      `json:"authority"`
-	TargetAddress string      `json:"target_address"`
-	NewConfig     LimitConfig `json:"new_config"`
+// Type implements sdk.Msg
+func (msg *MsgVerifyIdentity) Type() string {
+	return "VerifyIdentity"
 }
 
-// NewMsgUpdateLimitConfig creates a new MsgUpdateLimitConfig
-func NewMsgUpdateLimitConfig(authority, targetAddress string, newConfig LimitConfig) *MsgUpdateLimitConfig {
-	return &MsgUpdateLimitConfig{
-		Authority:     authority,
-		TargetAddress: targetAddress,
-		NewConfig:     newConfig,
-	}
+// GetSignBytes implements sdk.Msg
+func (msg *MsgVerifyIdentity) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // Route implements sdk.Msg
-func (msg MsgUpdateLimitConfig) Route() string {
+func (msg *MsgVerifyIdentity) Route() string {
 	return RouterKey
 }
 
-// Type implements sdk.Msg
-func (msg MsgUpdateLimitConfig) Type() string {
-	return TypeMsgUpdateLimitConfig
-}
-
 // GetSigners implements sdk.Msg
-func (msg MsgUpdateLimitConfig) GetSigners() []sdk.AccAddress {
-	addr, err := sdk.AccAddressFromBech32(msg.Authority)
+func (msg *MsgUpdateLimitConfig) GetSigners() []sdk.AccAddress {
+	addr, err := sdk.AccAddressFromBech32(msg.TargetAddress)
 	if err != nil {
 		return nil
 	}
 	return []sdk.AccAddress{addr}
 }
 
-// GetSignBytes implements sdk.Msg
-func (msg MsgUpdateLimitConfig) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-	return sdk.MustSortJSON(b)
-}
-
 // ValidateBasic implements sdk.Msg
-func (msg MsgUpdateLimitConfig) ValidateBasic() error {
-	if msg.Authority == "" {
-		return ErrUnauthorized.Wrap("authority address required")
-	}
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
-	if err != nil {
-		return ErrInvalidAddress.Wrap(err.Error())
-	}
+func (msg *MsgUpdateLimitConfig) ValidateBasic() error {
 	if msg.TargetAddress == "" {
-		return ErrInvalidAddress
+		return ErrInvalidAddress.Wrap("target address cannot be empty")
 	}
-	_, err = sdk.AccAddressFromBech32(msg.TargetAddress)
+	_, err := sdk.AccAddressFromBech32(msg.TargetAddress)
 	if err != nil {
 		return ErrInvalidAddress.Wrap(err.Error())
 	}
 	return nil
 }
 
-// MsgResetDailyLimits defines the message for resetting daily limits
-type MsgResetDailyLimits struct {
-	Authority string `json:"authority"`
+// Type implements sdk.Msg
+func (msg *MsgUpdateLimitConfig) Type() string {
+	return "UpdateLimitConfig"
 }
 
-// NewMsgResetDailyLimits creates a new MsgResetDailyLimits
-func NewMsgResetDailyLimits(authority string) *MsgResetDailyLimits {
-	return &MsgResetDailyLimits{
-		Authority: authority,
-	}
+// GetSignBytes implements sdk.Msg
+func (msg *MsgUpdateLimitConfig) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
 // Route implements sdk.Msg
-func (msg MsgResetDailyLimits) Route() string {
+func (msg *MsgUpdateLimitConfig) Route() string {
 	return RouterKey
 }
 
-// Type implements sdk.Msg
-func (msg MsgResetDailyLimits) Type() string {
-	return TypeMsgResetDailyLimits
-}
-
 // GetSigners implements sdk.Msg
-func (msg MsgResetDailyLimits) GetSigners() []sdk.AccAddress {
+func (msg *MsgResetDailyLimits) GetSigners() []sdk.AccAddress {
 	addr, err := sdk.AccAddressFromBech32(msg.Authority)
 	if err != nil {
 		return nil
@@ -228,23 +124,65 @@ func (msg MsgResetDailyLimits) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{addr}
 }
 
-// GetSignBytes implements sdk.Msg
-func (msg MsgResetDailyLimits) GetSignBytes() []byte {
-	b, err := json.Marshal(msg)
-	if err != nil {
-		panic(err)
-	}
-	return sdk.MustSortJSON(b)
-}
-
 // ValidateBasic implements sdk.Msg
-func (msg MsgResetDailyLimits) ValidateBasic() error {
+func (msg *MsgResetDailyLimits) ValidateBasic() error {
 	if msg.Authority == "" {
-		return ErrUnauthorized.Wrap("authority address required")
+		return ErrInvalidAddress.Wrap("authority cannot be empty")
 	}
 	_, err := sdk.AccAddressFromBech32(msg.Authority)
 	if err != nil {
 		return ErrInvalidAddress.Wrap(err.Error())
 	}
 	return nil
+}
+
+// Type implements sdk.Msg
+func (msg *MsgResetDailyLimits) Type() string {
+	return "ResetDailyLimits"
+}
+
+// GetSignBytes implements sdk.Msg
+func (msg *MsgResetDailyLimits) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// Route implements sdk.Msg
+func (msg *MsgResetDailyLimits) Route() string {
+	return RouterKey
+}
+
+// GetSigners implements sdk.Msg
+func (msg *MsgUpdateParams) GetSigners() []sdk.AccAddress {
+	addr, err := sdk.AccAddressFromBech32(msg.Authority)
+	if err != nil {
+		return nil
+	}
+	return []sdk.AccAddress{addr}
+}
+
+// ValidateBasic implements sdk.Msg
+func (msg *MsgUpdateParams) ValidateBasic() error {
+	if msg.Authority == "" {
+		return ErrInvalidAddress.Wrap("authority cannot be empty")
+	}
+	_, err := sdk.AccAddressFromBech32(msg.Authority)
+	if err != nil {
+		return ErrInvalidAddress.Wrap(err.Error())
+	}
+	return nil
+}
+
+// Type implements sdk.Msg
+func (msg *MsgUpdateParams) Type() string {
+	return "UpdateParams"
+}
+
+// GetSignBytes implements sdk.Msg
+func (msg *MsgUpdateParams) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// Route implements sdk.Msg
+func (msg *MsgUpdateParams) Route() string {
+	return RouterKey
 }

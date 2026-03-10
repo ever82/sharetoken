@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"sharetoken/x/identity/types"
@@ -25,8 +27,9 @@ func RegisterQueryServer(server interface{}, srv types.QueryServer) {
 var _ types.QueryServer = &queryServer{}
 
 // Params implements QueryServer
-func (k queryServer) Params(ctx sdk.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error) {
-	params := k.GetParams(ctx)
+func (k queryServer) Params(ctx context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	params := k.GetParams(sdkCtx)
 
 	return &types.QueryParamsResponse{
 		Params: params,
@@ -34,8 +37,9 @@ func (k queryServer) Params(ctx sdk.Context, req *types.QueryParamsRequest) (*ty
 }
 
 // Identity implements QueryServer
-func (k queryServer) Identity(ctx sdk.Context, req *types.QueryIdentityRequest) (*types.QueryIdentityResponse, error) {
-	identity, found := k.GetIdentity(ctx, req.Address)
+func (k queryServer) Identity(ctx context.Context, req *types.QueryIdentityRequest) (*types.QueryIdentityResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	identity, found := k.GetIdentity(sdkCtx, req.Address)
 	if !found {
 		return nil, types.ErrIdentityNotFound.Wrap(req.Address)
 	}
@@ -46,8 +50,9 @@ func (k queryServer) Identity(ctx sdk.Context, req *types.QueryIdentityRequest) 
 }
 
 // Identities implements QueryServer
-func (k queryServer) Identities(ctx sdk.Context, req *types.QueryIdentitiesRequest) (*types.QueryIdentitiesResponse, error) {
-	identities := k.GetAllIdentities(ctx)
+func (k queryServer) Identities(ctx context.Context, req *types.QueryIdentitiesRequest) (*types.QueryIdentitiesResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	identities := k.GetAllIdentities(sdkCtx)
 
 	return &types.QueryIdentitiesResponse{
 		Identities: identities,
@@ -55,8 +60,9 @@ func (k queryServer) Identities(ctx sdk.Context, req *types.QueryIdentitiesReque
 }
 
 // LimitConfig implements QueryServer
-func (k queryServer) LimitConfig(ctx sdk.Context, req *types.QueryLimitConfigRequest) (*types.QueryLimitConfigResponse, error) {
-	limitConfig, found := k.GetLimitConfig(ctx, req.Address)
+func (k queryServer) LimitConfig(ctx context.Context, req *types.QueryLimitConfigRequest) (*types.QueryLimitConfigResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	limitConfig, found := k.GetLimitConfig(sdkCtx, req.Address)
 	if !found {
 		return nil, types.ErrInvalidLimitConfig.Wrapf("limit config not found for %s", req.Address)
 	}
@@ -67,8 +73,9 @@ func (k queryServer) LimitConfig(ctx sdk.Context, req *types.QueryLimitConfigReq
 }
 
 // IsVerified implements QueryServer
-func (k queryServer) IsVerified(ctx sdk.Context, req *types.QueryIsVerifiedRequest) (*types.QueryIsVerifiedResponse, error) {
-	isVerified := k.Keeper.IsVerified(ctx, req.Address)
+func (k queryServer) IsVerified(ctx context.Context, req *types.QueryIsVerifiedRequest) (*types.QueryIsVerifiedResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	isVerified := k.Keeper.IsVerified(sdkCtx, req.Address)
 
 	return &types.QueryIsVerifiedResponse{
 		IsVerified: isVerified,

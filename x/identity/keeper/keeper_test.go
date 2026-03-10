@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"sharetoken/x/identity/types"
 )
 
@@ -25,7 +26,8 @@ func TestTransactionLimit(t *testing.T) {
 
 	// Test daily limit check
 	// This is a simplified test - in production, you would need to set up proper test fixtures
-	err := limitConfig.CheckTransactionLimit(types.DefaultCoin())
+	coin := sdk.NewCoin("ustt", sdk.ZeroInt())
+	err := limitConfig.CheckTransactionLimit(coin)
 	require.NoError(t, err)
 }
 
@@ -34,7 +36,8 @@ func TestWithdrawalLimit(t *testing.T) {
 	limitConfig := types.NewLimitConfig(address)
 
 	// Test withdrawal limit check
-	err := limitConfig.CheckWithdrawalLimit(types.DefaultCoin())
+	coin := sdk.NewCoin("ustt", sdk.ZeroInt())
+	err := limitConfig.CheckWithdrawalLimit(coin)
 	require.NoError(t, err)
 }
 
@@ -77,7 +80,7 @@ func TestServiceLimit(t *testing.T) {
 func TestIdentityValidation(t *testing.T) {
 	identity := types.Identity{
 		Address: "sharetoken1xyz",
-		DID:     "did:sharetoken:abc123",
+		Did:     "did:sharetoken:abc123",
 	}
 
 	// Test basic validation - this will fail because address is not a valid bech32 address
