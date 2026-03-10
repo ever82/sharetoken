@@ -15,31 +15,31 @@ option go_package = "github.com/ShareToken/sharetoken/x/identity/types";
 service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (cosmos.query.v1.module_query) = "true";
+    option (cosmos.query.v1.module_query_safe) = true;
     option (google.api.http).get = "/ShareToken/sharetoken/identity/params";
   }
 
   // Identity queries an identity by address.
   rpc Identity(QueryIdentityRequest) returns (QueryIdentityResponse) {
-    option (cosmos.query.v1.module_query) = "true";
+    option (cosmos.query.v1.module_query_safe) = true;
     option (google.api.http).get = "/ShareToken/sharetoken/identity/{address}";
   }
 
   // Identities queries all identities.
   rpc Identities(QueryIdentitiesRequest) returns (QueryIdentitiesResponse) {
-    option (cosmos.query.v1.module_query) = "true";
+    option (cosmos.query.v1.module_query_safe) = true;
     option (google.api.http).get = "/ShareToken/sharetoken/identity/identities";
   }
 
   // LimitConfig queries a user's limit configuration.
   rpc LimitConfig(QueryLimitConfigRequest) returns (QueryLimitConfigResponse) {
-    option (cosmos.query.v1.module_query) = "true";
+    option (cosmos.query.v1.module_query_safe) = true;
     option (google.api.http).get = "/ShareToken/sharetoken/identity/{address}/limits";
   }
 
   // IsVerified checks if an address is verified.
   rpc IsVerified(QueryIsVerifiedRequest) returns (QueryIsVerifiedResponse) {
-    option (cosmos.query.v1.module_query) = "true";
+    option (cosmos.query.v1.module_query_safe) = true;
     option (google.api.http).get = "/ShareToken/sharetoken/identity/{address}/verified";
   }
 }
