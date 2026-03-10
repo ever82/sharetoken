@@ -151,15 +151,15 @@ func IsValidProvider(provider string) bool {
 
 // GenesisState defines the identity module's genesis state
 type GenesisState struct {
-	Params        Params     `json:"params"`
-	Identities    []Identity `json:"identities"`
-	LimitConfigs  []LimitConfig `json:"limit_configs"`
+	Params       Params        `json:"params"`
+	Identities   []Identity    `json:"identities"`
+	LimitConfigs []LimitConfig `json:"limit_configs"`
 }
 
 // Params defines the parameters for the identity module
 type Params struct {
-	VerificationRequired bool     `json:"verification_required"`
-	AllowedProviders     []string `json:"allowed_providers"`
+	VerificationRequired bool               `json:"verification_required"`
+	AllowedProviders     []string           `json:"allowed_providers"`
 	DefaultLimits        DefaultLimitConfig `json:"default_limits"`
 }
 

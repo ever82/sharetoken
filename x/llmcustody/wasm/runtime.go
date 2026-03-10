@@ -23,11 +23,11 @@ func NewRuntime() *Runtime {
 
 // ExecutionResult represents the result of a WASM execution
 type ExecutionResult struct {
-	Success    bool
-	Output     []byte
-	Error      string
-	GasUsed    uint64
-	Duration   time.Duration
+	Success  bool
+	Output   []byte
+	Error    string
+	GasUsed  uint64
+	Duration time.Duration
 }
 
 // ExecuteInWASM executes a function in WASM sandbox with decrypted API key
@@ -107,10 +107,10 @@ func (r *Runtime) executeRequest(key *types.SecureString, provider types.Provide
 
 // SandboxConfig represents the WASM sandbox configuration
 type SandboxConfig struct {
-	MaxMemory      int64         `json:"max_memory"`
+	MaxMemory        int64         `json:"max_memory"`
 	MaxExecutionTime time.Duration `json:"max_execution_time"`
-	AllowedHosts   []string      `json:"allowed_hosts"`
-	NetworkEnabled bool          `json:"network_enabled"`
+	AllowedHosts     []string      `json:"allowed_hosts"`
+	NetworkEnabled   bool          `json:"network_enabled"`
 }
 
 // DefaultSandboxConfig returns the default sandbox configuration

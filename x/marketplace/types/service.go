@@ -15,9 +15,9 @@ const (
 type ServiceLevel int
 
 const (
-	ServiceLevelLLM      ServiceLevel = 1  // Level 1: LLM API
-	ServiceLevelAgent    ServiceLevel = 2  // Level 2: Agent
-	ServiceLevelWorkflow ServiceLevel = 3  // Level 3: Workflow
+	ServiceLevelLLM      ServiceLevel = 1 // Level 1: LLM API
+	ServiceLevelAgent    ServiceLevel = 2 // Level 2: Agent
+	ServiceLevelWorkflow ServiceLevel = 3 // Level 3: Workflow
 )
 
 // PricingMode represents the pricing mode

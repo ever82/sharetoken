@@ -14,9 +14,9 @@ type UserWorkflowSuite struct {
 	E2ETestSuite
 
 	// User accounts
-	User        *TestAccount
-	Provider    *TestAccount
-	Validator   *ValidatorClient
+	User      *TestAccount
+	Provider  *TestAccount
+	Validator *ValidatorClient
 }
 
 func TestUserWorkflowSuite(t *testing.T) {
@@ -41,9 +41,9 @@ func (s *UserWorkflowSuite) Test01_UserRegistration() {
 
 	// Step 1: Create identity
 	identityMsg := map[string]interface{}{
-		"creator":   s.User.Address,
-		"did":       fmt.Sprintf("did:sharetoken:%s", s.User.Address),
-		"metadata":  map[string]string{"name": "Test User"},
+		"creator":  s.User.Address,
+		"did":      fmt.Sprintf("did:sharetoken:%s", s.User.Address),
+		"metadata": map[string]string{"name": "Test User"},
 	}
 
 	// Submit identity creation
@@ -102,12 +102,12 @@ func (s *UserWorkflowSuite) Test03_ServiceDiscoveryAndPurchase() {
 
 	// Step 1: Provider registers a service
 	serviceMsg := map[string]interface{}{
-		"creator":     s.Provider.Address,
-		"name":        "Test LLM Service",
-		"description": "A test LLM service",
+		"creator":      s.Provider.Address,
+		"name":         "Test LLM Service",
+		"description":  "A test LLM service",
 		"service_type": "llm",
 		"pricing": map[string]interface{}{
-			"type":       "fixed",
+			"type":           "fixed",
 			"price_per_unit": "1000000", // 1 STT per 1000 tokens
 		},
 	}
@@ -131,8 +131,8 @@ func (s *UserWorkflowSuite) Test03_ServiceDiscoveryAndPurchase() {
 		"buyer":      s.User.Address,
 		"service_id": serviceID,
 		"parameters": map[string]string{
-			"model":       "gpt-4",
-			"max_tokens":  "1000",
+			"model":      "gpt-4",
+			"max_tokens": "1000",
 		},
 	}
 
@@ -187,8 +187,8 @@ func (s *UserWorkflowSuite) Test04_TaskMarketplace() {
 
 	// Step 3: User accepts application
 	acceptMsg := map[string]interface{}{
-		"creator":       s.User.Address,
-		"task_id":       taskID,
+		"creator":        s.User.Address,
+		"task_id":        taskID,
 		"application_id": txHash,
 	}
 
@@ -272,9 +272,9 @@ func (s *UserWorkflowSuite) Test05_IdeaCrowdfunding() {
 
 	// Step 3: Provider backs the campaign
 	backMsg := map[string]interface{}{
-		"backer":     s.Provider.Address,
+		"backer":      s.Provider.Address,
 		"campaign_id": campaignID,
-		"amount":     "100000000", // 100 STT
+		"amount":      "100000000", // 100 STT
 	}
 
 	txHash, err = s.submitTx(s.Provider, "crowdfunding", "back-campaign", backMsg)

@@ -212,12 +212,12 @@ func DefaultServiceConfig() *ServiceNodeConfig {
 // DefaultArchiveConfig returns default archive node config
 func DefaultArchiveConfig() *ArchiveNodeConfig {
 	return &ArchiveNodeConfig{
-		MaxPeers:             50,
-		EnableBlockExplorer:  true,
-		BlockExplorerPort:    8080,
-		IndexAllTransactions: true,
-		IndexEvents:          true,
-		CompressionEnabled:   true,
+		MaxPeers:              50,
+		EnableBlockExplorer:   true,
+		BlockExplorerPort:     8080,
+		IndexAllTransactions:  true,
+		IndexEvents:           true,
+		CompressionEnabled:    true,
 		ArchiveRetentionYears: 0, // Forever
 	}
 }

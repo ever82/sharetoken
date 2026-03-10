@@ -4,13 +4,13 @@ package types
 type Capability string
 
 const (
-	CapabilityCollector Capability = "collector" // Data collection and aggregation
-	CapabilityLead      Capability = "lead"      // Workflow orchestration and coordination
+	CapabilityCollector  Capability = "collector"  // Data collection and aggregation
+	CapabilityLead       Capability = "lead"       // Workflow orchestration and coordination
 	CapabilityResearcher Capability = "researcher" // Research and information gathering
-	CapabilityWriter    Capability = "writer"    // Content creation and documentation
-	CapabilityAnalyst   Capability = "analyst"   // Data analysis and insights
-	CapabilityTester    Capability = "tester"    // Testing and validation
-	CapabilityReviewer  Capability = "reviewer"  // Code/content review and feedback
+	CapabilityWriter     Capability = "writer"     // Content creation and documentation
+	CapabilityAnalyst    Capability = "analyst"    // Data analysis and insights
+	CapabilityTester     Capability = "tester"     // Testing and validation
+	CapabilityReviewer   Capability = "reviewer"   // Code/content review and feedback
 )
 
 // GetAllCapabilities returns all available capabilities

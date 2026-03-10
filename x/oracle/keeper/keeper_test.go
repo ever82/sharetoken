@@ -100,8 +100,8 @@ func TestLLMPriceConvertToSTT(t *testing.T) {
 	llmPrice := types.LLMPrice{
 		Provider:    "openai",
 		Model:       "gpt-4",
-		InputPrice:  sdk.NewDecWithPrec(3, 2),  // $0.03 per 1K tokens = 0.03
-		OutputPrice: sdk.NewDecWithPrec(6, 2),  // $0.06 per 1K tokens = 0.06
+		InputPrice:  sdk.NewDecWithPrec(3, 2), // $0.03 per 1K tokens = 0.03
+		OutputPrice: sdk.NewDecWithPrec(6, 2), // $0.06 per 1K tokens = 0.06
 		Currency:    "USD",
 	}
 

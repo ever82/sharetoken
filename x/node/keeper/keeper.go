@@ -326,8 +326,8 @@ func (k *NodeKeeper) updatePluginsForRole(role types.NodeRole) error {
 			}
 		}
 		// Unload service plugins if loaded
-		_ = k.pluginManager.UnloadPlugin("llm")     //nolint:errcheck
-		_ = k.pluginManager.UnloadPlugin("agent")   //nolint:errcheck
+		_ = k.pluginManager.UnloadPlugin("llm")      //nolint:errcheck
+		_ = k.pluginManager.UnloadPlugin("agent")    //nolint:errcheck
 		_ = k.pluginManager.UnloadPlugin("workflow") //nolint:errcheck
 
 	case types.RoleService:

@@ -9,10 +9,10 @@ import (
 type RatingDimension string
 
 const (
-	DimensionQuality         RatingDimension = "quality"          // Quality of work
-	DimensionCommunication RatingDimension = "communication"    // Communication
-	DimensionTimeliness    RatingDimension = "timeliness"       // Timeliness
-	DimensionProfessionalism RatingDimension = "professionalism"  // Professionalism
+	DimensionQuality         RatingDimension = "quality"         // Quality of work
+	DimensionCommunication   RatingDimension = "communication"   // Communication
+	DimensionTimeliness      RatingDimension = "timeliness"      // Timeliness
+	DimensionProfessionalism RatingDimension = "professionalism" // Professionalism
 )
 
 // GetAllDimensions returns all rating dimensions
@@ -27,13 +27,13 @@ func GetAllDimensions() []RatingDimension {
 
 // Rating represents a multi-dimensional rating
 type Rating struct {
-	ID          string            `json:"id"`
-	TaskID      string            `json:"task_id"`
-	RaterID     string            `json:"rater_id"`     // Who gave the rating
-	RatedID     string            `json:"rated_id"`     // Who was rated
-	Ratings     map[RatingDimension]int `json:"ratings"` // 1-5 for each dimension
-	Comment     string            `json:"comment"`
-	CreatedAt   int64             `json:"created_at"`
+	ID        string                  `json:"id"`
+	TaskID    string                  `json:"task_id"`
+	RaterID   string                  `json:"rater_id"` // Who gave the rating
+	RatedID   string                  `json:"rated_id"` // Who was rated
+	Ratings   map[RatingDimension]int `json:"ratings"`  // 1-5 for each dimension
+	Comment   string                  `json:"comment"`
+	CreatedAt int64                   `json:"created_at"`
 }
 
 // NewRating creates a new rating
@@ -115,25 +115,25 @@ func (r *Rating) IsComplete() bool {
 
 // Reputation represents a user's reputation
 type Reputation struct {
-	UserID           string                 `json:"user_id"`
-	TotalRatings     int                    `json:"total_ratings"`
-	AverageRating    float64                `json:"average_rating"`
-	RatingsByDim     map[RatingDimension]float64 `json:"ratings_by_dimension"`
-	CompletedTasks   int                    `json:"completed_tasks"`
-	DisputeRate      float64                `json:"dispute_rate"`
-	OnTimeDelivery   float64                `json:"on_time_delivery"` // percentage
-	CreatedAt        int64                  `json:"created_at"`
-	UpdatedAt        int64                  `json:"updated_at"`
+	UserID         string                      `json:"user_id"`
+	TotalRatings   int                         `json:"total_ratings"`
+	AverageRating  float64                     `json:"average_rating"`
+	RatingsByDim   map[RatingDimension]float64 `json:"ratings_by_dimension"`
+	CompletedTasks int                         `json:"completed_tasks"`
+	DisputeRate    float64                     `json:"dispute_rate"`
+	OnTimeDelivery float64                     `json:"on_time_delivery"` // percentage
+	CreatedAt      int64                       `json:"created_at"`
+	UpdatedAt      int64                       `json:"updated_at"`
 }
 
 // NewReputation creates a new reputation
 func NewReputation(userID string) *Reputation {
 	now := time.Now().Unix()
 	return &Reputation{
-		UserID:         userID,
-		RatingsByDim:   make(map[RatingDimension]float64),
-		CreatedAt:      now,
-		UpdatedAt:      now,
+		UserID:       userID,
+		RatingsByDim: make(map[RatingDimension]float64),
+		CreatedAt:    now,
+		UpdatedAt:    now,
 	}
 }
 
@@ -246,11 +246,11 @@ func (r *Reputation) GetTrustLevel() string {
 
 // RatingSummary provides a summary of ratings
 type RatingSummary struct {
-	UserID        string                 `json:"user_id"`
-	Overall       float64                `json:"overall"`
-	TotalReviews  int                    `json:"total_reviews"`
+	UserID        string                      `json:"user_id"`
+	Overall       float64                     `json:"overall"`
+	TotalReviews  int                         `json:"total_reviews"`
 	Dimensions    map[RatingDimension]float64 `json:"dimensions"`
-	RecentReviews []Rating               `json:"recent_reviews"`
+	RecentReviews []Rating                    `json:"recent_reviews"`
 }
 
 // NewRatingSummary creates a rating summary from reputation

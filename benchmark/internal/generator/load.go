@@ -10,11 +10,11 @@ import (
 
 // LoadGenerator generates load for benchmarking
 type LoadGenerator struct {
-	collector  *metrics.Collector
-	workers    int
-	rate       int           // Requests per second
-	duration   time.Duration
-	operation  Operation
+	collector *metrics.Collector
+	workers   int
+	rate      int // Requests per second
+	duration  time.Duration
+	operation Operation
 }
 
 // Operation represents a benchmark operation
@@ -26,13 +26,13 @@ type Operation interface {
 // OperationFunc allows using functions as operations
 type OperationFunc func(ctx context.Context) error
 
-func (f OperationFunc) Name() string { return "custom" }
+func (f OperationFunc) Name() string                      { return "custom" }
 func (f OperationFunc) Execute(ctx context.Context) error { return f(ctx) }
 
 // Config represents load generator configuration
 type Config struct {
 	Workers  int
-	Rate     int           // Requests per second (0 = unlimited)
+	Rate     int // Requests per second (0 = unlimited)
 	Duration time.Duration
 }
 

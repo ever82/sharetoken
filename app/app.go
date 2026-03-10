@@ -113,7 +113,7 @@ import (
 	sharetokenmodule "sharetoken/x/sharetoken"
 	sharetokenmodulekeeper "sharetoken/x/sharetoken/keeper"
 	sharetokenmoduletypes "sharetoken/x/sharetoken/types"
-// this line is used by starport scaffolding # stargate/app/moduleImport
+	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	"sharetoken/app/network"
 	appparams "sharetoken/app/params"
@@ -174,7 +174,7 @@ var (
 		vesting.AppModuleBasic{},
 		consensus.AppModuleBasic{},
 		sharetokenmodule.AppModuleBasic{},
-// this line is used by starport scaffolding # stargate/app/moduleBasic
+		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
 	// module account permissions
@@ -215,7 +215,7 @@ type App struct {
 	cdc               *codec.LegacyAmino
 	appCodec          codec.Codec
 	interfaceRegistry types.InterfaceRegistry
-    txConfig          client.TxConfig
+	txConfig          client.TxConfig
 
 	invCheckPeriod uint
 
@@ -226,24 +226,24 @@ type App struct {
 
 	// keepers
 	AccountKeeper         authkeeper.AccountKeeper
-    AuthzKeeper           authzkeeper.Keeper
-    BankKeeper            bankkeeper.Keeper
-    CapabilityKeeper      *capabilitykeeper.Keeper
-    StakingKeeper         *stakingkeeper.Keeper
-    SlashingKeeper        slashingkeeper.Keeper
-    MintKeeper            mintkeeper.Keeper
-    DistrKeeper           distrkeeper.Keeper
-    GovKeeper             govkeeper.Keeper
-    CrisisKeeper          *crisiskeeper.Keeper
-    UpgradeKeeper         *upgradekeeper.Keeper
-    ParamsKeeper          paramskeeper.Keeper
-    IBCKeeper             *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-    EvidenceKeeper        evidencekeeper.Keeper
-    TransferKeeper        ibctransferkeeper.Keeper
-    ICAHostKeeper         icahostkeeper.Keeper
-    FeeGrantKeeper        feegrantkeeper.Keeper
-    GroupKeeper           groupkeeper.Keeper
-    ConsensusParamsKeeper consensusparamkeeper.Keeper
+	AuthzKeeper           authzkeeper.Keeper
+	BankKeeper            bankkeeper.Keeper
+	CapabilityKeeper      *capabilitykeeper.Keeper
+	StakingKeeper         *stakingkeeper.Keeper
+	SlashingKeeper        slashingkeeper.Keeper
+	MintKeeper            mintkeeper.Keeper
+	DistrKeeper           distrkeeper.Keeper
+	GovKeeper             govkeeper.Keeper
+	CrisisKeeper          *crisiskeeper.Keeper
+	UpgradeKeeper         *upgradekeeper.Keeper
+	ParamsKeeper          paramskeeper.Keeper
+	IBCKeeper             *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
+	EvidenceKeeper        evidencekeeper.Keeper
+	TransferKeeper        ibctransferkeeper.Keeper
+	ICAHostKeeper         icahostkeeper.Keeper
+	FeeGrantKeeper        feegrantkeeper.Keeper
+	GroupKeeper           groupkeeper.Keeper
+	ConsensusParamsKeeper consensusparamkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -254,7 +254,7 @@ type App struct {
 
 	// NATManager handles UPnP/NAT port mapping
 	NATManager *network.NATManager
-// this line is used by starport scaffolding # stargate/app/keeperDeclaration
+	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
 	mm *module.Manager
@@ -301,7 +301,7 @@ func New(
 		feegrant.StoreKey, evidencetypes.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
 		capabilitytypes.StoreKey, group.StoreKey, icacontrollertypes.StoreKey, consensusparamtypes.StoreKey,
 		sharetokenmoduletypes.StoreKey,
-// this line is used by starport scaffolding # stargate/app/storeKey
+		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -519,21 +519,19 @@ func New(
 
 	app.GovKeeper = *govKeeper.SetHooks(
 		govtypes.NewMultiGovHooks(
-			// register the governance hooks
+		// register the governance hooks
 		),
 	)
 
-	
-		app.SharetokenKeeper = *sharetokenmodulekeeper.NewKeeper(
-			appCodec,
-			keys[sharetokenmoduletypes.StoreKey],
-			keys[sharetokenmoduletypes.MemStoreKey],
-			app.GetSubspace(sharetokenmoduletypes.ModuleName),
-			
-			)
-		sharetokenModule := sharetokenmodule.NewAppModule(appCodec, app.SharetokenKeeper, app.AccountKeeper, app.BankKeeper)
+	app.SharetokenKeeper = *sharetokenmodulekeeper.NewKeeper(
+		appCodec,
+		keys[sharetokenmoduletypes.StoreKey],
+		keys[sharetokenmoduletypes.MemStoreKey],
+		app.GetSubspace(sharetokenmoduletypes.ModuleName),
+	)
+	sharetokenModule := sharetokenmodule.NewAppModule(appCodec, app.SharetokenKeeper, app.AccountKeeper, app.BankKeeper)
 
-		// this line is used by starport scaffolding # stargate/app/keeperDefinition
+	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
 	/**** IBC Routing ****/
 
@@ -595,7 +593,7 @@ func New(
 		transferModule,
 		icaModule,
 		sharetokenModule,
-// this line is used by starport scaffolding # stargate/app/appModule
+		// this line is used by starport scaffolding # stargate/app/appModule
 
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
 	)
@@ -628,7 +626,7 @@ func New(
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		sharetokenmoduletypes.ModuleName,
-// this line is used by starport scaffolding # stargate/app/beginBlockers
+		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -654,7 +652,7 @@ func New(
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		sharetokenmoduletypes.ModuleName,
-// this line is used by starport scaffolding # stargate/app/endBlockers
+		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -685,7 +683,7 @@ func New(
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
 		sharetokenmoduletypes.ModuleName,
-// this line is used by starport scaffolding # stargate/app/initGenesis
+		// this line is used by starport scaffolding # stargate/app/initGenesis
 	}
 	app.mm.SetOrderInitGenesis(genesisModuleOrder...)
 	app.mm.SetOrderExportGenesis(genesisModuleOrder...)
@@ -921,7 +919,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(sharetokenmoduletypes.ModuleName)
-// this line is used by starport scaffolding # stargate/app/paramSubspace
+	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper
 }

@@ -38,11 +38,11 @@ type E2ETestSuite struct {
 
 // ValidatorClient represents a connection to a validator node
 type ValidatorClient struct {
-	Address    string
-	RPCAddr    string
-	LCDAddr    string
-	CLIHome    string
-	Mnemonic   string
+	Address  string
+	RPCAddr  string
+	LCDAddr  string
+	CLIHome  string
+	Mnemonic string
 }
 
 // RPCClient for tendermint RPC

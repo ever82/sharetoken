@@ -18,10 +18,10 @@ type TaskStatus string
 
 const (
 	TaskStatusDraft      TaskStatus = "draft"
-	TaskStatusOpen       TaskStatus = "open"       // Accepting applications/bids
-	TaskStatusAssigned   TaskStatus = "assigned"   // Worker selected
+	TaskStatusOpen       TaskStatus = "open"     // Accepting applications/bids
+	TaskStatusAssigned   TaskStatus = "assigned" // Worker selected
 	TaskStatusInProgress TaskStatus = "in_progress"
-	TaskStatusReview     TaskStatus = "review"     // Under review
+	TaskStatusReview     TaskStatus = "review" // Under review
 	TaskStatusCompleted  TaskStatus = "completed"
 	TaskStatusCancelled  TaskStatus = "cancelled"
 	TaskStatusDisputed   TaskStatus = "disputed"
@@ -50,10 +50,10 @@ type Task struct {
 	Type        TaskType     `json:"type"`
 	Category    TaskCategory `json:"category"`
 	Status      TaskStatus   `json:"status"`
-	Budget      uint64       `json:"budget"`       // In STT
-	Currency    string       `json:"currency"`     // "STT", "USDC"
-	Deadline    int64        `json:"deadline"`     // Unix timestamp
-	Skills      []string     `json:"skills"`       // Required skills
+	Budget      uint64       `json:"budget"`   // In STT
+	Currency    string       `json:"currency"` // "STT", "USDC"
+	Deadline    int64        `json:"deadline"` // Unix timestamp
+	Skills      []string     `json:"skills"`   // Required skills
 
 	// Subtasks for decomposition
 	Subtasks []Subtask `json:"subtasks"`
@@ -68,9 +68,9 @@ type Task struct {
 	CompletedAt int64 `json:"completed_at"`
 
 	// Statistics
-	ViewCount     int `json:"view_count"`
+	ViewCount        int `json:"view_count"`
 	ApplicationCount int `json:"application_count"`
-	BidCount      int `json:"bid_count"`
+	BidCount         int `json:"bid_count"`
 }
 
 // Subtask represents a decomposed subtask
@@ -102,12 +102,12 @@ type Milestone struct {
 type MilestoneStatus string
 
 const (
-	MilestoneStatusPending    MilestoneStatus = "pending"
-	MilestoneStatusActive     MilestoneStatus = "active"
-	MilestoneStatusSubmitted  MilestoneStatus = "submitted"
-	MilestoneStatusApproved   MilestoneStatus = "approved"
-	MilestoneStatusRejected   MilestoneStatus = "rejected"
-	MilestoneStatusPaid       MilestoneStatus = "paid"
+	MilestoneStatusPending   MilestoneStatus = "pending"
+	MilestoneStatusActive    MilestoneStatus = "active"
+	MilestoneStatusSubmitted MilestoneStatus = "submitted"
+	MilestoneStatusApproved  MilestoneStatus = "approved"
+	MilestoneStatusRejected  MilestoneStatus = "rejected"
+	MilestoneStatusPaid      MilestoneStatus = "paid"
 )
 
 // NewTask creates a new marketplace task

@@ -10,8 +10,8 @@ type CampaignType string
 
 const (
 	CampaignTypeInvestment CampaignType = "investment" // Equity investment
-	CampaignTypeLending  CampaignType = "lending"   // Loan with interest
-	CampaignTypeDonation CampaignType = "donation"  // No return
+	CampaignTypeLending    CampaignType = "lending"    // Loan with interest
+	CampaignTypeDonation   CampaignType = "donation"   // No return
 )
 
 // CampaignStatus represents the status of a campaign
@@ -20,10 +20,10 @@ type CampaignStatus string
 const (
 	CampaignStatusDraft     CampaignStatus = "draft"
 	CampaignStatusActive    CampaignStatus = "active"
-	CampaignStatusFunded    CampaignStatus = "funded"    // Reached goal
-	CampaignStatusExpired   CampaignStatus = "expired"   // Time ran out
+	CampaignStatusFunded    CampaignStatus = "funded"  // Reached goal
+	CampaignStatusExpired   CampaignStatus = "expired" // Time ran out
 	CampaignStatusCancelled CampaignStatus = "cancelled"
-	CampaignStatusClosed    CampaignStatus = "closed"    // Funds distributed
+	CampaignStatusClosed    CampaignStatus = "closed" // Funds distributed
 )
 
 // Campaign represents a crowdfunding campaign
@@ -54,13 +54,13 @@ type Campaign struct {
 	Valuation     uint64  `json:"valuation"`      // Company valuation
 
 	// For lending type
-	InterestRate   float64 `json:"interest_rate"`   // Annual interest rate
-	LoanTerm     int64   `json:"loan_term"`       // Term in days
-	RepaymentSchedule string `json:"repayment_schedule"` // "monthly", "quarterly", "lump"
+	InterestRate      float64 `json:"interest_rate"`      // Annual interest rate
+	LoanTerm          int64   `json:"loan_term"`          // Term in days
+	RepaymentSchedule string  `json:"repayment_schedule"` // "monthly", "quarterly", "lump"
 
 	// Statistics
-	BackerCount  int `json:"backer_count"`
-	UpdateCount  int `json:"update_count"`
+	BackerCount int `json:"backer_count"`
+	UpdateCount int `json:"update_count"`
 
 	// Timestamps
 	CreatedAt int64 `json:"created_at"`
@@ -235,15 +235,15 @@ func (c *Campaign) GetExpectedReturn(amount uint64) (uint64, error) {
 
 // Backer represents a backer/contribution to a campaign
 type Backer struct {
-	ID          string `json:"id"`
-	CampaignID  string `json:"campaign_id"`
-	BackerID    string `json:"backer_id"`
-	Amount      uint64 `json:"amount"`
-	Currency    string `json:"currency"`
-	Message     string `json:"message"`
-	Refunded    bool   `json:"refunded"`
+	ID           string `json:"id"`
+	CampaignID   string `json:"campaign_id"`
+	BackerID     string `json:"backer_id"`
+	Amount       uint64 `json:"amount"`
+	Currency     string `json:"currency"`
+	Message      string `json:"message"`
+	Refunded     bool   `json:"refunded"`
 	RefundAmount uint64 `json:"refund_amount"`
-	CreatedAt   int64  `json:"created_at"`
+	CreatedAt    int64  `json:"created_at"`
 }
 
 // NewBacker creates a new backer
@@ -288,13 +288,13 @@ func NewCampaignUpdate(id, campaignID, title, content, createdBy string) *Campai
 
 // RevenueDistribution represents revenue distribution to contributors
 type RevenueDistribution struct {
-	ID             string                 `json:"id"`
-	IdeaID         string                 `json:"idea_id"`
-	CampaignID     string                 `json:"campaign_id"`
-	TotalAmount    uint64                 `json:"total_amount"`
-	DistributedAt  int64                  `json:"distributed_at"`
-	Distributions  []ContributorPayout    `json:"distributions"`
-	Status         DistributionStatus     `json:"status"`
+	ID            string              `json:"id"`
+	IdeaID        string              `json:"idea_id"`
+	CampaignID    string              `json:"campaign_id"`
+	TotalAmount   uint64              `json:"total_amount"`
+	DistributedAt int64               `json:"distributed_at"`
+	Distributions []ContributorPayout `json:"distributions"`
+	Status        DistributionStatus  `json:"status"`
 }
 
 // DistributionStatus represents distribution status
@@ -310,9 +310,9 @@ const (
 type ContributorPayout struct {
 	ContributorID string  `json:"contributor_id"`
 	Weight        float64 `json:"weight"`
-	Share         float64 `json:"share"`       // Percentage
+	Share         float64 `json:"share"` // Percentage
 	Amount        uint64  `json:"amount"`
-	Status        string  `json:"status"`      // "pending", "sent", "failed"
+	Status        string  `json:"status"` // "pending", "sent", "failed"
 }
 
 // NewRevenueDistribution creates a new revenue distribution
@@ -358,9 +358,9 @@ func (rd *RevenueDistribution) CalculateDistributions(contributors map[string]fl
 
 // CampaignStats provides statistics for a campaign
 type CampaignStats struct {
-	CampaignID      string  `json:"campaign_id"`
-	AverageContribution float64 `json:"average_contribution"`
-	LargestContribution uint64  `json:"largest_contribution"`
-	SmallestContribution uint64 `json:"smallest_contribution"`
-	BackerRetention    float64 `json:"backer_retention"` // Repeat backers
+	CampaignID           string  `json:"campaign_id"`
+	AverageContribution  float64 `json:"average_contribution"`
+	LargestContribution  uint64  `json:"largest_contribution"`
+	SmallestContribution uint64  `json:"smallest_contribution"`
+	BackerRetention      float64 `json:"backer_retention"` // Repeat backers
 }

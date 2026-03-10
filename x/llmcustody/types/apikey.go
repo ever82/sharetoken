@@ -21,24 +21,24 @@ func IsValidProvider(p string) bool {
 
 // AccessRule represents an access control rule
 type AccessRule struct {
-	ServiceID   string `json:"service_id"`   // 允许访问的服务ID
-	RateLimit   int64  `json:"rate_limit"`   // 每分钟最大请求数
-	MaxRequests int64  `json:"max_requests"` // 总请求上限
-	PricePerReq int64  `json:"price_per_req"`// 每次请求价格 (ustt)
+	ServiceID   string `json:"service_id"`    // 允许访问的服务ID
+	RateLimit   int64  `json:"rate_limit"`    // 每分钟最大请求数
+	MaxRequests int64  `json:"max_requests"`  // 总请求上限
+	PricePerReq int64  `json:"price_per_req"` // 每次请求价格 (ustt)
 }
 
 // APIKey represents an encrypted API key stored on chain
 type APIKey struct {
-	ID            string       `json:"id"`
-	Provider      Provider     `json:"provider"`
-	EncryptedKey  []byte       `json:"encrypted_key"` // AES-256-GCM encrypted
-	Hash          string       `json:"hash"`          // SHA-256 hash for verification
-	Owner         string       `json:"owner"`
-	AccessRules   []AccessRule `json:"access_rules"`
-	CreatedAt     int64        `json:"created_at"`
-	LastUsedAt    int64        `json:"last_used_at"`
-	UsageCount    int64        `json:"usage_count"`
-	Active        bool         `json:"active"`
+	ID           string       `json:"id"`
+	Provider     Provider     `json:"provider"`
+	EncryptedKey []byte       `json:"encrypted_key"` // AES-256-GCM encrypted
+	Hash         string       `json:"hash"`          // SHA-256 hash for verification
+	Owner        string       `json:"owner"`
+	AccessRules  []AccessRule `json:"access_rules"`
+	CreatedAt    int64        `json:"created_at"`
+	LastUsedAt   int64        `json:"last_used_at"`
+	UsageCount   int64        `json:"usage_count"`
+	Active       bool         `json:"active"`
 }
 
 // NewAPIKey creates a new API key record

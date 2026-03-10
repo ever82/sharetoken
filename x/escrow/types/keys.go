@@ -52,10 +52,10 @@ const (
 
 // Attribute keys
 const (
-	AttributeKeyEscrowID       = "escrow_id"
-	AttributeKeyRequester      = "requester"
-	AttributeKeyProvider       = "provider"
-	AttributeKeyAmount         = "amount"
+	AttributeKeyEscrowID        = "escrow_id"
+	AttributeKeyRequester       = "requester"
+	AttributeKeyProvider        = "provider"
+	AttributeKeyAmount          = "amount"
 	AttributeKeyRequesterAmount = "requester_amount"
-	AttributeKeyProviderAmount = "provider_amount"
+	AttributeKeyProviderAmount  = "provider_amount"
 )

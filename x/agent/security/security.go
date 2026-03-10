@@ -8,10 +8,10 @@ import (
 type SecurityLevel int
 
 const (
-	LevelMinimal    SecurityLevel = 1
-	LevelStandard   SecurityLevel = 2
-	LevelHigh       SecurityLevel = 3
-	LevelParanoid   SecurityLevel = 4
+	LevelMinimal  SecurityLevel = 1
+	LevelStandard SecurityLevel = 2
+	LevelHigh     SecurityLevel = 3
+	LevelParanoid SecurityLevel = 4
 )
 
 // SecurityLayer represents a single security mechanism
@@ -23,7 +23,7 @@ type SecurityLayer struct {
 
 // SecurityConfig contains all 16 security layers
 type SecurityConfig struct {
-	Level SecurityLevel `json:"level"`
+	Level  SecurityLevel   `json:"level"`
 	Layers []SecurityLayer `json:"layers"`
 }
 

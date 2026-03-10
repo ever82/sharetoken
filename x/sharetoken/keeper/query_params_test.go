@@ -5,7 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	testkeeper 	"sharetoken/testutil/keeper"
+	testkeeper "sharetoken/testutil/keeper"
 	"sharetoken/x/sharetoken/types"
 )
 

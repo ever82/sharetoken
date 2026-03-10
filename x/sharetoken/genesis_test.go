@@ -3,17 +3,17 @@ package sharetoken_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	keepertest "sharetoken/testutil/keeper"
 	"sharetoken/testutil/nullify"
 	"sharetoken/x/sharetoken"
 	"sharetoken/x/sharetoken/types"
-	"github.com/stretchr/testify/require"
 )
 
 func TestGenesis(t *testing.T) {
 	genesisState := types.GenesisState{
-		Params:	types.DefaultParams(),
-		
+		Params: types.DefaultParams(),
+
 		// this line is used by starport scaffolding # genesis/test/state
 	}
 
@@ -24,8 +24,6 @@ func TestGenesis(t *testing.T) {
 
 	nullify.Fill(&genesisState)
 	nullify.Fill(got)
-
-	
 
 	// this line is used by starport scaffolding # genesis/test/assert
 }

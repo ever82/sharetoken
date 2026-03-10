@@ -44,13 +44,13 @@ func DefaultNATConfig() *NATConfig {
 // NATManager handles NAT traversal including UPnP
 // nolint:govet // fieldalignment: struct field order is for readability
 type NATManager struct {
-	config    *NATConfig
-	mappings  []PortMapping
-	logger    log.Logger
-	cancel    context.CancelFunc
-	ctx       context.Context
+	config     *NATConfig
+	mappings   []PortMapping
+	logger     log.Logger
+	cancel     context.CancelFunc
+	ctx        context.Context
 	upnpClient UPnPClient
-	upnpMu    sync.RWMutex
+	upnpMu     sync.RWMutex
 }
 
 // UPnPClient interface for UPnP operations

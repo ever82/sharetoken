@@ -95,9 +95,9 @@ func (s *DisputeWorkflowSuite) Test02_AIMediationOnly() {
 	aiResolution := map[string]interface{}{
 		"dispute_id": disputeID,
 		"proposal": map[string]interface{}{
-			"user_share":    70, // 70% to user
+			"user_share":     70, // 70% to user
 			"provider_share": 30, // 30% to provider
-			"reason":        "Partial delivery, quality issues",
+			"reason":         "Partial delivery, quality issues",
 		},
 		"evidence": []string{"chat_logs", "delivery_analysis"},
 	}
@@ -203,7 +203,7 @@ func (s *DisputeWorkflowSuite) Test04_DisputeTimeout() {
 	aiResolution := map[string]interface{}{
 		"dispute_id": disputeID,
 		"proposal": map[string]interface{}{
-			"user_share":    50,
+			"user_share":     50,
 			"provider_share": 50,
 		},
 	}
@@ -265,8 +265,8 @@ func (s *DisputeWorkflowSuite) createTaskWithEscrow() string {
 
 	// User accepts and funds escrow
 	accept := map[string]interface{}{
-		"creator":       s.User.Address,
-		"task_id":       taskID,
+		"creator":        s.User.Address,
+		"task_id":        taskID,
 		"application_id": txHash,
 	}
 
@@ -316,10 +316,10 @@ func (s *DisputeWorkflowSuite) aiMediation(disputeID string) {
 	aiAnalysis := map[string]interface{}{
 		"dispute_id": disputeID,
 		"analysis": map[string]interface{}{
-			"sentiment":       "mixed",
-			"quality_score":   65,
-			"completeness":    80,
-			"recommendation":  "partial_refund",
+			"sentiment":      "mixed",
+			"quality_score":  65,
+			"completeness":   80,
+			"recommendation": "partial_refund",
 		},
 	}
 

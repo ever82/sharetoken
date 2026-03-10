@@ -10,26 +10,26 @@ import (
 type DisputeStatus string
 
 const (
-	DisputeStatusOpen       DisputeStatus = "open"
-	DisputeStatusMediating  DisputeStatus = "mediating"
-	DisputeStatusVoting     DisputeStatus = "voting"
-	DisputeStatusResolved   DisputeStatus = "resolved"
-	DisputeStatusCancelled  DisputeStatus = "cancelled"
+	DisputeStatusOpen      DisputeStatus = "open"
+	DisputeStatusMediating DisputeStatus = "mediating"
+	DisputeStatusVoting    DisputeStatus = "voting"
+	DisputeStatusResolved  DisputeStatus = "resolved"
+	DisputeStatusCancelled DisputeStatus = "cancelled"
 )
 
 // Dispute represents a dispute between parties
 type Dispute struct {
-	ID            string        `json:"id"`
-	EscrowID      string        `json:"escrow_id"`
-	Requester     string        `json:"requester"`
-	Provider      string        `json:"provider"`
-	Status        DisputeStatus `json:"status"`
-	Reason        string        `json:"reason"`
-	Evidence      []Evidence    `json:"evidence"`
-	Votes         []Vote        `json:"votes"`
-	Result        VoteResult    `json:"result"`
-	CreatedAt     int64         `json:"created_at"`
-	CompletedAt   int64         `json:"completed_at"`
+	ID          string        `json:"id"`
+	EscrowID    string        `json:"escrow_id"`
+	Requester   string        `json:"requester"`
+	Provider    string        `json:"provider"`
+	Status      DisputeStatus `json:"status"`
+	Reason      string        `json:"reason"`
+	Evidence    []Evidence    `json:"evidence"`
+	Votes       []Vote        `json:"votes"`
+	Result      VoteResult    `json:"result"`
+	CreatedAt   int64         `json:"created_at"`
+	CompletedAt int64         `json:"completed_at"`
 }
 
 // Evidence represents evidence submitted in a dispute
@@ -50,11 +50,11 @@ type Vote struct {
 
 // VoteResult represents the result of voting
 type VoteResult struct {
-	Decision      string    `json:"decision"`
-	RequesterVotes sdk.Dec  `json:"requester_votes"`
-	ProviderVotes  sdk.Dec  `json:"provider_votes"`
-	SplitVotes     sdk.Dec  `json:"split_votes"`
-	TotalWeight    sdk.Dec  `json:"total_weight"`
+	Decision       string  `json:"decision"`
+	RequesterVotes sdk.Dec `json:"requester_votes"`
+	ProviderVotes  sdk.Dec `json:"provider_votes"`
+	SplitVotes     sdk.Dec `json:"split_votes"`
+	TotalWeight    sdk.Dec `json:"total_weight"`
 }
 
 // NewDispute creates a new dispute

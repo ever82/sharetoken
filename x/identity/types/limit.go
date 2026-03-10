@@ -10,25 +10,25 @@ import (
 
 // LimitConfig stores user limits configuration
 type LimitConfig struct {
-	Address          string             `json:"address"`
-	TxLimit          TransactionLimit   `json:"tx_limit"`
-	WithdrawalLimit  WithdrawalLimit    `json:"withdrawal_limit"`
-	DisputeLimit     DisputeLimit       `json:"dispute_limit"`
-	ServiceLimit     ServiceLimit       `json:"service_limit"`
-	UpdatedAt        int64              `json:"updated_at"`
+	Address         string           `json:"address"`
+	TxLimit         TransactionLimit `json:"tx_limit"`
+	WithdrawalLimit WithdrawalLimit  `json:"withdrawal_limit"`
+	DisputeLimit    DisputeLimit     `json:"dispute_limit"`
+	ServiceLimit    ServiceLimit     `json:"service_limit"`
+	UpdatedAt       int64            `json:"updated_at"`
 }
 
 // TransactionLimit defines transaction related limits
 type TransactionLimit struct {
-	MaxSingle        sdk.Coin `json:"max_single"`
-	MaxDaily         sdk.Coin `json:"max_daily"`
-	MaxMonthly       sdk.Coin `json:"max_monthly"`
-	DailyTxCount     uint64   `json:"daily_tx_count"`
-	MonthlyTxCount   uint64   `json:"monthly_tx_count"`
-	DailySpent       sdk.Coin `json:"daily_spent"`
-	MonthlySpent     sdk.Coin `json:"monthly_spent"`
-	LastResetDay     int64    `json:"last_reset_day"`
-	LastResetMonth   int64    `json:"last_reset_month"`
+	MaxSingle      sdk.Coin `json:"max_single"`
+	MaxDaily       sdk.Coin `json:"max_daily"`
+	MaxMonthly     sdk.Coin `json:"max_monthly"`
+	DailyTxCount   uint64   `json:"daily_tx_count"`
+	MonthlyTxCount uint64   `json:"monthly_tx_count"`
+	DailySpent     sdk.Coin `json:"daily_spent"`
+	MonthlySpent   sdk.Coin `json:"monthly_spent"`
+	LastResetDay   int64    `json:"last_reset_day"`
+	LastResetMonth int64    `json:"last_reset_month"`
 }
 
 // WithdrawalLimit defines withdrawal related limits
@@ -57,10 +57,10 @@ type ServiceLimit struct {
 
 // DefaultLimitConfig stores default limit values
 type DefaultLimitConfig struct {
-	DefaultTxLimit        TransactionLimit  `json:"default_tx_limit"`
+	DefaultTxLimit         TransactionLimit `json:"default_tx_limit"`
 	DefaultWithdrawalLimit WithdrawalLimit  `json:"default_withdrawal_limit"`
-	DefaultDisputeLimit   DisputeLimit      `json:"default_dispute_limit"`
-	DefaultServiceLimit   ServiceLimit      `json:"default_service_limit"`
+	DefaultDisputeLimit    DisputeLimit     `json:"default_dispute_limit"`
+	DefaultServiceLimit    ServiceLimit     `json:"default_service_limit"`
 }
 
 // DefaultCoin returns a default coin for limit initialization
@@ -72,19 +72,19 @@ func DefaultCoin() sdk.Coin {
 func DefaultDefaultLimitConfig() DefaultLimitConfig {
 	return DefaultLimitConfig{
 		DefaultTxLimit: TransactionLimit{
-			MaxSingle:      sdk.NewCoin("ustt", sdk.NewInt(1000000000)),      // 1000 STT
-			MaxDaily:       sdk.NewCoin("ustt", sdk.NewInt(10000000000)),     // 10000 STT
-			MaxMonthly:     sdk.NewCoin("ustt", sdk.NewInt(100000000000)),    // 100000 STT
+			MaxSingle:      sdk.NewCoin("ustt", sdk.NewInt(1000000000)),   // 1000 STT
+			MaxDaily:       sdk.NewCoin("ustt", sdk.NewInt(10000000000)),  // 10000 STT
+			MaxMonthly:     sdk.NewCoin("ustt", sdk.NewInt(100000000000)), // 100000 STT
 			DailySpent:     DefaultCoin(),
 			MonthlySpent:   DefaultCoin(),
 			LastResetDay:   time.Now().Unix(),
 			LastResetMonth: time.Now().Unix(),
 		},
 		DefaultWithdrawalLimit: WithdrawalLimit{
-			MaxDaily:           sdk.NewCoin("ustt", sdk.NewInt(5000000000)),  // 5000 STT
-			CooldownHours:      24,
-			DailyWithdrawn:     DefaultCoin(),
-			LastResetDay:       time.Now().Unix(),
+			MaxDaily:       sdk.NewCoin("ustt", sdk.NewInt(5000000000)), // 5000 STT
+			CooldownHours:  24,
+			DailyWithdrawn: DefaultCoin(),
+			LastResetDay:   time.Now().Unix(),
 		},
 		DefaultDisputeLimit: DisputeLimit{
 			MaxActiveDisputes: 5,
@@ -225,7 +225,7 @@ func (lc *LimitConfig) CheckWithdrawalLimit(amount sdk.Coin) error {
 	// Check cooldown
 	now := time.Now().Unix()
 	cooldownSeconds := int64(lc.WithdrawalLimit.CooldownHours) * 3600
-	if now - lc.WithdrawalLimit.LastWithdrawalTime < cooldownSeconds {
+	if now-lc.WithdrawalLimit.LastWithdrawalTime < cooldownSeconds {
 		remaining := cooldownSeconds - (now - lc.WithdrawalLimit.LastWithdrawalTime)
 		return LimitError{
 			LimitType:   "withdrawal_cooldown",

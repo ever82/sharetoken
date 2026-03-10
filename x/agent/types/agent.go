@@ -7,20 +7,20 @@ import (
 
 // Agent represents an AI agent instance
 type Agent struct {
-	ID       string        `json:"id"`
-	Owner    string        `json:"owner"`
-	Template AgentTemplate `json:"template"`
-	Runtime  string        `json:"runtime"` // "wasm", "rust", "python"
-	Config   AgentConfig   `json:"config"`
-	Active   bool          `json:"active"`
-	CreatedAt int64        `json:"created_at"`
+	ID        string        `json:"id"`
+	Owner     string        `json:"owner"`
+	Template  AgentTemplate `json:"template"`
+	Runtime   string        `json:"runtime"` // "wasm", "rust", "python"
+	Config    AgentConfig   `json:"config"`
+	Active    bool          `json:"active"`
+	CreatedAt int64         `json:"created_at"`
 }
 
 // AgentConfig represents agent configuration
 type AgentConfig struct {
 	MaxTokens      int64    `json:"max_tokens"`
 	Temperature    float64  `json:"temperature"`
-	Timeout        int64    `json:"timeout"`        // seconds
+	Timeout        int64    `json:"timeout"` // seconds
 	MaxMemoryMB    int64    `json:"max_memory_mb"`
 	AllowedTools   []string `json:"allowed_tools"`
 	RestrictedDirs []string `json:"restricted_dirs"`

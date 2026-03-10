@@ -8,11 +8,11 @@ import (
 
 // MQScore represents a user's Moral Quotient score
 type MQScore struct {
-	Address   string  `json:"address"`
-	Score     int32   `json:"score"`      // Current MQ score (0-100)
-	Disputes  uint64  `json:"disputes"`   // Number of disputes participated
-	Consensus uint64  `json:"consensus"`  // Number of times voted with consensus
-	UpdatedAt int64   `json:"updated_at"`
+	Address   string `json:"address"`
+	Score     int32  `json:"score"`     // Current MQ score (0-100)
+	Disputes  uint64 `json:"disputes"`  // Number of disputes participated
+	Consensus uint64 `json:"consensus"` // Number of times voted with consensus
+	UpdatedAt int64  `json:"updated_at"`
 }
 
 // InitialMQ is the starting MQ score for new users

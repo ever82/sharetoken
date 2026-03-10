@@ -73,16 +73,16 @@ func (r *Reporter) Report(name string, stats metrics.Stats, thresholds metrics.T
 
 // ReportJSON generates a JSON report
 func (r *Reporter) ReportJSON(name string, stats metrics.Stats) error {
-	report := map[string]interface{
+	report := map[string]interface {
 	}{
 		"benchmark": name,
 		"timestamp": time.Now().UTC(),
 		"summary": map[string]interface{}{
-			"duration":        stats.Duration.String(),
-			"total_requests":  stats.TotalRequests,
-			"success_count":   stats.SuccessCount,
-			"failure_count":   stats.FailureCount,
-			"success_rate":    stats.SuccessRate,
+			"duration":       stats.Duration.String(),
+			"total_requests": stats.TotalRequests,
+			"success_count":  stats.SuccessCount,
+			"failure_count":  stats.FailureCount,
+			"success_rate":   stats.SuccessRate,
 			"tps":            stats.TPS,
 		},
 		"latency": map[string]string{

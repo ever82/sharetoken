@@ -17,7 +17,7 @@ type LatencyMetric struct {
 
 // Collector collects and analyzes metrics
 type Collector struct {
-	latencies    []LatencyMetric
+	latencies     []LatencyMetric
 	totalRequests int64
 	successCount  int64
 	failureCount  int64
@@ -126,19 +126,19 @@ func (c *Collector) GetStats() Stats {
 	latencies := c.GetLatencies()
 
 	return Stats{
-		TotalRequests:   c.totalRequests,
-		SuccessCount:    c.successCount,
-		FailureCount:    c.failureCount,
-		SuccessRate:     float64(c.successCount) / float64(c.totalRequests) * 100,
-		TPS:             c.GetTPS(),
-		MinLatency:      c.getMinLatency(latencies),
-		MaxLatency:      c.getMaxLatency(latencies),
-		AvgLatency:      c.getAvgLatency(latencies),
-		P50Latency:      c.GetPercentile(50),
-		P90Latency:      c.GetPercentile(90),
-		P99Latency:      c.GetPercentile(99),
-		P999Latency:     c.GetPercentile(99.9),
-		Duration:        c.endTime.Sub(c.startTime),
+		TotalRequests: c.totalRequests,
+		SuccessCount:  c.successCount,
+		FailureCount:  c.failureCount,
+		SuccessRate:   float64(c.successCount) / float64(c.totalRequests) * 100,
+		TPS:           c.GetTPS(),
+		MinLatency:    c.getMinLatency(latencies),
+		MaxLatency:    c.getMaxLatency(latencies),
+		AvgLatency:    c.getAvgLatency(latencies),
+		P50Latency:    c.GetPercentile(50),
+		P90Latency:    c.GetPercentile(90),
+		P99Latency:    c.GetPercentile(99),
+		P999Latency:   c.GetPercentile(99.9),
+		Duration:      c.endTime.Sub(c.startTime),
 	}
 }
 
@@ -186,33 +186,33 @@ func (c *Collector) getAvgLatency(latencies []time.Duration) time.Duration {
 
 // Stats represents benchmark statistics
 type Stats struct {
-	TotalRequests   int64
-	SuccessCount    int64
-	FailureCount    int64
-	SuccessRate     float64
-	TPS             float64
-	MinLatency      time.Duration
-	MaxLatency      time.Duration
-	AvgLatency      time.Duration
-	P50Latency      time.Duration
-	P90Latency      time.Duration
-	P99Latency      time.Duration
-	P999Latency     time.Duration
-	Duration        time.Duration
+	TotalRequests int64
+	SuccessCount  int64
+	FailureCount  int64
+	SuccessRate   float64
+	TPS           float64
+	MinLatency    time.Duration
+	MaxLatency    time.Duration
+	AvgLatency    time.Duration
+	P50Latency    time.Duration
+	P90Latency    time.Duration
+	P99Latency    time.Duration
+	P999Latency   time.Duration
+	Duration      time.Duration
 }
 
 // ValidateThresholds validates against performance thresholds
 type Thresholds struct {
-	MinTPS       float64
-	MaxP99Latency time.Duration
+	MinTPS         float64
+	MaxP99Latency  time.Duration
 	MinSuccessRate float64
 }
 
 // DefaultThresholds returns default performance thresholds
 func DefaultThresholds() Thresholds {
 	return Thresholds{
-		MinTPS:        100,
-		MaxP99Latency: 3 * time.Second,
+		MinTPS:         100,
+		MaxP99Latency:  3 * time.Second,
 		MinSuccessRate: 95.0,
 	}
 }

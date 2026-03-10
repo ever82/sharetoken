@@ -81,15 +81,15 @@ func TestNodeKeeper_DoubleInitialization(t *testing.T) {
 
 func TestNodeKeeper_Capabilities(t *testing.T) {
 	tests := []struct {
-		role                types.NodeRole
-		canValidate         bool
-		canQueryState       bool
-		canQueryHistory     bool
-		canServeLight       bool
-		canRunPlugins       bool
-		canIndexBlocks      bool
-		storageRequirement  int
-		memoryRequirement   int
+		role               types.NodeRole
+		canValidate        bool
+		canQueryState      bool
+		canQueryHistory    bool
+		canServeLight      bool
+		canRunPlugins      bool
+		canIndexBlocks     bool
+		storageRequirement int
+		memoryRequirement  int
 	}{
 		{
 			role:               types.RoleLight,

@@ -9,12 +9,12 @@ import (
 type WorkflowStatus string
 
 const (
-	WorkflowStatusPending    WorkflowStatus = "pending"
-	WorkflowStatusRunning    WorkflowStatus = "running"
-	WorkflowStatusPaused     WorkflowStatus = "paused"
-	WorkflowStatusCompleted  WorkflowStatus = "completed"
-	WorkflowStatusFailed     WorkflowStatus = "failed"
-	WorkflowStatusCancelled  WorkflowStatus = "cancelled"
+	WorkflowStatusPending   WorkflowStatus = "pending"
+	WorkflowStatusRunning   WorkflowStatus = "running"
+	WorkflowStatusPaused    WorkflowStatus = "paused"
+	WorkflowStatusCompleted WorkflowStatus = "completed"
+	WorkflowStatusFailed    WorkflowStatus = "failed"
+	WorkflowStatusCancelled WorkflowStatus = "cancelled"
 )
 
 // StepStatus represents the status of a workflow step
@@ -22,7 +22,7 @@ type StepStatus string
 
 const (
 	StepStatusPending   StepStatus = "pending"
-	StepStatusReady     StepStatus = "ready"     // Dependencies satisfied
+	StepStatusReady     StepStatus = "ready" // Dependencies satisfied
 	StepStatusRunning   StepStatus = "running"
 	StepStatusCompleted StepStatus = "completed"
 	StepStatusFailed    StepStatus = "failed"
@@ -33,45 +33,45 @@ const (
 type StepType string
 
 const (
-	StepTypeAgent      StepType = "agent"      // Execute agent task
-	StepTypeParallel   StepType = "parallel"   // Run steps in parallel
-	StepTypeSequence   StepType = "sequence"   // Run steps sequentially
-	StepTypeCondition  StepType = "condition"  // Conditional execution
-	StepTypeMilestone  StepType = "milestone"  // Payment milestone
+	StepTypeAgent     StepType = "agent"     // Execute agent task
+	StepTypeParallel  StepType = "parallel"  // Run steps in parallel
+	StepTypeSequence  StepType = "sequence"  // Run steps sequentially
+	StepTypeCondition StepType = "condition" // Conditional execution
+	StepTypeMilestone StepType = "milestone" // Payment milestone
 )
 
 // Workflow represents a multi-agent workflow
 type Workflow struct {
-	ID          string         `json:"id"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Owner       string         `json:"owner"`
-	Status      WorkflowStatus `json:"status"`
-	Steps       []WorkflowStep `json:"steps"`
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	Owner       string                 `json:"owner"`
+	Status      WorkflowStatus         `json:"status"`
+	Steps       []WorkflowStep         `json:"steps"`
 	Inputs      map[string]interface{} `json:"inputs"`
 	Outputs     map[string]interface{} `json:"outputs"`
-	CreatedAt   int64          `json:"created_at"`
-	StartedAt   int64          `json:"started_at"`
-	CompletedAt int64          `json:"completed_at"`
+	CreatedAt   int64                  `json:"created_at"`
+	StartedAt   int64                  `json:"started_at"`
+	CompletedAt int64                  `json:"completed_at"`
 }
 
 // WorkflowStep represents a single step in a workflow
 type WorkflowStep struct {
-	ID           string            `json:"id"`
-	Name         string            `json:"name"`
-	Description  string            `json:"description"`
-	Type         StepType          `json:"type"`
-	Capability   Capability        `json:"capability"`
-	DependsOn    []string          `json:"depends_on"`    // IDs of dependent steps
-	Params       map[string]string `json:"params"`
-	Status       StepStatus        `json:"status"`
-	Output       string            `json:"output"`
-	Error        string            `json:"error"`
-	StartedAt    int64             `json:"started_at"`
-	CompletedAt  int64             `json:"completed_at"`
-	SubSteps     []WorkflowStep    `json:"sub_steps"`     // For parallel/sequence
-	Condition    string            `json:"condition"`     // For condition step
-	MilestoneID  string            `json:"milestone_id"`  // For milestone step
+	ID          string            `json:"id"`
+	Name        string            `json:"name"`
+	Description string            `json:"description"`
+	Type        StepType          `json:"type"`
+	Capability  Capability        `json:"capability"`
+	DependsOn   []string          `json:"depends_on"` // IDs of dependent steps
+	Params      map[string]string `json:"params"`
+	Status      StepStatus        `json:"status"`
+	Output      string            `json:"output"`
+	Error       string            `json:"error"`
+	StartedAt   int64             `json:"started_at"`
+	CompletedAt int64             `json:"completed_at"`
+	SubSteps    []WorkflowStep    `json:"sub_steps"`    // For parallel/sequence
+	Condition   string            `json:"condition"`    // For condition step
+	MilestoneID string            `json:"milestone_id"` // For milestone step
 }
 
 // NewWorkflow creates a new workflow

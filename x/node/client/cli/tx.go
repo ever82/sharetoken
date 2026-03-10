@@ -160,11 +160,11 @@ func GetCmdQueryState() *cobra.Command {
 				"state":       state.String(),
 				"config_path": getConfigPath(clientCtx),
 				"capabilities": map[string]interface{}{
-					"can_validate":     caps.CanValidate,
-					"can_query_state":  caps.CanQueryState,
-					"can_run_plugins":  caps.CanRunPlugins,
-					"storage_gb":       caps.StorageRequirementGB,
-					"memory_gb":        caps.MemoryRequirementGB,
+					"can_validate":    caps.CanValidate,
+					"can_query_state": caps.CanQueryState,
+					"can_run_plugins": caps.CanRunPlugins,
+					"storage_gb":      caps.StorageRequirementGB,
+					"memory_gb":       caps.MemoryRequirementGB,
 				},
 			}
 

@@ -100,11 +100,11 @@ func (c *ChainlinkClient) FetchPrice(symbol string) (types.Price, error) {
 	// This would call Chainlink API in production
 	// For now, return mock data
 	return types.Price{
-		Symbol:      symbol,
-		Price:       sdk.NewDec(100),
-		Source:      types.PriceSourceChainlink,
-		Timestamp:   time.Now().Unix(),
-		Confidence:  95,
+		Symbol:     symbol,
+		Price:      sdk.NewDec(100),
+		Source:     types.PriceSourceChainlink,
+		Timestamp:  time.Now().Unix(),
+		Confidence: 95,
 	}, nil
 }
 
@@ -184,11 +184,11 @@ func (pa *PriceAggregator) AggregatePrice(symbol string) (types.Price, error) {
 	median := prices[len(prices)/2]
 
 	return types.Price{
-		Symbol:      symbol,
-		Price:       median,
-		Source:      types.PriceSourceManual, // aggregated
-		Timestamp:   time.Now().Unix(),
-		Confidence:  90,
+		Symbol:     symbol,
+		Price:      median,
+		Source:     types.PriceSourceManual, // aggregated
+		Timestamp:  time.Now().Unix(),
+		Confidence: 90,
 	}, nil
 }
 

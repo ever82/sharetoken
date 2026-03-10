@@ -23,12 +23,12 @@ type Scenario struct {
 
 func main() {
 	var (
-		scenario    = flag.String("scenario", "transfer", "Benchmark scenario (transfer, query, mixed, stress)")
-		workers     = flag.Int("workers", 100, "Number of concurrent workers")
-		duration    = flag.Duration("duration", 30*time.Second, "Benchmark duration")
-		output      = flag.String("output", "text", "Output format (text, json, markdown)")
-		thresholds  = flag.Bool("thresholds", true, "Validate against performance thresholds")
-		rampUp      = flag.Bool("rampup", false, "Run ramp-up test")
+		scenario   = flag.String("scenario", "transfer", "Benchmark scenario (transfer, query, mixed, stress)")
+		workers    = flag.Int("workers", 100, "Number of concurrent workers")
+		duration   = flag.Duration("duration", 30*time.Second, "Benchmark duration")
+		output     = flag.String("output", "text", "Output format (text, json, markdown)")
+		thresholds = flag.Bool("thresholds", true, "Validate against performance thresholds")
+		rampUp     = flag.Bool("rampup", false, "Run ramp-up test")
 	)
 	flag.Parse()
 

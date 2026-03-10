@@ -15,17 +15,17 @@ func TestTaskCreation(t *testing.T) {
 
 	task := types.NewTask("task-1", "Build Website", "Create a responsive website", "requester-1", types.TaskTypeOpen, 1000)
 	task.AddMilestone(types.Milestone{
-		ID:    "ms-1",
-		Title: "Design",
+		ID:     "ms-1",
+		Title:  "Design",
 		Amount: 500,
-		Order: 1,
+		Order:  1,
 		Status: types.MilestoneStatusPending,
 	})
 	task.AddMilestone(types.Milestone{
-		ID:    "ms-2",
-		Title: "Development",
+		ID:     "ms-2",
+		Title:  "Development",
 		Amount: 500,
-		Order: 2,
+		Order:  2,
 		Status: types.MilestoneStatusPending,
 	})
 
@@ -402,7 +402,7 @@ func TestTaskStatistics(t *testing.T) {
 	// Get statistics
 	stats := k.GetTaskStatistics()
 	require.Equal(t, 3, stats["total_tasks"])
-	require.Equal(t, 2, stats["open_tasks"]) // task-1 and task-3
+	require.Equal(t, 2, stats["open_tasks"])     // task-1 and task-3
 	require.Equal(t, 1, stats["assigned_tasks"]) // task-2
 	require.GreaterOrEqual(t, stats["total_bids"].(int), 1)
 }

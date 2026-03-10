@@ -9,11 +9,11 @@ import (
 type MilestoneStatus string
 
 const (
-	MilestoneStatusPending    MilestoneStatus = "pending"
-	MilestoneStatusActive     MilestoneStatus = "active"
-	MilestoneStatusCompleted  MilestoneStatus = "completed"
-	MilestoneStatusFailed     MilestoneStatus = "failed"
-	MilestoneStatusPaid       MilestoneStatus = "paid"
+	MilestoneStatusPending   MilestoneStatus = "pending"
+	MilestoneStatusActive    MilestoneStatus = "active"
+	MilestoneStatusCompleted MilestoneStatus = "completed"
+	MilestoneStatusFailed    MilestoneStatus = "failed"
+	MilestoneStatusPaid      MilestoneStatus = "paid"
 )
 
 // Milestone represents a payment milestone in a workflow
@@ -22,11 +22,11 @@ type Milestone struct {
 	WorkflowID  string          `json:"workflow_id"`
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
-	Amount      uint64          `json:"amount"`       // Amount in STT
+	Amount      uint64          `json:"amount"` // Amount in STT
 	Status      MilestoneStatus `json:"status"`
-	Order       int             `json:"order"`        // Execution order
-	Criteria    string          `json:"criteria"`     // Completion criteria
-	EscrowID    string          `json:"escrow_id"`    // Associated escrow
+	Order       int             `json:"order"`     // Execution order
+	Criteria    string          `json:"criteria"`  // Completion criteria
+	EscrowID    string          `json:"escrow_id"` // Associated escrow
 	CreatedAt   int64           `json:"created_at"`
 	CompletedAt int64           `json:"completed_at"`
 	PaidAt      int64           `json:"paid_at"`
@@ -180,17 +180,17 @@ func (mp *MilestonePlan) GetPendingAmount() uint64 {
 
 // ProgressReport represents a progress report for a workflow
 type ProgressReport struct {
-	WorkflowID      string         `json:"workflow_id"`
-	TotalSteps      int            `json:"total_steps"`
-	CompletedSteps  int            `json:"completed_steps"`
-	FailedSteps     int            `json:"failed_steps"`
-	CurrentStep     string         `json:"current_step"`
-	TotalMilestones int            `json:"total_milestones"`
-	CompletedMs     int            `json:"completed_milestones"`
-	PaidMs          int            `json:"paid_milestones"`
-	ProgressPct     float64        `json:"progress_percentage"`
-	EstimatedTime   int64          `json:"estimated_time_remaining"` // seconds
-	GeneratedAt     int64          `json:"generated_at"`
+	WorkflowID      string  `json:"workflow_id"`
+	TotalSteps      int     `json:"total_steps"`
+	CompletedSteps  int     `json:"completed_steps"`
+	FailedSteps     int     `json:"failed_steps"`
+	CurrentStep     string  `json:"current_step"`
+	TotalMilestones int     `json:"total_milestones"`
+	CompletedMs     int     `json:"completed_milestones"`
+	PaidMs          int     `json:"paid_milestones"`
+	ProgressPct     float64 `json:"progress_percentage"`
+	EstimatedTime   int64   `json:"estimated_time_remaining"` // seconds
+	GeneratedAt     int64   `json:"generated_at"`
 }
 
 // NewProgressReport creates a new progress report

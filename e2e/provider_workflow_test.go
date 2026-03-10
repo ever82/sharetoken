@@ -28,7 +28,7 @@ func (s *ProviderWorkflowSuite) SetupSuite() {
 
 	// Create test accounts
 	s.Provider = s.CreateAccount("provider", 100000000) // 100 STT for gas
-	s.User = s.CreateAccount("user", 1000000000)       // 1000 STT
+	s.User = s.CreateAccount("user", 1000000000)        // 1000 STT
 	s.Validator = s.ValidatorClients[0]
 
 	s.T().Log("Provider workflow test setup complete")
@@ -41,8 +41,8 @@ func (s *ProviderWorkflowSuite) Test01_ProviderRegistration() {
 
 	// Step 1: Create identity
 	identityMsg := map[string]interface{}{
-		"creator":   s.Provider.Address,
-		"did":       fmt.Sprintf("did:sharetoken:%s", s.Provider.Address),
+		"creator": s.Provider.Address,
+		"did":     fmt.Sprintf("did:sharetoken:%s", s.Provider.Address),
 		"metadata": map[string]string{
 			"name":  "Test Provider",
 			"email": "provider@test.com",
@@ -144,10 +144,10 @@ func (s *ProviderWorkflowSuite) Test03_ServiceRegistration() {
 		"description":  "Access to GPT-4 via API",
 		"service_type": "llm",
 		"pricing": map[string]interface{}{
-			"type":           "dynamic",
-			"base_price":     "500000",  // 0.5 STT per 1K tokens
-			"oracle_feed":    "openai_gpt4",
-			"update_interval": 300,      // 5 minutes
+			"type":            "dynamic",
+			"base_price":      "500000", // 0.5 STT per 1K tokens
+			"oracle_feed":     "openai_gpt4",
+			"update_interval": 300, // 5 minutes
 		},
 		"capabilities": []string{"text-generation", "chat", "function-calling"},
 	}
@@ -168,8 +168,8 @@ func (s *ProviderWorkflowSuite) Test03_ServiceRegistration() {
 		"description":  "AI-powered code review",
 		"service_type": "agent",
 		"pricing": map[string]interface{}{
-			"type":   "fixed",
-			"price":  "2000000", // 2 STT per review
+			"type":  "fixed",
+			"price": "2000000", // 2 STT per review
 		},
 		"capabilities": []string{"code-review", "security-analysis", "optimization"},
 	}
@@ -237,8 +237,8 @@ func (s *ProviderWorkflowSuite) Test04_OrderFulfillment() {
 		"description":  "For order fulfillment test",
 		"service_type": "llm",
 		"pricing": map[string]interface{}{
-			"type":   "fixed",
-			"price":  "1000000", // 1 STT
+			"type":  "fixed",
+			"price": "1000000", // 1 STT
 		},
 	}
 
@@ -337,9 +337,9 @@ func (s *ProviderWorkflowSuite) Test05_MQScoreManagement() {
 	for i := 0; i < 5; i++ {
 		// Each successful transaction could increase MQ
 		mqUpdate := map[string]interface{}{
-			"address":   s.Provider.Address,
-			"change":    1,
-			"reason":    "successful_transaction",
+			"address": s.Provider.Address,
+			"change":  1,
+			"reason":  "successful_transaction",
 		}
 
 		txHash, err := s.submitTx(s.Provider, "trust", "update-mq", mqUpdate)
@@ -390,10 +390,10 @@ func (s *ProviderWorkflowSuite) queryIdentity(address string) (*IdentityDetail, 
 
 func (s *ProviderWorkflowSuite) queryAPIKey(id string) (*APIKeyDetail, error) {
 	return &APIKeyDetail{
-		ID:            id,
-		ServiceName:   "openai",
-		EncryptedKey:  "encrypted",
-		Status:        "active",
+		ID:           id,
+		ServiceName:  "openai",
+		EncryptedKey: "encrypted",
+		Status:       "active",
 	}, nil
 }
 
@@ -411,10 +411,10 @@ type IdentityDetail struct {
 }
 
 type APIKeyDetail struct {
-	ID            string
-	ServiceName   string
-	EncryptedKey  string
-	Status        string
+	ID           string
+	ServiceName  string
+	EncryptedKey string
+	Status       string
 }
 
 type MQScoreDetail struct {

@@ -17,30 +17,30 @@ const (
 
 // Application represents a worker's application for an open task
 type Application struct {
-	ID          string            `json:"id"`
-	TaskID      string            `json:"task_id"`
-	WorkerID    string            `json:"worker_id"`
-	Status      ApplicationStatus `json:"status"`
-	ProposedPrice uint64          `json:"proposed_price"`
-	CoverLetter string            `json:"cover_letter"`
-	RelevantExperience []string   `json:"relevant_experience"`
-	PortfolioLinks []string       `json:"portfolio_links"`
-	EstimatedDuration int64       `json:"estimated_duration"` // days
-	CreatedAt   int64             `json:"created_at"`
-	UpdatedAt   int64             `json:"updated_at"`
+	ID                 string            `json:"id"`
+	TaskID             string            `json:"task_id"`
+	WorkerID           string            `json:"worker_id"`
+	Status             ApplicationStatus `json:"status"`
+	ProposedPrice      uint64            `json:"proposed_price"`
+	CoverLetter        string            `json:"cover_letter"`
+	RelevantExperience []string          `json:"relevant_experience"`
+	PortfolioLinks     []string          `json:"portfolio_links"`
+	EstimatedDuration  int64             `json:"estimated_duration"` // days
+	CreatedAt          int64             `json:"created_at"`
+	UpdatedAt          int64             `json:"updated_at"`
 }
 
 // NewApplication creates a new application
 func NewApplication(id, taskID, workerID string, price uint64) *Application {
 	now := time.Now().Unix()
 	return &Application{
-		ID:               id,
-		TaskID:           taskID,
-		WorkerID:         workerID,
-		Status:           ApplicationStatusPending,
-		ProposedPrice:    price,
-		CreatedAt:        now,
-		UpdatedAt:        now,
+		ID:            id,
+		TaskID:        taskID,
+		WorkerID:      workerID,
+		Status:        ApplicationStatusPending,
+		ProposedPrice: price,
+		CreatedAt:     now,
+		UpdatedAt:     now,
 	}
 }
 
@@ -92,7 +92,7 @@ type Bid struct {
 	ID        string    `json:"id"`
 	TaskID    string    `json:"task_id"`
 	WorkerID  string    `json:"worker_id"`
-	Amount    uint64    `json:"amount"`     // Bid amount (lower is better)
+	Amount    uint64    `json:"amount"` // Bid amount (lower is better)
 	Status    BidStatus `json:"status"`
 	Message   string    `json:"message"`
 	Portfolio string    `json:"portfolio"`
@@ -159,13 +159,13 @@ func (b *Bid) IsLowerThan(other *Bid) bool {
 
 // Auction represents an auction with bids
 type Auction struct {
-	TaskID        string    `json:"task_id"`
-	StartingPrice uint64    `json:"starting_price"`
-	ReservePrice  uint64    `json:"reserve_price"`   // Minimum acceptable price
-	EndTime       int64     `json:"end_time"`        // Auction end time
-	Bids          []Bid     `json:"bids"`
-	WinningBidID  string    `json:"winning_bid_id"`
-	IsActive      bool      `json:"is_active"`
+	TaskID        string `json:"task_id"`
+	StartingPrice uint64 `json:"starting_price"`
+	ReservePrice  uint64 `json:"reserve_price"` // Minimum acceptable price
+	EndTime       int64  `json:"end_time"`      // Auction end time
+	Bids          []Bid  `json:"bids"`
+	WinningBidID  string `json:"winning_bid_id"`
+	IsActive      bool   `json:"is_active"`
 }
 
 // NewAuction creates a new auction

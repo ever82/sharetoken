@@ -64,11 +64,11 @@ func (p Price) String() string {
 
 // LLMPrice represents LLM API pricing
 type LLMPrice struct {
-	Provider  string  `json:"provider"`   // e.g., "openai", "anthropic"
-	Model     string  `json:"model"`      // e.g., "gpt-4", "claude-3"
+	Provider    string  `json:"provider"`     // e.g., "openai", "anthropic"
+	Model       string  `json:"model"`        // e.g., "gpt-4", "claude-3"
 	InputPrice  sdk.Dec `json:"input_price"`  // per 1K tokens
 	OutputPrice sdk.Dec `json:"output_price"` // per 1K tokens
-	Currency  string  `json:"currency"`   // e.g., "USD"
+	Currency    string  `json:"currency"`     // e.g., "USD"
 }
 
 // ConvertToSTT converts USD price to STT

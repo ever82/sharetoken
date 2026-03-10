@@ -3,8 +3,9 @@ package keeper
 import (
 	"testing"
 
-	"sharetoken/x/sharetoken/keeper"
-	"sharetoken/x/sharetoken/types"
+	tmdb "github.com/cometbft/cometbft-db"
+	"github.com/cometbft/cometbft/libs/log"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/store"
@@ -12,9 +13,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/stretchr/testify/require"
-	"github.com/cometbft/cometbft/libs/log"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	tmdb "github.com/cometbft/cometbft-db"
+	"sharetoken/x/sharetoken/keeper"
+	"sharetoken/x/sharetoken/types"
 )
 
 func SharetokenKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
@@ -37,10 +37,10 @@ func SharetokenKeeper(t testing.TB) (*keeper.Keeper, sdk.Context) {
 		"SharetokenParams",
 	)
 	k := keeper.NewKeeper(
-	    cdc,
-	    storeKey,
-	    memStoreKey,
-	    paramsSubspace, 
+		cdc,
+		storeKey,
+		memStoreKey,
+		paramsSubspace,
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())

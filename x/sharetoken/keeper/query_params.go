@@ -4,9 +4,9 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"sharetoken/x/sharetoken/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"sharetoken/x/sharetoken/types"
 )
 
 func (k Keeper) Params(goCtx context.Context, req *types.QueryParamsRequest) (*types.QueryParamsResponse, error) {

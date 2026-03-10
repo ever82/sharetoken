@@ -204,21 +204,21 @@ func TestWorkflowExecution(t *testing.T) {
 
 	// Add steps
 	step1 := types.WorkflowStep{
-		ID:          "step-1",
-		Name:        "Research",
-		Type:        types.StepTypeAgent,
-		Capability:  types.CapabilityResearcher,
-		Status:      types.StepStatusPending,
-		Params:      map[string]string{"topic": "test topic"},
+		ID:         "step-1",
+		Name:       "Research",
+		Type:       types.StepTypeAgent,
+		Capability: types.CapabilityResearcher,
+		Status:     types.StepStatusPending,
+		Params:     map[string]string{"topic": "test topic"},
 	}
 	step2 := types.WorkflowStep{
-		ID:          "step-2",
-		Name:        "Write",
-		Type:        types.StepTypeAgent,
-		Capability:  types.CapabilityWriter,
-		DependsOn:   []string{"step-1"},
-		Status:      types.StepStatusPending,
-		Params:      map[string]string{"type": "report"},
+		ID:         "step-2",
+		Name:       "Write",
+		Type:       types.StepTypeAgent,
+		Capability: types.CapabilityWriter,
+		DependsOn:  []string{"step-1"},
+		Status:     types.StepStatusPending,
+		Params:     map[string]string{"type": "report"},
 	}
 
 	workflow.AddStep(step1)
@@ -263,11 +263,11 @@ func TestParallelStepExecution(t *testing.T) {
 	}
 
 	parallelStep := types.WorkflowStep{
-		ID:        "parallel-1",
-		Name:      "Parallel Execution",
-		Type:      types.StepTypeParallel,
-		Status:    types.StepStatusPending,
-		SubSteps:  []types.WorkflowStep{subStep1, subStep2},
+		ID:       "parallel-1",
+		Name:     "Parallel Execution",
+		Type:     types.StepTypeParallel,
+		Status:   types.StepStatusPending,
+		SubSteps: []types.WorkflowStep{subStep1, subStep2},
 	}
 
 	workflow.AddStep(parallelStep)
@@ -294,18 +294,18 @@ func TestProgressReport(t *testing.T) {
 	workflow := types.NewWorkflow("wf-progress", "Progress Test", "owner1")
 
 	step1 := types.WorkflowStep{
-		ID:   "step-1",
-		Name: "Step 1",
-		Type: types.StepTypeAgent,
+		ID:         "step-1",
+		Name:       "Step 1",
+		Type:       types.StepTypeAgent,
 		Capability: types.CapabilityResearcher,
-		Status: types.StepStatusCompleted,
+		Status:     types.StepStatusCompleted,
 	}
 	step2 := types.WorkflowStep{
-		ID:   "step-2",
-		Name: "Step 2",
-		Type: types.StepTypeAgent,
+		ID:         "step-2",
+		Name:       "Step 2",
+		Type:       types.StepTypeAgent,
 		Capability: types.CapabilityWriter,
-		Status: types.StepStatusRunning,
+		Status:     types.StepStatusRunning,
 	}
 
 	workflow.AddStep(step1)

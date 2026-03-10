@@ -21,12 +21,12 @@ const (
 type ContributionCategory string
 
 const (
-	ContributionCode    ContributionCategory = "code"
-	ContributionDesign  ContributionCategory = "design"
-	ContributionDocs    ContributionCategory = "docs"
-	ContributionResearch ContributionCategory = "research"
+	ContributionCode      ContributionCategory = "code"
+	ContributionDesign    ContributionCategory = "design"
+	ContributionDocs      ContributionCategory = "docs"
+	ContributionResearch  ContributionCategory = "research"
 	ContributionMarketing ContributionCategory = "marketing"
-	ContributionTesting  ContributionCategory = "testing"
+	ContributionTesting   ContributionCategory = "testing"
 )
 
 // GetAllContributionCategories returns all contribution categories
@@ -53,21 +53,21 @@ var CategoryWeights = map[ContributionCategory]float64{
 
 // Idea represents a creative idea/project
 type Idea struct {
-	ID           string     `json:"id"`
-	Title        string     `json:"title"`
-	Description  string     `json:"description"`
-	CreatorID    string     `json:"creator_id"`
-	Status       IdeaStatus `json:"status"`
-	CurrentVersion int      `json:"current_version"`
+	ID             string     `json:"id"`
+	Title          string     `json:"title"`
+	Description    string     `json:"description"`
+	CreatorID      string     `json:"creator_id"`
+	Status         IdeaStatus `json:"status"`
+	CurrentVersion int        `json:"current_version"`
 
 	// Tags and categories
 	Tags       []string `json:"tags"`
 	Categories []string `json:"categories"`
 
 	// Statistics
-	ViewCount        int     `json:"view_count"`
-	ContributionCount int    `json:"contribution_count"`
-	TotalWeight      float64 `json:"total_weight"`
+	ViewCount         int     `json:"view_count"`
+	ContributionCount int     `json:"contribution_count"`
+	TotalWeight       float64 `json:"total_weight"`
 
 	// Crowdfunding
 	CampaignID string `json:"campaign_id"` // Associated crowdfunding campaign
@@ -82,16 +82,16 @@ type Idea struct {
 func NewIdea(id, title, description, creatorID string) *Idea {
 	now := time.Now().Unix()
 	return &Idea{
-		ID:              id,
-		Title:           title,
-		Description:     description,
-		CreatorID:       creatorID,
-		Status:          IdeaStatusDraft,
-		CurrentVersion:  1,
-		Tags:            []string{},
-		Categories:      []string{},
-		CreatedAt:       now,
-		UpdatedAt:       now,
+		ID:             id,
+		Title:          title,
+		Description:    description,
+		CreatorID:      creatorID,
+		Status:         IdeaStatusDraft,
+		CurrentVersion: 1,
+		Tags:           []string{},
+		Categories:     []string{},
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	}
 }
 
@@ -203,27 +203,27 @@ func NewIdeaVersion(id, ideaID string, version int, title, description, changes,
 
 // Contribution represents a contribution to an idea
 type Contribution struct {
-	ID          string               `json:"id"`
-	IdeaID      string               `json:"idea_id"`
-	ContributorID string             `json:"contributor_id"`
-	Category    ContributionCategory `json:"category"`
-	Description string               `json:"description"`
-	Weight      float64              `json:"weight"`       // Calculated weight
-	RawScore    float64              `json:"raw_score"`    // Base contribution score
-	Evidence    string               `json:"evidence"`     // Link to work/evidence
-	Status      ContributionStatus   `json:"status"`
-	ReviewedBy  string               `json:"reviewed_by"`
-	ReviewedAt  int64                `json:"reviewed_at"`
-	CreatedAt   int64                `json:"created_at"`
+	ID            string               `json:"id"`
+	IdeaID        string               `json:"idea_id"`
+	ContributorID string               `json:"contributor_id"`
+	Category      ContributionCategory `json:"category"`
+	Description   string               `json:"description"`
+	Weight        float64              `json:"weight"`    // Calculated weight
+	RawScore      float64              `json:"raw_score"` // Base contribution score
+	Evidence      string               `json:"evidence"`  // Link to work/evidence
+	Status        ContributionStatus   `json:"status"`
+	ReviewedBy    string               `json:"reviewed_by"`
+	ReviewedAt    int64                `json:"reviewed_at"`
+	CreatedAt     int64                `json:"created_at"`
 }
 
 // ContributionStatus represents contribution status
 type ContributionStatus string
 
 const (
-	ContributionStatusPending   ContributionStatus = "pending"
-	ContributionStatusApproved  ContributionStatus = "approved"
-	ContributionStatusRejected  ContributionStatus = "rejected"
+	ContributionStatusPending  ContributionStatus = "pending"
+	ContributionStatusApproved ContributionStatus = "approved"
+	ContributionStatusRejected ContributionStatus = "rejected"
 )
 
 // NewContribution creates a new contribution
@@ -276,14 +276,14 @@ func (c *Contribution) Validate() error {
 
 // ContributorStats represents statistics for a contributor
 type ContributorStats struct {
-	ContributorID    string                 `json:"contributor_id"`
-	IdeaID           string                 `json:"idea_id"`
-	TotalWeight      float64                `json:"total_weight"`
-	ContributionCount int                   `json:"contribution_count"`
-	ByCategory       map[ContributionCategory]float64 `json:"by_category"`
-	ApprovedCount    int                    `json:"approved_count"`
-	PendingCount     int                    `json:"pending_count"`
-	RejectedCount    int                    `json:"rejected_count"`
+	ContributorID     string                           `json:"contributor_id"`
+	IdeaID            string                           `json:"idea_id"`
+	TotalWeight       float64                          `json:"total_weight"`
+	ContributionCount int                              `json:"contribution_count"`
+	ByCategory        map[ContributionCategory]float64 `json:"by_category"`
+	ApprovedCount     int                              `json:"approved_count"`
+	PendingCount      int                              `json:"pending_count"`
+	RejectedCount     int                              `json:"rejected_count"`
 }
 
 // NewContributorStats creates new contributor stats
@@ -309,11 +309,11 @@ func (cs *ContributorStats) AddContribution(contribution *Contribution) {
 
 // ContributionSummary provides a summary of contributions
 type ContributionSummary struct {
-	IdeaID           string                 `json:"idea_id"`
-	TotalContributors int                   `json:"total_contributors"`
-	TotalWeight      float64                `json:"total_weight"`
-	ByCategory       map[ContributionCategory]float64 `json:"by_category"`
-	TopContributors  []ContributorStats     `json:"top_contributors"`
+	IdeaID            string                           `json:"idea_id"`
+	TotalContributors int                              `json:"total_contributors"`
+	TotalWeight       float64                          `json:"total_weight"`
+	ByCategory        map[ContributionCategory]float64 `json:"by_category"`
+	TopContributors   []ContributorStats               `json:"top_contributors"`
 }
 
 // NewContributionSummary creates a contribution summary

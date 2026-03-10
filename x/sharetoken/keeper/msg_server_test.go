@@ -6,9 +6,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-    "sharetoken/x/sharetoken/types"
-    "sharetoken/x/sharetoken/keeper"
-    keepertest "sharetoken/testutil/keeper"
+	keepertest "sharetoken/testutil/keeper"
+	"sharetoken/x/sharetoken/keeper"
+	"sharetoken/x/sharetoken/types"
 )
 
 func setupMsgServer(t testing.TB) (types.MsgServer, context.Context) {

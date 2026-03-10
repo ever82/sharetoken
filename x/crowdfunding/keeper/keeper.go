@@ -12,14 +12,14 @@ import (
 
 // Keeper manages crowdfunding state
 type Keeper struct {
-	ideas              map[string]*types.Idea
-	versions           map[string][]*types.IdeaVersion
-	contributions      map[string]*types.Contribution
-	campaigns          map[string]*types.Campaign
-	backers            map[string]*types.Backer
-	updates            map[string][]*types.CampaignUpdate
-	contributorStats   map[string]*types.ContributorStats
-	mutex              sync.RWMutex
+	ideas            map[string]*types.Idea
+	versions         map[string][]*types.IdeaVersion
+	contributions    map[string]*types.Contribution
+	campaigns        map[string]*types.Campaign
+	backers          map[string]*types.Backer
+	updates          map[string][]*types.CampaignUpdate
+	contributorStats map[string]*types.ContributorStats
+	mutex            sync.RWMutex
 }
 
 // NewKeeper creates a new crowdfunding keeper

@@ -24,12 +24,12 @@ func NewExecutor(secLevel security.SecurityLevel) *Executor {
 
 // ExecutionResult represents task execution result
 type ExecutionResult struct {
-	Success   bool
-	Output    string
-	Error     string
-	GasUsed   uint64
-	Duration  time.Duration
-	Layers    []string // Enabled security layers
+	Success  bool
+	Output   string
+	Error    string
+	GasUsed  uint64
+	Duration time.Duration
+	Layers   []string // Enabled security layers
 }
 
 // ExecuteTask executes an agent task
