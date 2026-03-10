@@ -277,7 +277,7 @@ func TestBidValidation(t *testing.T) {
 
 	// Invalid - exceeds starting price
 	bid1 := types.NewBid("bid-1", "task-1", "worker-1", 1100)
-	err := k.SubmitBid(bid1)
+	err = k.SubmitBid(bid1)
 	require.Error(t, err)
 
 	// Valid bid
@@ -309,7 +309,7 @@ func TestRatingSystem(t *testing.T) {
 	require.NoError(t, err)
 	rating.Comment = "Great work!"
 
-	err := k.SubmitRating(rating)
+	err = k.SubmitRating(rating)
 	require.NoError(t, err)
 
 	// Check rating

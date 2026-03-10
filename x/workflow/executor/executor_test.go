@@ -362,7 +362,7 @@ func TestWorkflowEvents(t *testing.T) {
 	// Execute in background
 	go func() {
 		ctx := context.Background()
-		_, err := executor.ExecuteWorkflow(ctx, "wf-events")
+		_, err = executor.ExecuteWorkflow(ctx, "wf-events")
 		require.NoError(t, err)
 	}()
 

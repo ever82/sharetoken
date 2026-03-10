@@ -121,12 +121,8 @@ func (lt *LoadTester) executeTransaction(account string) {
 	}
 	
 	latency := time.Since(start)
-	
-	if success {
-		lt.metrics.RecordSuccess(latency)
-	} else {
-		lt.metrics.RecordFailure()
-	}
+
+	lt.metrics.Record(latency, success, nil)
 }
 
 // simulateTransfer simulates a token transfer
