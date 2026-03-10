@@ -49,6 +49,7 @@ func NewLoadGenerator(collector *metrics.Collector, config Config, op Operation)
 
 // Run runs the load generator
 func (g *LoadGenerator) Run(ctx context.Context) error {
+	g.collector.Start()
 	defer g.collector.Stop()
 
 	ctx, cancel := context.WithTimeout(ctx, g.duration)
@@ -111,11 +112,7 @@ func (g *LoadGenerator) worker(ctx context.Context, wg *sync.WaitGroup, workCh <
 			err := g.operation.Execute(ctx)
 			duration := time.Since(start)
 
-			if err != nil {
-				g.collector.RecordFailure()
-			} else {
-				g.collector.RecordSuccess(duration)
-			}
+			g.collector.Record(duration, err == nil, err)
 		}
 	}
 }
