@@ -326,35 +326,35 @@ func (k *NodeKeeper) updatePluginsForRole(role types.NodeRole) error {
 			}
 		}
 		// Unload service plugins if loaded
-		_ = k.pluginManager.UnloadPlugin("llm")
-		_ = k.pluginManager.UnloadPlugin("agent")
-		_ = k.pluginManager.UnloadPlugin("workflow")
+		_ = k.pluginManager.UnloadPlugin("llm")     //nolint:errcheck
+		_ = k.pluginManager.UnloadPlugin("agent")   //nolint:errcheck
+		_ = k.pluginManager.UnloadPlugin("workflow") //nolint:errcheck
 
 	case types.RoleService:
 		// Load service plugins
 		if k.config.ServiceConfig != nil {
 			if k.config.ServiceConfig.EnableLLMPlugin {
 				if !k.pluginManager.IsPluginLoaded("llm") {
-					k.pluginManager.LoadPlugin("llm", map[string]interface{}{})
+					_ = k.pluginManager.LoadPlugin("llm", map[string]interface{}{}) //nolint:errcheck
 				}
 			}
 			if k.config.ServiceConfig.EnableAgentPlugin {
 				if !k.pluginManager.IsPluginLoaded("agent") {
-					k.pluginManager.LoadPlugin("agent", map[string]interface{}{})
+					_ = k.pluginManager.LoadPlugin("agent", map[string]interface{}{}) //nolint:errcheck
 				}
 			}
 			if k.config.ServiceConfig.EnableWorkflowPlugin {
 				if !k.pluginManager.IsPluginLoaded("workflow") {
-					k.pluginManager.LoadPlugin("workflow", map[string]interface{}{})
+					_ = k.pluginManager.LoadPlugin("workflow", map[string]interface{}{}) //nolint:errcheck
 				}
 			}
 		}
 		// Unload geniebot if loaded
-		k.pluginManager.UnloadPlugin("geniebot")
+		_ = k.pluginManager.UnloadPlugin("geniebot") //nolint:errcheck
 
 	default:
 		// Other roles don't run plugins
-		k.pluginManager.StopAll()
+		_ = k.pluginManager.StopAll() //nolint:errcheck
 	}
 
 	return nil

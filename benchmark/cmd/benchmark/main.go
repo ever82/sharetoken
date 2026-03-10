@@ -59,7 +59,9 @@ func main() {
 
 	switch *output {
 	case "json":
-		_ = rep.ReportJSON(*scenario, stats)
+		if err := rep.ReportJSON(*scenario, stats); err != nil {
+			fmt.Fprintf(os.Stderr, "Error generating JSON report: %v\n", err)
+		}
 	case "markdown":
 		rep.ReportMarkdown(*scenario, stats, th)
 	default:
