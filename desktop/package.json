@@ -28,23 +28,33 @@
       {
         "from": "../bin",
         "to": "bin",
-        "filter": ["sharetokend*"]
+        "filter": [
+          "sharetokend*"
+        ]
       },
       {
         "from": "../frontend/dist",
         "to": "frontend",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ],
     "mac": {
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "category": "public.app-category.finance",
@@ -54,15 +64,21 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.ico"
@@ -71,11 +87,15 @@
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "tar.gz",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "category": "Office",
@@ -99,10 +119,15 @@
   "author": "ShareToken Team",
   "license": "MIT",
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1"
   },
   "dependencies": {
+    "@cosmjs/crypto": "^0.32.4",
+    "@cosmjs/encoding": "^0.32.4",
+    "@cosmjs/proto-signing": "^0.32.4",
+    "@cosmjs/stargate": "^0.32.4",
     "node-fetch": "^3.3.2"
   }
 }

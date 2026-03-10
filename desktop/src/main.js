@@ -1,12 +1,15 @@
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
-const { spawn, exec } = require('child_process');
+const { spawn } = require('child_process');
 const fs = require('fs');
-const os = require('os');
+
+// Wallet manager
+const walletManager = require('./wallet');
 
 // 保持全局窗口对象，防止被垃圾回收
 let mainWindow;
 let sharetokenProcess = null;
+let walletPaths = null;
 
 // 确定平台
 const platform = process.platform;
@@ -169,6 +172,17 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
 
+    // 初始化钱包
+    initializeWallet().then((result) => {
+      console.log('Wallet initialization result:', result);
+      // 通知前端钱包状态
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('wallet-initialized', result);
+      }
+    }).catch((err) => {
+      console.error('Failed to initialize wallet:', err);
+    });
+
     // 启动本地节点
     startSharetokenNode().then(() => {
       console.log('ShareToken node started');
@@ -214,6 +228,163 @@ app.on('window-all-closed', () => {
 // 应用退出前
 app.on('before-quit', () => {
   stopSharetokenNode();
+});
+
+// 初始化钱包（首次启动自动创建）
+async function initializeWallet() {
+  walletPaths = walletManager.getWalletPaths(app.getPath('userData'));
+
+  if (!walletManager.walletExists(walletPaths)) {
+    console.log('First launch - creating new wallet...');
+    try {
+      const wallet = await walletManager.createWallet();
+      walletManager.saveEncryptedMnemonic(wallet.mnemonic, walletPaths);
+      console.log('Wallet created:', wallet.address);
+      return { created: true, address: wallet.address, needsBackup: true };
+    } catch (error) {
+      console.error('Failed to create wallet:', error);
+      return { created: false, error: error.message };
+    }
+  } else {
+    console.log('Wallet already exists');
+    const address = await walletManager.getWalletAddress(walletPaths);
+    const needsBackup = walletManager.needsBackup(walletPaths);
+    return { created: false, address, needsBackup };
+  }
+}
+
+// IPC 通信处理
+
+// 初始化钱包
+ipcMain.handle('wallet-init', async () => {
+  return await initializeWallet();
+});
+
+// 获取钱包地址
+ipcMain.handle('wallet-get-address', async () => {
+  if (!walletPaths) {
+    walletPaths = walletManager.getWalletPaths(app.getPath('userData'));
+  }
+  return await walletManager.getWalletAddress(walletPaths);
+});
+
+// 获取钱包状态
+ipcMain.handle('wallet-get-status', async () => {
+  if (!walletPaths) {
+    walletPaths = walletManager.getWalletPaths(app.getPath('userData'));
+  }
+  const exists = walletManager.walletExists(walletPaths);
+  const needsBackup = walletManager.needsBackup(walletPaths);
+  const address = exists ? await walletManager.getWalletAddress(walletPaths) : null;
+
+  return {
+    exists,
+    address,
+    needsBackup
+  };
+});
+
+// 获取余额
+ipcMain.handle('wallet-get-balance', async (event, address) => {
+  if (!walletPaths) {
+    walletPaths = walletManager.getWalletPaths(app.getPath('userData'));
+  }
+
+  try {
+    const addr = address || await walletManager.getWalletAddress(walletPaths);
+    if (!addr) {
+      return { success: false, error: 'No wallet found' };
+    }
+
+    const balances = await walletManager.getBalance(addr);
+    return { success: true, balances };
+  } catch (error) {
+    console.error('Failed to get balance:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// 发送交易
+ipcMain.handle('wallet-send', async (event, { recipient, amount, denom, memo }) => {
+  if (!walletPaths) {
+    walletPaths = walletManager.getWalletPaths(app.getPath('userData'));
+  }
+
+  try {
+    const result = await walletManager.sendTokens(
+      recipient,
+      amount,
+      denom || 'stake',
+      memo || '',
+      walletPaths
+    );
+    return { success: true, result };
+  } catch (error) {
+    console.error('Failed to send tokens:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// 导出助记词
+ipcMain.handle('wallet-export', async (event, { password }) => {
+  if (!walletPaths) {
+    walletPaths = walletManager.getWalletPaths(app.getPath('userData'));
+  }
+
+  try {
+    const data = await walletManager.exportWalletData(walletPaths, password);
+    walletManager.markBackupComplete(walletPaths);
+    return { success: true, mnemonic: data.mnemonic };
+  } catch (error) {
+    console.error('Failed to export wallet:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// 标记备份完成
+ipcMain.handle('wallet-mark-backup', async () => {
+  if (!walletPaths) {
+    walletPaths = walletManager.getWalletPaths(app.getPath('userData'));
+  }
+  walletManager.markBackupComplete(walletPaths);
+  return { success: true };
+});
+
+// 从助记词恢复钱包
+ipcMain.handle('wallet-restore', async (event, { mnemonic }) => {
+  if (!walletPaths) {
+    walletPaths = walletManager.getWalletPaths(app.getPath('userData'));
+  }
+
+  try {
+    if (!walletManager.isValidMnemonic(mnemonic)) {
+      return { success: false, error: 'Invalid mnemonic format' };
+    }
+
+    const wallet = await walletManager.restoreWallet(mnemonic);
+    walletManager.saveEncryptedMnemonic(mnemonic, walletPaths);
+    walletManager.markBackupComplete(walletPaths);
+
+    return { success: true, address: wallet.address };
+  } catch (error) {
+    console.error('Failed to restore wallet:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// 删除钱包（用于切换）
+ipcMain.handle('wallet-delete', async () => {
+  if (!walletPaths) {
+    walletPaths = walletManager.getWalletPaths(app.getPath('userData'));
+  }
+
+  try {
+    walletManager.deleteWallet(walletPaths);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete wallet:', error);
+    return { success: false, error: error.message };
+  }
 });
 
 // IPC 通信处理

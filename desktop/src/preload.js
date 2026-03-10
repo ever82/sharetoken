@@ -19,8 +19,27 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 节点状态
   checkNodeStatus: () => ipcRenderer.invoke('check-node-status'),
 
+  // 钱包操作
+  walletInit: () => ipcRenderer.invoke('wallet-init'),
+  walletGetStatus: () => ipcRenderer.invoke('wallet-get-status'),
+  walletGetAddress: () => ipcRenderer.invoke('wallet-get-address'),
+  walletGetBalance: (address) => ipcRenderer.invoke('wallet-get-balance', address),
+  walletSend: (params) => ipcRenderer.invoke('wallet-send', params),
+  walletExport: (params) => ipcRenderer.invoke('wallet-export', params),
+  walletMarkBackup: () => ipcRenderer.invoke('wallet-mark-backup'),
+  walletRestore: (params) => ipcRenderer.invoke('wallet-restore', params),
+  walletDelete: () => ipcRenderer.invoke('wallet-delete'),
+
   // 是否是 Electron 环境
-  isElectron: true
+  isElectron: true,
+
+  // 事件监听
+  onWalletInitialized: (callback) => {
+    ipcRenderer.on('wallet-initialized', (event, data) => callback(data));
+  },
+  onNodeStatus: (callback) => {
+    ipcRenderer.on('node-status', (event, data) => callback(data));
+  }
 });
 
 console.log('Electron preload script loaded');
