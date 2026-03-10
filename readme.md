@@ -42,7 +42,7 @@ ShareToken 是一个**去中心化的 AI 服务市场**，让您能够：
 
 ```bash
 # 克隆项目到本地
-git clone https://github.com/yourusername/sharetoken.git
+git clone https://github.com/ever82/sharetoken.git
 cd sharetoken
 ```
 
@@ -337,9 +337,8 @@ rm -rf .devnet/
 
 **ShareToken** 是一个开源项目，欢迎贡献！
 
-- 📧 联系邮箱：contact@sharetoken.io
-- 💬 社区讨论：[GitHub Discussions](https://github.com/yourusername/sharetoken/discussions)
-- 🐛 问题反馈：[GitHub Issues](https://github.com/yourusername/sharetoken/issues)
+- 💬 社区讨论：[GitHub Discussions](../../discussions)
+- 🐛 问题反馈：[GitHub Issues](../../issues)
 
 ---
 
