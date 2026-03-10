@@ -26,9 +26,9 @@
     ],
     "extraResources": [
       {
-        "from": "../bin/sharetokend",
-        "to": "bin/sharetokend",
-        "filter": ["**/*"]
+        "from": "../bin",
+        "to": "bin",
+        "filter": ["sharetokend*"]
       },
       {
         "from": "../frontend/dist",

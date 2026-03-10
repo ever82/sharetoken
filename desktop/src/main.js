@@ -40,8 +40,7 @@ function startSharetokenNode() {
 
   if (!fs.existsSync(sharetokenPath)) {
     console.error('ShareToken binary not found:', sharetokenPath);
-    dialog.showErrorBox('错误', '找不到 ShareToken 节点程序');
-    return;
+    return Promise.reject(new Error('找不到 ShareToken 节点程序: ' + sharetokenPath));
   }
 
   const dataDir = path.join(app.getPath('userData'), 'sharetoken-data');
@@ -136,6 +135,7 @@ function createWindow() {
       console.log('ShareToken node started');
     }).catch((err) => {
       console.error('Failed to start ShareToken node:', err);
+      dialog.showErrorBox('启动错误', err.message);
     });
   });
 
