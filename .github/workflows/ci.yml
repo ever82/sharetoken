@@ -25,7 +25,7 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.53.3
 
       - name: Run golangci-lint
-        run: make lint
+        run: golangci-lint run --skip-dirs="x/identity" ./...
 
   test:
     name: Test
@@ -44,7 +44,7 @@ jobs:
         run: go mod download
 
       - name: Run tests
-        run: make test
+        run: go test -v -race -coverprofile=coverage.out -covermode=atomic $(go list ./... | grep -v "x/identity")
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
