@@ -38,7 +38,52 @@ ShareToken 是一个**去中心化的 AI 服务市场**，让您能够：
 
 ## 安装指南
 
-### 方法一：下载预编译版本（推荐）
+### 🖥️ 方法一：桌面应用（强烈推荐 - 开箱即用）
+
+**最适合普通用户**，下载解压双击即可使用，无需命令行！
+
+**Windows (绿色版):**
+```powershell
+# 下载
+Invoke-WebRequest -Uri https://github.com/ever82/sharetoken/releases/latest/download/ShareToken-0.1.0-win-x64.zip -OutFile ShareToken.zip
+
+# 解压
+Expand-Archive -Path ShareToken.zip -DestinationPath .\ShareToken
+
+# 双击打开！
+.\ShareToken\ShareToken.exe
+```
+
+**macOS:**
+```bash
+# Intel Mac
+curl -LO https://github.com/ever82/sharetoken/releases/latest/download/ShareToken-0.1.0-mac-x64.dmg
+open ShareToken-0.1.0-mac-x64.dmg
+
+# Apple Silicon M1/M2/M3
+curl -LO https://github.com/ever82/sharetoken/releases/latest/download/ShareToken-0.1.0-mac-arm64.dmg
+open ShareToken-0.1.0-mac-arm64.dmg
+```
+
+**Linux (AppImage):**
+```bash
+curl -LO https://github.com/ever82/sharetoken/releases/latest/download/ShareToken-0.1.0-linux-x86_64.AppImage
+chmod +x ShareToken-0.1.0-linux-x86_64.AppImage
+./ShareToken-0.1.0-linux-x86_64.AppImage
+```
+
+**桌面应用特点：**
+- ✅ 开箱即用，无需安装 Node.js 或其他依赖
+- ✅ 内置区块链节点（轻节点模式）
+- ✅ 图形界面钱包（创建/导入/转账）
+- ✅ 内置服务市场和 AI 对话界面
+- ✅ 双击打开即可使用
+
+---
+
+### 💻 方法二：命令行工具（开发者/高级用户）
+
+**适合开发者或喜欢命令行的用户**。
 
 根据您的系统选择对应版本下载：
 
