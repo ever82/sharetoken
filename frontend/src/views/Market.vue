@@ -28,6 +28,12 @@
   </div>
 </template>
 
+<script>
+export default {
+  name: 'MarketView'
+}
+</script>
+
 <style scoped>
 .market-view {
   max-width: 1200px;

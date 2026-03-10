@@ -8,6 +8,7 @@
         <router-link to="/market" class="btn btn-secondary">浏览市场</router-link>
       </div>
     </div>
+
     <div class="features">
       <div class="feature">
         <h3>🔐 安全钱包</h3>
@@ -24,6 +25,12 @@
     </div>
   </div>
 </template>
+
+<script>
+export default {
+  name: 'HomeView'
+}
+</script>
 
 <style scoped>
 .home-view {
