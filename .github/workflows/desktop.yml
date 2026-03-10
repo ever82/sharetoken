@@ -59,6 +59,54 @@ jobs:
           file "bin/sharetokend*" || true
         shell: bash
 
+      - name: Prepare ShareToken Node Data
+        run: |
+          # Create single-node configuration for desktop app
+          mkdir -p desktop/node-data
+          if [ "${{ matrix.platform }}" = "win" ]; then
+            ./bin/sharetokend.exe init desktop-node --chain-id sharetoken-desktop --home desktop/node-data
+            ./bin/sharetokend.exe keys add validator --keyring-backend test --home desktop/node-data
+            VALIDATOR_ADDR=$(./bin/sharetokend.exe keys show validator -a --keyring-backend test --home desktop/node-data)
+          else
+            ./bin/sharetokend init desktop-node --chain-id sharetoken-desktop --home desktop/node-data
+            ./bin/sharetokend keys add validator --keyring-backend test --home desktop/node-data
+            VALIDATOR_ADDR=$(./bin/sharetokend keys show validator -a --keyring-backend test --home desktop/node-data)
+          fi
+          echo "Validator address: $VALIDATOR_ADDR"
+          # Add genesis account and gentx
+          if [ "${{ matrix.platform }}" = "win" ]; then
+            ./bin/sharetokend.exe add-genesis-account $VALIDATOR_ADDR 100000000stt --home desktop/node-data
+            ./bin/sharetokend.exe gentx validator 10000000stt --chain-id sharetoken-desktop --keyring-backend test --home desktop/node-data
+            ./bin/sharetokend.exe collect-gentxs --home desktop/node-data
+          else
+            ./bin/sharetokend add-genesis-account $VALIDATOR_ADDR 100000000stt --home desktop/node-data
+            ./bin/sharetokend gentx validator 10000000stt --chain-id sharetoken-desktop --keyring-backend test --home desktop/node-data
+            ./bin/sharetokend collect-gentxs --home desktop/node-data
+          fi
+          echo "Node data prepared"
+        shell: bash
+
+      - name: Update extraResources with node data
+        run: |
+          # Add node-data to extraResources in package.json
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('desktop/package.json', 'utf8'));
+            if (!pkg.build.extraResources) pkg.build.extraResources = [];
+            // Add node-data if not exists
+            const hasNodeData = pkg.build.extraResources.some(r => r.to === 'node-data');
+            if (!hasNodeData) {
+              pkg.build.extraResources.push({
+                from: '../desktop/node-data',
+                to: 'node-data',
+                filter: ['**/*']
+              });
+            }
+            fs.writeFileSync('desktop/package.json', JSON.stringify(pkg, null, 2) + '\\n');
+            console.log('Updated package.json with node-data');
+          "
+        shell: bash
+
       - name: Build Frontend
         run: |
           cd frontend

@@ -59,6 +59,13 @@ function startSharetokenNode() {
   }
 
   const dataDir = path.join(app.getPath('userData'), 'sharetoken-data');
+  const nodeDataTemplate = path.join(process.resourcesPath, 'node-data');
+
+  // 如果数据目录不存在且模板存在，复制模板
+  if (!fs.existsSync(dataDir) && fs.existsSync(nodeDataTemplate)) {
+    console.log('Copying node data template to:', dataDir);
+    copyDir(nodeDataTemplate, dataDir);
+  }
 
   // 确保数据目录存在
   if (!fs.existsSync(dataDir)) {
@@ -98,6 +105,23 @@ function startSharetokenNode() {
       resolve();
     }, 3000);
   });
+}
+
+// 复制目录
+function copyDir(src, dest) {
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyDir(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
 }
 
 // 停止 sharetoken 节点
