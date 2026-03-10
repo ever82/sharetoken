@@ -40,3 +40,22 @@ func GetEscrowByRequesterKey(requester, id string) []byte {
 func GetEscrowByProviderKey(provider, id string) []byte {
 	return append(append(EscrowByProviderKey, []byte(provider)...), []byte(id)...)
 }
+
+// Event types
+const (
+	EventTypeCreateEscrow = "create_escrow"
+	EventTypeRelease      = "release_escrow"
+	EventTypeRefund       = "refund_escrow"
+	EventTypeDispute      = "dispute_escrow"
+	EventTypeResolve      = "resolve_escrow"
+)
+
+// Attribute keys
+const (
+	AttributeKeyEscrowID       = "escrow_id"
+	AttributeKeyRequester      = "requester"
+	AttributeKeyProvider       = "provider"
+	AttributeKeyAmount         = "amount"
+	AttributeKeyRequesterAmount = "requester_amount"
+	AttributeKeyProviderAmount = "provider_amount"
+)

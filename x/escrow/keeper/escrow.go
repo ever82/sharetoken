@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -149,4 +151,152 @@ func (k Keeper) GetAllEscrows(ctx sdk.Context) []types.Escrow {
 	}
 
 	return escrows
+}
+
+// CreateEscrow creates a new escrow
+func (k Keeper) CreateEscrow(ctx sdk.Context, requester, provider string, amount sdk.Coins, duration time.Duration) (types.Escrow, error) {
+	// Generate unique ID
+	id := fmt.Sprintf("escrow-%d-%d", ctx.BlockHeight(), ctx.BlockTime().Unix())
+
+	escrow := types.NewEscrow(id, requester, provider, amount, duration)
+
+	// Validate
+	if err := escrow.ValidateBasic(); err != nil {
+		return types.Escrow{}, err
+	}
+
+	// Store escrow
+	k.SetEscrow(ctx, *escrow)
+
+	// Emit event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeCreateEscrow,
+			sdk.NewAttribute(types.AttributeKeyEscrowID, id),
+			sdk.NewAttribute(types.AttributeKeyRequester, requester),
+			sdk.NewAttribute(types.AttributeKeyProvider, provider),
+			sdk.NewAttribute(types.AttributeKeyAmount, amount.String()),
+		),
+	)
+
+	return *escrow, nil
+}
+
+// Release releases funds to provider
+func (k Keeper) Release(ctx sdk.Context, escrowID string) error {
+	escrow, found := k.GetEscrow(ctx, escrowID)
+	if !found {
+		return types.ErrEscrowNotFound
+	}
+
+	if !escrow.CanComplete() {
+		return types.ErrInvalidStatus
+	}
+
+	// Update status
+	escrow.Status = types.EscrowStatusCompleted
+	escrow.CompletedAt = ctx.BlockTime().Unix()
+	k.SetEscrow(ctx, escrow)
+
+	// Emit event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeRelease,
+			sdk.NewAttribute(types.AttributeKeyEscrowID, escrowID),
+			sdk.NewAttribute(types.AttributeKeyProvider, escrow.Provider),
+			sdk.NewAttribute(types.AttributeKeyAmount, escrow.Amount.String()),
+		),
+	)
+
+	return nil
+}
+
+// Refund refunds funds to requester (only if expired)
+func (k Keeper) Refund(ctx sdk.Context, escrowID string) error {
+	escrow, found := k.GetEscrow(ctx, escrowID)
+	if !found {
+		return types.ErrEscrowNotFound
+	}
+
+	if !escrow.CanRefund() {
+		return types.ErrInvalidStatus
+	}
+
+	// Update status
+	escrow.Status = types.EscrowStatusRefunded
+	k.SetEscrow(ctx, escrow)
+
+	// Emit event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeRefund,
+			sdk.NewAttribute(types.AttributeKeyEscrowID, escrowID),
+			sdk.NewAttribute(types.AttributeKeyRequester, escrow.Requester),
+			sdk.NewAttribute(types.AttributeKeyAmount, escrow.Amount.String()),
+		),
+	)
+
+	return nil
+}
+
+// Dispute marks escrow as disputed
+func (k Keeper) Dispute(ctx sdk.Context, escrowID string) error {
+	escrow, found := k.GetEscrow(ctx, escrowID)
+	if !found {
+		return types.ErrEscrowNotFound
+	}
+
+	if !escrow.CanDispute() {
+		return types.ErrInvalidStatus
+	}
+
+	// Update status
+	escrow.Status = types.EscrowStatusDisputed
+	k.SetEscrow(ctx, escrow)
+
+	// Emit event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeDispute,
+			sdk.NewAttribute(types.AttributeKeyEscrowID, escrowID),
+			sdk.NewAttribute(types.AttributeKeyRequester, escrow.Requester),
+			sdk.NewAttribute(types.AttributeKeyProvider, escrow.Provider),
+		),
+	)
+
+	return nil
+}
+
+// ResolveDispute resolves a disputed escrow with fund allocation
+func (k Keeper) ResolveDispute(ctx sdk.Context, escrowID string, allocation types.FundAllocation) error {
+	escrow, found := k.GetEscrow(ctx, escrowID)
+	if !found {
+		return types.ErrEscrowNotFound
+	}
+
+	if escrow.Status != types.EscrowStatusDisputed {
+		return types.ErrInvalidStatus
+	}
+
+	// Validate allocation
+	if err := allocation.Validate(escrow.Amount); err != nil {
+		return err
+	}
+
+	// Update escrow
+	escrow.Status = types.EscrowStatusCompleted
+	escrow.CompletedAt = ctx.BlockTime().Unix()
+	k.SetEscrow(ctx, escrow)
+
+	// Emit event
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			types.EventTypeResolve,
+			sdk.NewAttribute(types.AttributeKeyEscrowID, escrowID),
+			sdk.NewAttribute(types.AttributeKeyRequesterAmount, allocation.RequesterAmount.String()),
+			sdk.NewAttribute(types.AttributeKeyProviderAmount, allocation.ProviderAmount.String()),
+		),
+	)
+
+	return nil
 }
