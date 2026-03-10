@@ -89,7 +89,7 @@ import { keplrWallet } from '../utils/keplr.js';
 import { walletConnectWallet } from '../utils/walletconnect.js';
 
 export default {
-  name: 'Wallet',
+  name: 'WalletView',
   data() {
     return {
       connected: false,

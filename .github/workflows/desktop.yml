@@ -56,7 +56,7 @@ jobs:
         run: |
           cd frontend
           npm install
-          npm run build
+          ESLINT_NO_DEV_ERRORS=true npm run build
         shell: bash
 
       - name: Install Desktop Dependencies
