@@ -15,12 +15,27 @@ const isDev = process.env.NODE_ENV === 'development';
 // 获取 sharetokend 二进制路径
 function getSharetokenPath() {
   if (isDev) {
-    return path.join(__dirname, '../../bin/sharetokend');
+    const devPath = path.join(__dirname, '../../bin/sharetokend');
+    const devPathWin = devPath + '.exe';
+    return fs.existsSync(devPathWin) ? devPathWin : devPath;
   }
 
-  // 打包后的路径
+  // 打包后的路径 - 尝试多个可能的路径
+  const binDir = path.join(process.resourcesPath, 'bin');
+  const candidates = [
+    path.join(binDir, 'sharetokend.exe'),  // Windows
+    path.join(binDir, 'sharetokend'),      // Linux/macOS
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  // 默认返回平台对应的路径
   const exeName = platform === 'win32' ? 'sharetokend.exe' : 'sharetokend';
-  return path.join(process.resourcesPath, 'bin', exeName);
+  return path.join(binDir, exeName);
 }
 
 // 获取前端资源路径
