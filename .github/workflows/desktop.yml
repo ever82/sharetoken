@@ -73,14 +73,14 @@ jobs:
             VALIDATOR_ADDR=$(./bin/sharetokend keys show validator -a --keyring-backend test --home desktop/node-data)
           fi
           echo "Validator address: $VALIDATOR_ADDR"
-          # Add genesis account and gentx
+          # Add genesis account and gentx (use stake instead of stt)
           if [ "${{ matrix.platform }}" = "win" ]; then
-            ./bin/sharetokend.exe add-genesis-account $VALIDATOR_ADDR 100000000stt --home desktop/node-data
-            ./bin/sharetokend.exe gentx validator 10000000stt --chain-id sharetoken-desktop --keyring-backend test --home desktop/node-data
+            ./bin/sharetokend.exe add-genesis-account $VALIDATOR_ADDR 100000000stake --home desktop/node-data
+            ./bin/sharetokend.exe gentx validator 10000000stake --chain-id sharetoken-desktop --keyring-backend test --home desktop/node-data
             ./bin/sharetokend.exe collect-gentxs --home desktop/node-data
           else
-            ./bin/sharetokend add-genesis-account $VALIDATOR_ADDR 100000000stt --home desktop/node-data
-            ./bin/sharetokend gentx validator 10000000stt --chain-id sharetoken-desktop --keyring-backend test --home desktop/node-data
+            ./bin/sharetokend add-genesis-account $VALIDATOR_ADDR 100000000stake --home desktop/node-data
+            ./bin/sharetokend gentx validator 10000000stake --chain-id sharetoken-desktop --keyring-backend test --home desktop/node-data
             ./bin/sharetokend collect-gentxs --home desktop/node-data
           fi
           echo "Node data prepared"
