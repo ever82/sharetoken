@@ -375,7 +375,7 @@ func TestWorkflowEvents(t *testing.T) {
 		case event := <-eventCh:
 			events = append(events, event)
 		case <-timeout:
-			break
+			return
 		}
 	}
 

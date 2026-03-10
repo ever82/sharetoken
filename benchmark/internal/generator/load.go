@@ -62,7 +62,9 @@ func (g *LoadGenerator) Run(ctx context.Context) error {
 	var rateLimiter <-chan time.Time
 	if g.rate > 0 {
 		interval := time.Second / time.Duration(g.rate)
-		rateLimiter = time.Tick(interval)
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		rateLimiter = ticker.C
 	}
 
 	// Start workers

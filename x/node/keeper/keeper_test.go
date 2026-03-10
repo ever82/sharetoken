@@ -189,7 +189,7 @@ func TestNodeKeeper_RoleSwitching(t *testing.T) {
 	require.True(t, requiresRestart)
 
 	// Test invalid role
-	canHot, requiresRestart, err = k.CanSwitchRole(types.RoleUndefined)
+	_, _, err = k.CanSwitchRole(types.RoleUndefined)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "invalid")
 }

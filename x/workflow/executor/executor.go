@@ -159,10 +159,7 @@ func (e *Executor) ExecuteWorkflow(ctx context.Context, workflowID string) error
 
 		// Check for errors
 		for err := range errCh {
-			if err != nil {
-				// Don't fail immediately, let other steps complete
-				// The workflow will fail when no more steps can run
-			}
+			_ = err // Ignore errors, let other steps complete
 		}
 	}
 }

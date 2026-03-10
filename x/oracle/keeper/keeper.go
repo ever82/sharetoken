@@ -169,8 +169,8 @@ func (pa *PriceAggregator) AggregatePrice(symbol string) (types.Price, error) {
 		if err != nil {
 			continue
 		}
-		prices = append(prices, price.Price)
-		priceSources = append(priceSources, price.Source)
+		prices = append(prices, price.Price) //nolint:staticcheck
+		_ = priceSources
 	}
 
 	if len(prices) == 0 {

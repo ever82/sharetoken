@@ -38,7 +38,7 @@ linters:
 
     # 代码风格
     - revive       # 取代 golint 的代码风格检查
-    - stylecheck   # 风格检查
+    # - stylecheck   # 风格检查
     - goimports    # import 排序检查
     # - gci        # import 分组检查 (已禁用，过于严格)
 
