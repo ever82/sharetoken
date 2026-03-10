@@ -71,6 +71,46 @@
 
 ---
 
+### ACH-DEV-021. Desktop Application (桌面应用)
+
+**优先级:** P0
+**描述:** 实现开箱即用的桌面图形界面应用，让用户无需技术背景即可使用。
+
+**为什么这是 P0:**
+- 命令行工具 (`sharetokend`) 只适合开发者，普通用户无法使用
+- Web 前端 (`npm run serve`) 需要安装 Node.js，门槛太高
+- Keplr 插件只能提供钱包功能，无法承载完整平台功能（服务市场、AI 对话等）
+- 现代用户预期：下载 → 解压 → 双击打开，三步完成
+
+**验收标准:**
+- [ ] 支持 Windows (`.exe` 或 `.zip`)
+- [ ] 支持 macOS (`.app` 或 `.dmg`)
+- [ ] 支持 Linux (`.AppImage` 或 `.tar.gz`)
+- [ ] 内置区块链节点（轻节点模式），无需单独启动
+- [ ] 内置钱包功能（创建/导入/转账）
+- [ ] 内置服务市场浏览器
+- [ ] 内置 GenieBot AI 对话界面
+- [ ] 自动更新机制
+- [ ] CI/CD 自动构建和发布
+
+**技术方案选型:**
+| 方案 | 优点 | 缺点 | 推荐度 |
+|------|------|------|--------|
+| **Electron + Go 后端** | 成熟生态、Vue 代码可复用 | 包体积大 (~150MB) | ⭐⭐⭐⭐⭐ |
+| **Wails (Go + WebView)** | 包体积小 (~20MB)、性能高 | 生态较新 | ⭐⭐⭐⭐ |
+| **Tauri (Rust + WebView)** | 包体积极小 (~5MB)、安全 | 需要 Rust | ⭐⭐⭐ |
+
+**选定方案:** Electron + Go 嵌入式节点
+- 前端：复用现有的 Vue 代码
+- 后端：嵌入式轻节点，使用 `sharetokend` 作为库调用
+- 通信：HTTP API 或 WebSocket
+
+**依赖:** ACH-DEV-003 (Wallet), ACH-DEV-004 (Identity)
+
+**关联 Spec:** CORE-003, REQ-001, NODE-002
+
+---
+
 ## P1 - 核心功能
 
 ### ACH-DEV-004. Identity Module
@@ -371,7 +411,7 @@
 
 ---
 
-### ACH-DEV-021. Mainnet Launch
+### ACH-DEV-023. Mainnet Launch
 
 **优先级:** P3
 **描述:** 主网正式上线。
@@ -389,7 +429,7 @@
 
 ---
 
-### ACH-DEV-022. End-to-End Integration
+### ACH-DEV-024. End-to-End Integration
 
 **优先级:** P3
 **描述:** 端到端集成测试与整体系统验收。
@@ -411,7 +451,10 @@
 Wave 0 (P0): Infrastructure & Foundation
 ├── ACH-DEV-001 (Dev Infrastructure)
 ├── ACH-DEV-002 (Blockchain Network)
-└── ACH-DEV-003 (Wallet & Token)
+├── ACH-DEV-003 (Wallet & Token) ───────────► ACH-DEV-021 (Desktop App)
+│                                                 (依赖钱包功能)
+└── ACH-DEV-021 (Desktop App)
+    └── 依赖: ACH-DEV-003, ACH-DEV-004
 
 Wave 1 (P1): Core Modules
 ├── ACH-DEV-004 (Identity) ─────────────┐
@@ -432,8 +475,8 @@ Wave 2 (P2): Plugins & Features
 
 Wave 3 (P3): Production Ready
 ├── ACH-DEV-019 (Node Roles)
-├── ACH-DEV-020 (Security Audit) ──────────► ACH-DEV-021 (Mainnet)
-└── ACH-DEV-022 (E2E Integration)
+├── ACH-DEV-020 (Security Audit) ──────────► ACH-DEV-023 (Mainnet)
+└── ACH-DEV-024 (E2E Integration)
 ```
 
 ---
@@ -442,12 +485,12 @@ Wave 3 (P3): Production Ready
 
 | 优先级 | 数量 | 描述 |
 |--------|------|------|
-| P0 | 3 | 核心基础 |
+| P0 | 4 | 核心基础 (含桌面应用) |
 | P1 | 7 | 核心功能 (MVP) |
 | P2 | 8 | 重要功能 |
 | P3 | 4 | 增强功能 |
-| **Total** | **22** | |
+| **Total** | **23** | |
 
 ---
 
-*Last updated: 2026-03-05*
+*Last updated: 2026-03-10*
