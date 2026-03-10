@@ -4,6 +4,8 @@ const (
 	// ModuleName is the name of the llmcustody module
 	ModuleName = "llmcustody"
 	StoreKey   = ModuleName
+	// RouterKey is the message route for llmcustody module
+	RouterKey = ModuleName
 )
 
 // APIKeyPrefix is the prefix for API key store
