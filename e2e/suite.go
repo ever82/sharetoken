@@ -75,6 +75,7 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.Denom = "ustt"
 	s.MinGasPrice = "0.025" + s.Denom
 	s.FixturePath = "./fixtures"
+	s.TestAccounts = make(map[string]*TestAccount)
 
 	// Setup test environment
 	s.T().Log("Setting up E2E test environment...")
