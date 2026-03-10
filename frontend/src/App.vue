@@ -8,6 +8,7 @@
         <router-link to="/">首页</router-link>
         <router-link to="/wallet">钱包</router-link>
         <router-link to="/market">市场</router-link>
+        <router-link to="/geniebot">GenieBot</router-link>
       </div>
     </nav>
     <router-view />
