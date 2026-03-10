@@ -1,10 +1,11 @@
 syntax = "proto3";
 package sharetoken.identity;
 
-import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
 import "cosmos/query/v1/query.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "sharetoken/identity/genesis.proto";
 import "sharetoken/identity/identity.proto";
 import "sharetoken/identity/limit.proto";
 
@@ -67,7 +68,7 @@ message QueryIdentityResponse {
 // QueryIdentitiesRequest is request type for the Query/Identities RPC method.
 message QueryIdentitiesRequest {
   // pagination defines an optional pagination for the request.
-  cosmos.query.v1.PageRequest pagination = 1;
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
 }
 
 // QueryIdentitiesResponse is response type for the Query/Identities RPC method.
@@ -75,7 +76,7 @@ message QueryIdentitiesResponse {
   // identities is the list of identities
   repeated Identity identities = 1 [(gogoproto.nullable) = false];
   // pagination defines the pagination in the response.
-  cosmos.query.v1.PageResponse pagination = 2;
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
 // QueryLimitConfigRequest is request type for the Query/LimitConfig RPC method.
