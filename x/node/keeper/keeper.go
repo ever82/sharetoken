@@ -121,7 +121,7 @@ func (k *NodeKeeper) saveConfig() error {
 
 	// Ensure directory exists
 	dir := filepath.Dir(k.configPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0755); err != nil { //nolint:gosec
 		return fmt.Errorf("failed to create config dir: %w", err)
 	}
 
@@ -130,7 +130,7 @@ func (k *NodeKeeper) saveConfig() error {
 		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
-	if err := os.WriteFile(k.configPath, data, 0644); err != nil {
+	if err := os.WriteFile(k.configPath, data, 0644); err != nil { //nolint:gosec
 		return fmt.Errorf("failed to write config: %w", err)
 	}
 

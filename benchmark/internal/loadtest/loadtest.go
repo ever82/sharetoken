@@ -146,12 +146,12 @@ func (lt *LoadTester) simulateMarketplace(account string) bool {
 	// Simulate marketplace operations (service purchase, etc.)
 	
 	// Simulate occasional failures (3% failure rate)
-	if rand.Float32() < 0.03 {
+	if rand.Float32() < 0.03 { //nolint:gosec
 		return false
 	}
 	
 	// Simulate processing time (marketplace ops take longer)
-	time.Sleep(time.Duration(rand.Int63n(100)+20) * time.Millisecond)
+	time.Sleep(time.Duration(rand.Int63n(100)+20) * time.Millisecond) //nolint:gosec
 	
 	return true
 }

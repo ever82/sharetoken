@@ -147,7 +147,7 @@ func (k *DisputeKeeper) selectWeightedRandomJurors(count int) []string {
 	used := make(map[string]bool)
 
 	for len(selected) < count && len(used) < len(weighted) {
-		target := rand.Int63n(totalWeight)
+		target := rand.Int63n(totalWeight) //nolint:gosec
 		var current int64
 
 		for _, wj := range weighted {

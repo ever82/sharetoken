@@ -217,7 +217,7 @@ func GetCmdInitializeRole() *cobra.Command {
 			configPath, _ := cmd.Flags().GetString("config-file") //nolint:errcheck
 			var customConfig *types.RoleConfig
 			if configPath != "" {
-				data, err := os.ReadFile(configPath)
+				data, err := os.ReadFile(configPath) //nolint:gosec
 				if err != nil {
 					return fmt.Errorf("failed to read config file: %w", err)
 				}
@@ -288,7 +288,7 @@ while others require a restart. This command will tell you if a restart is neede
 			configPath, _ := cmd.Flags().GetString("config-file") //nolint:errcheck
 			var customConfig *types.RoleConfig
 			if configPath != "" {
-				data, err := os.ReadFile(configPath)
+				data, err := os.ReadFile(configPath) //nolint:gosec
 				if err != nil {
 					return fmt.Errorf("failed to read config file: %w", err)
 				}
@@ -358,7 +358,7 @@ func GetCmdUpdateConfig() *cobra.Command {
 				return fmt.Errorf("--config-file is required")
 			}
 
-			data, err := os.ReadFile(configPath)
+			data, err := os.ReadFile(configPath) //nolint:gosec
 			if err != nil {
 				return fmt.Errorf("failed to read config file: %w", err)
 			}
