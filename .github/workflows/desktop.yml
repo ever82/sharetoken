@@ -49,7 +49,11 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           COMMIT=$(git rev-parse --short HEAD)
-          go build -ldflags "-X main.Version=$VERSION -X main.Commit=$COMMIT" -o bin/sharetokend ./cmd/sharetokend
+          OUTPUT="bin/sharetokend"
+          if [ "${{ matrix.platform }}" = "win" ]; then
+            OUTPUT="bin/sharetokend.exe"
+          fi
+          go build -ldflags "-X main.Version=$VERSION -X main.Commit=$COMMIT" -o "$OUTPUT" ./cmd/sharetokend
         shell: bash
 
       - name: Build Frontend
