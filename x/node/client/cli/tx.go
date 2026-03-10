@@ -394,7 +394,7 @@ func GetCmdUpdateConfig() *cobra.Command {
 	}
 
 	cmd.Flags().String("config-file", "", "Path to new configuration JSON file (required)")
-	cmd.MarkFlagRequired("config-file") //nolint:gosec
+	cmd.MarkFlagRequired("config-file") //nolint:errcheck,gosec
 
 	return cmd
 }
