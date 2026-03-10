@@ -59,11 +59,11 @@ func main() {
 
 	switch *output {
 	case "json":
-		rep.ReportJSON(*scenario, stats)
+		_ = rep.ReportJSON(*scenario, stats)
 	case "markdown":
-		rep.ReportMarkdown(*scenario, stats, th)
+		_ = rep.ReportMarkdown(*scenario, stats, th)
 	default:
-		rep.Report(*scenario, stats, th)
+		_ = rep.Report(*scenario, stats, th)
 	}
 
 	// Exit with error code if thresholds not met

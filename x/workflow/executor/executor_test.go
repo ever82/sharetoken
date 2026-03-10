@@ -321,8 +321,10 @@ func TestProgressReport(t *testing.T) {
 	plan.AddMilestone(*ms2)
 
 	// Register
-	executor.RegisterWorkflow(workflow)
-	executor.RegisterMilestonePlan(plan)
+	err := executor.RegisterWorkflow(workflow)
+	require.NoError(t, err)
+	err = executor.RegisterMilestonePlan(plan)
+	require.NoError(t, err)
 
 	// Generate report
 	report, err := executor.GenerateProgressReport("wf-progress")
@@ -354,12 +356,14 @@ func TestWorkflowEvents(t *testing.T) {
 	}
 	workflow.AddStep(step)
 
-	executor.RegisterWorkflow(workflow)
+	err := executor.RegisterWorkflow(workflow)
+	require.NoError(t, err)
 
 	// Execute in background
 	go func() {
 		ctx := context.Background()
-		executor.ExecuteWorkflow(ctx, "wf-events")
+		_, err := executor.ExecuteWorkflow(ctx, "wf-events")
+		require.NoError(t, err)
 	}()
 
 	// Collect events

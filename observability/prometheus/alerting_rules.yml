@@ -1,0 +1,103 @@
+groups:
+  - name: sharetoken_alerts
+    rules:
+      # High block time alert
+      - alert: HighBlockTime
+        expr: histogram_quantile(0.99, rate(sharetoken_block_time_bucket[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          alertgroup: blockchain
+        annotations:
+          summary: "High block time detected"
+          description: "Block time is {{ $value }}s, exceeding 10s threshold"
+
+      # Low TPS alert
+      - alert: LowTPS
+        expr: rate(sharetoken_transactions_total[5m]) < 10
+        for: 10m
+        labels:
+          severity: warning
+          alertgroup: blockchain
+        annotations:
+          summary: "Low transaction throughput"
+          description: "TPS is {{ $value }}, below 10 threshold"
+
+      # Consensus failures
+      - alert: ConsensusFailure
+        expr: rate(sharetoken_consensus_failures_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          alertgroup: blockchain
+        annotations:
+          summary: "Consensus failures detected"
+          description: "{{ $value }} consensus failures in the last 5 minutes"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: (sharetoken_memory_alloc_bytes / sharetoken_memory_sys_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          alertgroup: blockchain
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      # Node down
+      - alert: NodeDown
+        expr: up{job="sharetoken-node"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          alertgroup: blockchain
+        annotations:
+          summary: "ShareToken node is down"
+          description: "Node {{ $labels.instance }} has been down for more than 1 minute"
+
+  - name: system_alerts
+    rules:
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          alertgroup: system
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      # High memory usage
+      - alert: SystemHighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          alertgroup: system
+        annotations:
+          summary: "High system memory usage"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+      # Low disk space
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          alertgroup: system
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is below 10% on {{ $labels.instance }}"
+
+      # High network errors
+      - alert: NetworkErrors
+        expr: rate(node_network_receive_errs_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          alertgroup: system
+        annotations:
+          summary: "Network errors detected"
+          description: "Network errors on {{ $labels.instance }}"

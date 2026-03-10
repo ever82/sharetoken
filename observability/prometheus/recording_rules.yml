@@ -1,0 +1,52 @@
+groups:
+  - name: sharetoken_recording_rules
+    interval: 10s
+    rules:
+      # TPS (Transactions Per Second)
+      - record: sharetoken:tps_1m
+        expr: rate(sharetoken_transactions_total[1m])
+
+      - record: sharetoken:tps_5m
+        expr: rate(sharetoken_transactions_total[5m])
+
+      # Block time
+      - record: sharetoken:block_time_seconds
+        expr: histogram_quantile(0.99, rate(sharetoken_block_time_bucket[5m]))
+
+      # Average block size
+      - record: sharetoken:block_size_bytes_avg
+        expr: avg_over_time(sharetoken_block_size_bytes[5m])
+
+      # Consensus participation rate
+      - record: sharetoken:consensus_participation_rate
+        expr: sum(rate(sharetoken_consensus_votes_total{result="agree"}[5m])) / sum(rate(sharetoken_consensus_votes_total[5m]))
+
+      # Memory usage percentage
+      - record: sharetoken:memory_usage_percent
+        expr: (sharetoken_memory_alloc_bytes / sharetoken_memory_sys_bytes) * 100
+
+      # Goroutine count smoothed
+      - record: sharetoken:goroutines_avg
+        expr: avg_over_time(sharetoken_goroutines[5m])
+
+  - name: system_recording_rules
+    interval: 10s
+    rules:
+      # CPU usage percentage
+      - record: system:cpu_usage_percent
+        expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+      # Memory usage percentage
+      - record: system:memory_usage_percent
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100
+
+      # Disk usage percentage
+      - record: system:disk_usage_percent
+        expr: (node_filesystem_size_bytes{fstype!="tmpfs"} - node_filesystem_avail_bytes{fstype!="tmpfs"}) / node_filesystem_size_bytes{fstype!="tmpfs"} * 100
+
+      # Network traffic
+      - record: system:network_receive_bytes_per_second
+        expr: rate(node_network_receive_bytes_total[1m])
+
+      - record: system:network_transmit_bytes_per_second
+        expr: rate(node_network_transmit_bytes_total[1m])

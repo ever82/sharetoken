@@ -104,7 +104,8 @@ func TestMilestoneWorkflow(t *testing.T) {
 
 	task.Publish()
 	task.Assign("worker-1")
-	k.StartTask("task-1")
+	err = k.StartTask("task-1")
+	require.NoError(t, err)
 
 	// Check first milestone is active
 	require.Equal(t, types.MilestoneStatusActive, task.Milestones[0].Status)
@@ -197,16 +198,18 @@ func TestApplicationValidation(t *testing.T) {
 	k := NewKeeper()
 
 	task := types.NewTask("task-1", "Build Website", "Description", "requester-1", types.TaskTypeOpen, 1000)
-	k.CreateTask(task)
+	err := k.CreateTask(task)
+	require.NoError(t, err)
 	task.Publish()
 
 	// Invalid - auction task
 	auctionTask := types.NewTask("task-2", "Build App", "Description", "requester-1", types.TaskTypeAuction, 2000)
-	k.CreateTask(auctionTask)
+	err = k.CreateTask(auctionTask)
+	require.NoError(t, err)
 	auctionTask.Publish()
 
 	app := types.NewApplication("app-1", "task-2", "worker-1", 1800)
-	err := k.SubmitApplication(app)
+	err = k.SubmitApplication(app)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "not open type")
 
@@ -264,10 +267,12 @@ func TestBidValidation(t *testing.T) {
 	k := NewKeeper()
 
 	task := types.NewTask("task-1", "Build Website", "Description", "requester-1", types.TaskTypeAuction, 1000)
-	k.CreateTask(task)
+	err := k.CreateTask(task)
+	require.NoError(t, err)
 	task.Publish()
 
-	auction, _ := k.CreateAuction("task-1", 1000, 800, 86400)
+	auction, err := k.CreateAuction("task-1", 1000, 800, 86400)
+	require.NoError(t, err)
 	require.NotNil(t, auction)
 
 	// Invalid - exceeds starting price
@@ -286,17 +291,22 @@ func TestRatingSystem(t *testing.T) {
 
 	// Create and complete task
 	task := types.NewTask("task-1", "Build Website", "Description", "requester-1", types.TaskTypeOpen, 1000)
-	k.CreateTask(task)
+	err := k.CreateTask(task)
+	require.NoError(t, err)
 	task.Publish()
 	task.Assign("worker-1")
 	task.Complete()
 
 	// Submit rating
 	rating := types.NewRating("rating-1", "task-1", "requester-1", "worker-1")
-	rating.SetRating(types.DimensionQuality, 5)
-	rating.SetRating(types.DimensionCommunication, 4)
-	rating.SetRating(types.DimensionTimeliness, 5)
-	rating.SetRating(types.DimensionProfessionalism, 4)
+	err = rating.SetRating(types.DimensionQuality, 5)
+	require.NoError(t, err)
+	err = rating.SetRating(types.DimensionCommunication, 4)
+	require.NoError(t, err)
+	err = rating.SetRating(types.DimensionTimeliness, 5)
+	require.NoError(t, err)
+	err = rating.SetRating(types.DimensionProfessionalism, 4)
+	require.NoError(t, err)
 	rating.Comment = "Great work!"
 
 	err := k.SubmitRating(rating)

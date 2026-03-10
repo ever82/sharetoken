@@ -1,0 +1,119 @@
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@sharetoken.local'
+  smtp_auth_username: ''
+  smtp_auth_password: ''
+
+# Templates for notification messages
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route alerts to different receivers based on severity and type
+route:
+  receiver: 'default-receiver'
+  group_by: ['alertname', 'severity', 'instance']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      repeat_interval: 30m
+      continue: true
+
+    # Warning alerts - standard notification
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 1m
+      repeat_interval: 2h
+      continue: true
+
+    # Blockchain-specific alerts
+    - match:
+        alertgroup: blockchain
+      receiver: 'blockchain-ops'
+      group_wait: 30s
+      repeat_interval: 1h
+
+    # System alerts
+    - match:
+        alertgroup: system
+      receiver: 'system-ops'
+      group_wait: 1m
+      repeat_interval: 2h
+
+# Inhibition rules - prevent duplicate alerts
+inhibit_rules:
+  # If a critical alert is firing, suppress warning alerts for same instance
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
+
+  # If node is down, suppress other alerts for that node
+  - source_match:
+      alertname: 'NodeDown'
+    target_match_re:
+      alertname: '.+'
+    equal: ['instance']
+
+# Alert receivers
+receivers:
+  # Default receiver - webhook for logging
+  - name: 'default-receiver'
+    webhook_configs:
+      - url: 'http://localhost:5001/webhook'
+        send_resolved: true
+        max_alerts: 10
+
+  # Critical alerts - multiple channels
+  - name: 'critical-alerts'
+    webhook_configs:
+      - url: 'http://localhost:5001/webhook/critical'
+        send_resolved: true
+    email_configs:
+      - to: 'ops-critical@sharetoken.local'
+        headers:
+          Subject: '[CRITICAL] ShareToken Alert: {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.critical.html" . }}'
+        text: '{{ template "email.critical.text" . }}'
+
+  # Warning alerts
+  - name: 'warning-alerts'
+    webhook_configs:
+      - url: 'http://localhost:5001/webhook/warning'
+        send_resolved: true
+    email_configs:
+      - to: 'ops@sharetoken.local'
+        headers:
+          Subject: '[WARNING] ShareToken Alert: {{ .GroupLabels.alertname }}'
+        html: '{{ template "email.warning.html" . }}'
+        text: '{{ template "email.warning.text" . }}'
+
+  # Blockchain operations team
+  - name: 'blockchain-ops'
+    webhook_configs:
+      - url: 'http://localhost:5001/webhook/blockchain'
+        send_resolved: true
+    email_configs:
+      - to: 'blockchain-ops@sharetoken.local'
+        headers:
+          Subject: '[BLOCKCHAIN] ShareToken Alert'
+        html: '{{ template "email.blockchain.html" . }}'
+
+  # System operations team
+  - name: 'system-ops'
+    webhook_configs:
+      - url: 'http://localhost:5001/webhook/system'
+        send_resolved: true
+    email_configs:
+      - to: 'sysops@sharetoken.local'
+        headers:
+          Subject: '[SYSTEM] ShareToken Alert'
+        html: '{{ template "email.system.html" . }}'
