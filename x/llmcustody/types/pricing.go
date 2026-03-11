@@ -69,15 +69,6 @@ type AuctionPriceConfig struct {
 	CurrentPrice    int64     `json:"current_price"`     // 当前中标价
 }
 
-// AccessRule 访问规则
-type AccessRule struct {
-	ServiceID    string `json:"service_id"`
-	Allowed      bool   `json:"allowed"`
-	RateLimit    int64  `json:"rate_limit"`    // 每分钟请求数
-	MaxRequests  int64  `json:"max_requests"`  // 总请求数上限
-	PricePerReq  int64  `json:"price_per_req"` // 每次请求价格（覆盖默认价格）
-}
-
 // UsageStats 使用统计
 type UsageStats struct {
 	APIKeyID         string    `json:"api_key_id"`

@@ -22,6 +22,7 @@ func IsValidProvider(p string) bool {
 // AccessRule represents an access control rule
 type AccessRule struct {
 	ServiceID   string `json:"service_id"`    // 允许访问的服务ID
+	Allowed     bool   `json:"allowed"`       // 是否允许访问
 	RateLimit   int64  `json:"rate_limit"`    // 每分钟最大请求数
 	MaxRequests int64  `json:"max_requests"`  // 总请求上限
 	PricePerReq int64  `json:"price_per_req"` // 每次请求价格 (ustt)
