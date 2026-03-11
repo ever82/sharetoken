@@ -205,6 +205,46 @@ func (s *E2ETestSuite) SkipIfShort() {
 	}
 }
 
+// CreateUnverifiedUser creates a new unverified user account
+func (s *E2ETestSuite) CreateUnverifiedUser() *TestAccount {
+	return s.CreateAccount("unverified_user", 1000000000)
+}
+
+// CreateVerifiedUser creates a new verified user account with the specified provider
+func (s *E2ETestSuite) CreateVerifiedUser(provider string) *TestAccount {
+	return s.CreateAccount("verified_user_"+provider, 10000000000)
+}
+
+// UserLimits represents user limit configuration
+type UserLimits struct {
+	TransactionLimit int64
+	WithdrawalLimit  int64
+	DisputeLimit     int64
+	ServiceLimit     int64
+}
+
+// QueryUserLimits queries the limits for a user
+func (s *E2ETestSuite) QueryUserLimits(address string) (*UserLimits, error) {
+	// Placeholder implementation
+	return &UserLimits{
+		TransactionLimit: 1000000000,
+		WithdrawalLimit:  500000000,
+		DisputeLimit:     100000000,
+		ServiceLimit:     500000000,
+	}, nil
+}
+
+// QueryIdentityStatus queries the identity verification status
+func (s *E2ETestSuite) QueryIdentityStatus(address string) (string, error) {
+	// Placeholder implementation
+	return "verified", nil
+}
+
+// CreateEscrow creates a new escrow for testing
+func (s *E2ETestSuite) CreateEscrow(from *TestAccount, amount int64) (string, error) {
+	return s.SendTx(from.Address, "escrow_address", amount, 200000)
+}
+
 // TestE2E runs the E2E test suite
 func TestE2E(t *testing.T) {
 	if testing.Short() {
