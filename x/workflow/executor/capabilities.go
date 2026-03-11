@@ -3,6 +3,7 @@ package executor
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"sharetoken/x/workflow/types"
 )
@@ -57,13 +58,16 @@ func handleCollector(ctx context.Context, config types.CapabilityConfig, params 
 		target = "general data"
 	}
 
-	result := fmt.Sprintf("Collected data from %s sources about '%s':\n", sources, target)
-	result += "- Source 1: Retrieved successfully\n"
-	result += "- Source 2: Retrieved successfully\n"
-	result += "- Source 3: Retrieved successfully\n"
-	result += fmt.Sprintf("Total items collected: %d\n", 42)
+	// Performance: 使用 strings.Builder 预分配容量
+	var result strings.Builder
+	result.Grow(256)
+	result.WriteString(fmt.Sprintf("Collected data from %s sources about '%s':\n", sources, target))
+	result.WriteString("- Source 1: Retrieved successfully\n")
+	result.WriteString("- Source 2: Retrieved successfully\n")
+	result.WriteString("- Source 3: Retrieved successfully\n")
+	result.WriteString(fmt.Sprintf("Total items collected: %d\n", 42))
 
-	return result, nil
+	return result.String(), nil
 }
 
 // handleLead handles workflow orchestration capability
@@ -74,13 +78,16 @@ func handleLead(ctx context.Context, config types.CapabilityConfig, params map[s
 		action = "coordinate"
 	}
 
-	result := fmt.Sprintf("Lead agent executing '%s' action:\n", action)
-	result += "- Analyzing workflow dependencies\n"
-	result += "- Scheduling parallel tasks\n"
-	result += "- Monitoring execution progress\n"
-	result += "Status: Coordination complete\n"
+	// Performance: 使用 strings.Builder 预分配容量
+	var result strings.Builder
+	result.Grow(128)
+	result.WriteString(fmt.Sprintf("Lead agent executing '%s' action:\n", action))
+	result.WriteString("- Analyzing workflow dependencies\n")
+	result.WriteString("- Scheduling parallel tasks\n")
+	result.WriteString("- Monitoring execution progress\n")
+	result.WriteString("Status: Coordination complete\n")
 
-	return result, nil
+	return result.String(), nil
 }
 
 // handleResearcher handles research capability
@@ -92,16 +99,19 @@ func handleResearcher(ctx context.Context, config types.CapabilityConfig, params
 
 	depth := config.Params["depth"]
 
-	result := fmt.Sprintf("Research on '%s' (depth: %s):\n", topic, depth)
-	result += "1. Found 5 relevant sources\n"
-	result += "2. Analyzed key findings\n"
-	result += "3. Synthesized conclusions\n"
-	result += "Key findings:\n"
-	result += "- Finding A: Important insight\n"
-	result += "- Finding B: Supporting evidence\n"
-	result += "- Finding C: Related context\n"
+	// Performance: 使用 strings.Builder 预分配容量
+	var result strings.Builder
+	result.Grow(256)
+	result.WriteString(fmt.Sprintf("Research on '%s' (depth: %s):\n", topic, depth))
+	result.WriteString("1. Found 5 relevant sources\n")
+	result.WriteString("2. Analyzed key findings\n")
+	result.WriteString("3. Synthesized conclusions\n")
+	result.WriteString("Key findings:\n")
+	result.WriteString("- Finding A: Important insight\n")
+	result.WriteString("- Finding B: Supporting evidence\n")
+	result.WriteString("- Finding C: Related context\n")
 
-	return result, nil
+	return result.String(), nil
 }
 
 // handleWriter handles content creation capability
@@ -114,17 +124,20 @@ func handleWriter(ctx context.Context, config types.CapabilityConfig, params map
 	style := config.Params["style"]
 	length := config.Params["length"]
 
-	result := fmt.Sprintf("Created %s (style: %s, length: %s):\n\n", contentType, style, length)
-	result += "# Generated Content\n\n"
-	result += "This is a sample generated content based on the specified parameters.\n\n"
-	result += "## Section 1\n\n"
-	result += "Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n\n"
-	result += "## Section 2\n\n"
-	result += "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n"
-	result += "---\n"
-	result += fmt.Sprintf("Content type: %s | Style: %s | Length: %s\n", contentType, style, length)
+	// Performance: 使用 strings.Builder 预分配容量
+	var result strings.Builder
+	result.Grow(512)
+	result.WriteString(fmt.Sprintf("Created %s (style: %s, length: %s):\n\n", contentType, style, length))
+	result.WriteString("# Generated Content\n\n")
+	result.WriteString("This is a sample generated content based on the specified parameters.\n\n")
+	result.WriteString("## Section 1\n\n")
+	result.WriteString("Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n\n")
+	result.WriteString("## Section 2\n\n")
+	result.WriteString("Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n\n")
+	result.WriteString("---\n")
+	result.WriteString(fmt.Sprintf("Content type: %s | Style: %s | Length: %s\n", contentType, style, length))
 
-	return result, nil
+	return result.String(), nil
 }
 
 // handleAnalyst handles data analysis capability
@@ -136,21 +149,24 @@ func handleAnalyst(ctx context.Context, config types.CapabilityConfig, params ma
 
 	confidence := config.Params["confidence"]
 
-	result := fmt.Sprintf("Analysis of '%s' (confidence: %s):\n\n", data, confidence)
-	result += "## Data Summary\n"
-	result += "- Total records: 1,234\n"
-	result += "- Valid records: 1,200\n"
-	result += "- Anomalies: 34\n\n"
-	result += "## Key Metrics\n"
-	result += "- Mean: 42.5\n"
-	result += "- Median: 41.0\n"
-	result += "- Std Dev: 8.3\n\n"
-	result += "## Insights\n"
-	result += "1. Primary trend: Positive growth\n"
-	result += "2. Seasonality: Detected quarterly pattern\n"
-	result += "3. Outliers: 3 significant anomalies\n"
+	// Performance: 使用 strings.Builder 预分配容量
+	var result strings.Builder
+	result.Grow(512)
+	result.WriteString(fmt.Sprintf("Analysis of '%s' (confidence: %s):\n\n", data, confidence))
+	result.WriteString("## Data Summary\n")
+	result.WriteString("- Total records: 1,234\n")
+	result.WriteString("- Valid records: 1,200\n")
+	result.WriteString("- Anomalies: 34\n\n")
+	result.WriteString("## Key Metrics\n")
+	result.WriteString("- Mean: 42.5\n")
+	result.WriteString("- Median: 41.0\n")
+	result.WriteString("- Std Dev: 8.3\n\n")
+	result.WriteString("## Insights\n")
+	result.WriteString("1. Primary trend: Positive growth\n")
+	result.WriteString("2. Seasonality: Detected quarterly pattern\n")
+	result.WriteString("3. Outliers: 3 significant anomalies\n")
 
-	return result, nil
+	return result.String(), nil
 }
 
 // handleTester handles testing capability
@@ -163,21 +179,24 @@ func handleTester(ctx context.Context, config types.CapabilityConfig, params map
 	coverage := config.Params["coverage"]
 	testTypes := config.Params["types"]
 
-	result := fmt.Sprintf("Test Results for '%s':\n\n", target)
-	result += "## Test Configuration\n"
-	result += fmt.Sprintf("- Coverage target: %s%%\n", coverage)
-	result += fmt.Sprintf("- Test types: %s\n\n", testTypes)
-	result += "## Test Summary\n"
-	result += "✓ Unit Tests: 45/45 PASS\n"
-	result += "✓ Integration Tests: 12/12 PASS\n"
-	result += "✓ E2E Tests: 8/8 PASS\n\n"
-	result += "## Coverage Report\n"
-	result += "- Lines: 87%\n"
-	result += "- Functions: 92%\n"
-	result += "- Branches: 81%\n\n"
-	result += "Status: All tests passed ✓\n"
+	// Performance: 使用 strings.Builder 预分配容量
+	var result strings.Builder
+	result.Grow(512)
+	result.WriteString(fmt.Sprintf("Test Results for '%s':\n\n", target))
+	result.WriteString("## Test Configuration\n")
+	result.WriteString(fmt.Sprintf("- Coverage target: %s%%\n", coverage))
+	result.WriteString(fmt.Sprintf("- Test types: %s\n\n", testTypes))
+	result.WriteString("## Test Summary\n")
+	result.WriteString("✓ Unit Tests: 45/45 PASS\n")
+	result.WriteString("✓ Integration Tests: 12/12 PASS\n")
+	result.WriteString("✓ E2E Tests: 8/8 PASS\n\n")
+	result.WriteString("## Coverage Report\n")
+	result.WriteString("- Lines: 87%\n")
+	result.WriteString("- Functions: 92%\n")
+	result.WriteString("- Branches: 81%\n\n")
+	result.WriteString("Status: All tests passed ✓\n")
 
-	return result, nil
+	return result.String(), nil
 }
 
 // handleReviewer handles review capability
@@ -189,20 +208,23 @@ func handleReviewer(ctx context.Context, config types.CapabilityConfig, params m
 
 	strictness := config.Params["strictness"]
 
-	result := fmt.Sprintf("Review of '%s' (strictness: %s):\n\n", target, strictness)
-	result += "## Quality Score: 8.5/10\n\n"
-	result += "## Strengths\n"
-	result += "✓ Well structured\n"
-	result += "✓ Clear explanations\n"
-	result += "✓ Good examples\n\n"
-	result += "## Areas for Improvement\n"
-	result += "- Add more edge case coverage\n"
-	result += "- Improve error handling\n"
-	result += "- Add performance benchmarks\n\n"
-	result += "## Recommendations\n"
-	result += "1. Address the 2 medium-priority issues\n"
-	result += "2. Add documentation for public APIs\n"
-	result += "3. Consider refactoring module X\n"
+	// Performance: 使用 strings.Builder 预分配容量
+	var result strings.Builder
+	result.Grow(512)
+	result.WriteString(fmt.Sprintf("Review of '%s' (strictness: %s):\n\n", target, strictness))
+	result.WriteString("## Quality Score: 8.5/10\n\n")
+	result.WriteString("## Strengths\n")
+	result.WriteString("✓ Well structured\n")
+	result.WriteString("✓ Clear explanations\n")
+	result.WriteString("✓ Good examples\n\n")
+	result.WriteString("## Areas for Improvement\n")
+	result.WriteString("- Add more edge case coverage\n")
+	result.WriteString("- Improve error handling\n")
+	result.WriteString("- Add performance benchmarks\n\n")
+	result.WriteString("## Recommendations\n")
+	result.WriteString("1. Address the 2 medium-priority issues\n")
+	result.WriteString("2. Add documentation for public APIs\n")
+	result.WriteString("3. Consider refactoring module X\n")
 
-	return result, nil
+	return result.String(), nil
 }

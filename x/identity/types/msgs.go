@@ -2,27 +2,18 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"sharetoken/pkg/validation"
 )
 
 // GetSigners implements sdk.Msg
 func (msg *MsgRegisterIdentity) GetSigners() []sdk.AccAddress {
-	addr, err := sdk.AccAddressFromBech32(msg.Address)
-	if err != nil {
-		return nil
-	}
-	return []sdk.AccAddress{addr}
+	return validation.MustGetSigners(msg.Address)
 }
 
 // ValidateBasic implements sdk.Msg
 func (msg *MsgRegisterIdentity) ValidateBasic() error {
-	if msg.Address == "" {
-		return ErrInvalidAddress.Wrap("address cannot be empty")
-	}
-	_, err := sdk.AccAddressFromBech32(msg.Address)
-	if err != nil {
-		return ErrInvalidAddress.Wrap(err.Error())
-	}
-	return nil
+	return validation.ValidateAddress(msg.Address, "address")
 }
 
 // Type implements sdk.Msg
@@ -42,24 +33,16 @@ func (msg *MsgRegisterIdentity) Route() string {
 
 // GetSigners implements sdk.Msg
 func (msg *MsgVerifyIdentity) GetSigners() []sdk.AccAddress {
-	addr, err := sdk.AccAddressFromBech32(msg.Address)
-	if err != nil {
-		return nil
-	}
-	return []sdk.AccAddress{addr}
+	return validation.MustGetSigners(msg.Address)
 }
 
 // ValidateBasic implements sdk.Msg
 func (msg *MsgVerifyIdentity) ValidateBasic() error {
-	if msg.Address == "" {
-		return ErrInvalidAddress.Wrap("address cannot be empty")
-	}
-	_, err := sdk.AccAddressFromBech32(msg.Address)
-	if err != nil {
+	if err := validation.ValidateAddress(msg.Address, "address"); err != nil {
 		return ErrInvalidAddress.Wrap(err.Error())
 	}
-	if msg.Provider == "" {
-		return ErrInvalidProvider.Wrap("provider cannot be empty")
+	if err := validation.ValidateNonEmpty(msg.Provider, "provider"); err != nil {
+		return ErrInvalidProvider.Wrap(err.Error())
 	}
 	return nil
 }
@@ -81,23 +64,12 @@ func (msg *MsgVerifyIdentity) Route() string {
 
 // GetSigners implements sdk.Msg
 func (msg *MsgUpdateLimitConfig) GetSigners() []sdk.AccAddress {
-	addr, err := sdk.AccAddressFromBech32(msg.TargetAddress)
-	if err != nil {
-		return nil
-	}
-	return []sdk.AccAddress{addr}
+	return validation.MustGetSigners(msg.TargetAddress)
 }
 
 // ValidateBasic implements sdk.Msg
 func (msg *MsgUpdateLimitConfig) ValidateBasic() error {
-	if msg.TargetAddress == "" {
-		return ErrInvalidAddress.Wrap("target address cannot be empty")
-	}
-	_, err := sdk.AccAddressFromBech32(msg.TargetAddress)
-	if err != nil {
-		return ErrInvalidAddress.Wrap(err.Error())
-	}
-	return nil
+	return validation.ValidateAddress(msg.TargetAddress, "target address")
 }
 
 // Type implements sdk.Msg
@@ -117,23 +89,12 @@ func (msg *MsgUpdateLimitConfig) Route() string {
 
 // GetSigners implements sdk.Msg
 func (msg *MsgResetDailyLimits) GetSigners() []sdk.AccAddress {
-	addr, err := sdk.AccAddressFromBech32(msg.Authority)
-	if err != nil {
-		return nil
-	}
-	return []sdk.AccAddress{addr}
+	return validation.MustGetSigners(msg.Authority)
 }
 
 // ValidateBasic implements sdk.Msg
 func (msg *MsgResetDailyLimits) ValidateBasic() error {
-	if msg.Authority == "" {
-		return ErrInvalidAddress.Wrap("authority cannot be empty")
-	}
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
-	if err != nil {
-		return ErrInvalidAddress.Wrap(err.Error())
-	}
-	return nil
+	return validation.ValidateAddress(msg.Authority, "authority")
 }
 
 // Type implements sdk.Msg
@@ -153,23 +114,12 @@ func (msg *MsgResetDailyLimits) Route() string {
 
 // GetSigners implements sdk.Msg
 func (msg *MsgUpdateParams) GetSigners() []sdk.AccAddress {
-	addr, err := sdk.AccAddressFromBech32(msg.Authority)
-	if err != nil {
-		return nil
-	}
-	return []sdk.AccAddress{addr}
+	return validation.MustGetSigners(msg.Authority)
 }
 
 // ValidateBasic implements sdk.Msg
 func (msg *MsgUpdateParams) ValidateBasic() error {
-	if msg.Authority == "" {
-		return ErrInvalidAddress.Wrap("authority cannot be empty")
-	}
-	_, err := sdk.AccAddressFromBech32(msg.Authority)
-	if err != nil {
-		return ErrInvalidAddress.Wrap(err.Error())
-	}
-	return nil
+	return validation.ValidateAddress(msg.Authority, "authority")
 }
 
 // Type implements sdk.Msg

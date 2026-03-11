@@ -99,69 +99,94 @@ func (e *Executor) ExecuteWorkflow(ctx context.Context, workflowID string) error
 	// Execute steps
 	for {
 		// Check context
-		if ctx.Err() != nil {
-			workflow.Fail("execution cancelled")
-			e.emitEvent(WorkflowEvent{
-				WorkflowID: workflowID,
-				Type:       EventWorkflowFailed,
-				Payload:    "context cancelled",
-				Timestamp:  time.Now().Unix(),
-			})
-			return ctx.Err()
+		if err := e.checkContext(ctx, workflow); err != nil {
+			return err
+		}
+
+		// Check completion
+		if done, err := e.checkCompletion(workflow); done {
+			return err
 		}
 
 		// Get ready steps
 		readySteps := workflow.GetReadySteps()
 		if len(readySteps) == 0 {
-			// Check if workflow is complete
-			if workflow.IsComplete() {
-				workflow.Complete()
-				e.emitEvent(WorkflowEvent{
-					WorkflowID: workflowID,
-					Type:       EventWorkflowCompleted,
-					Timestamp:  time.Now().Unix(),
-				})
-				return nil
-			}
-
-			// Check for stuck workflow (no ready steps but not complete)
-			if hasFailedSteps(workflow) {
-				workflow.Fail("workflow has failed steps")
-				e.emitEvent(WorkflowEvent{
-					WorkflowID: workflowID,
-					Type:       EventWorkflowFailed,
-					Timestamp:  time.Now().Unix(),
-				})
-				return fmt.Errorf("workflow has failed steps")
-			}
-
 			// Wait a bit before checking again
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
 
-		// Execute ready steps in parallel
-		var wg sync.WaitGroup
-		errCh := make(chan error, len(readySteps))
-
-		for _, step := range readySteps {
-			wg.Add(1)
-			go func(s *types.WorkflowStep) {
-				defer wg.Done()
-				if err := e.executeStep(ctx, workflow, s, milestones); err != nil {
-					errCh <- fmt.Errorf("step %s failed: %w", s.ID, err)
-				}
-			}(step)
-		}
-
-		wg.Wait()
-		close(errCh)
-
-		// Check for errors
-		for err := range errCh {
-			_ = err // Ignore errors, let other steps complete
+		// Execute ready steps
+		if err := e.executeReadySteps(ctx, workflow, milestones, readySteps); err != nil {
+			return err
 		}
 	}
+}
+
+// checkContext checks if the context is cancelled
+func (e *Executor) checkContext(ctx context.Context, workflow *types.Workflow) error {
+	if ctx.Err() != nil {
+		workflow.Fail("execution cancelled")
+		e.emitEvent(WorkflowEvent{
+			WorkflowID: workflow.ID,
+			Type:       EventWorkflowFailed,
+			Payload:    "context cancelled",
+			Timestamp:  time.Now().Unix(),
+		})
+		return ctx.Err()
+	}
+	return nil
+}
+
+// checkCompletion checks if workflow is complete or has failed steps
+func (e *Executor) checkCompletion(workflow *types.Workflow) (bool, error) {
+	if workflow.IsComplete() {
+		workflow.Complete()
+		e.emitEvent(WorkflowEvent{
+			WorkflowID: workflow.ID,
+			Type:       EventWorkflowCompleted,
+			Timestamp:  time.Now().Unix(),
+		})
+		return true, nil
+	}
+
+	if hasFailedSteps(workflow) {
+		workflow.Fail("workflow has failed steps")
+		e.emitEvent(WorkflowEvent{
+			WorkflowID: workflow.ID,
+			Type:       EventWorkflowFailed,
+			Timestamp:  time.Now().Unix(),
+		})
+		return true, fmt.Errorf("workflow has failed steps")
+	}
+
+	return false, nil
+}
+
+// executeReadySteps executes ready steps in parallel
+func (e *Executor) executeReadySteps(ctx context.Context, workflow *types.Workflow, milestones *types.MilestonePlan, readySteps []*types.WorkflowStep) error {
+	var wg sync.WaitGroup
+	errCh := make(chan error, len(readySteps))
+
+	for _, step := range readySteps {
+		wg.Add(1)
+		go func(s *types.WorkflowStep) {
+			defer wg.Done()
+			if err := e.executeStep(ctx, workflow, s, milestones); err != nil {
+				errCh <- fmt.Errorf("step %s failed: %w", s.ID, err)
+			}
+		}(step)
+	}
+
+	wg.Wait()
+	close(errCh)
+
+	// Check for errors (but don't stop other steps)
+	for err := range errCh {
+		_ = err
+	}
+
+	return nil
 }
 
 // executeStep executes a single workflow step

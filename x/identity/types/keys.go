@@ -1,5 +1,9 @@
 package types
 
+import (
+	"sharetoken/pkg/store"
+)
+
 const (
 	// ModuleName is the name of the identity module
 	ModuleName = "identity"
@@ -31,20 +35,20 @@ var (
 
 // GetIdentityKey returns the key for an identity by address
 func GetIdentityKey(address string) []byte {
-	return append(IdentityKey, []byte(address)...)
+	return store.BuildKey(IdentityKey, address)
 }
 
 // GetLimitConfigKey returns the key for a limit config by address
 func GetLimitConfigKey(address string) []byte {
-	return append(LimitConfigKey, []byte(address)...)
+	return store.BuildKey(LimitConfigKey, address)
 }
 
 // GetRegisteredDIDKey returns the key for a registered DID
 func GetRegisteredDIDKey(did string) []byte {
-	return append(RegisteredDIDKey, []byte(did)...)
+	return store.BuildKey(RegisteredDIDKey, did)
 }
 
 // GetVerificationProviderKey returns the key for verification provider tracking
 func GetVerificationProviderKey(provider, providerID string) []byte {
-	return append(append(VerificationProviderKey, []byte(provider)...), []byte(providerID)...)
+	return store.BuildCompositeKey(VerificationProviderKey, provider, providerID)
 }

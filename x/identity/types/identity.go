@@ -4,7 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"time"
+	"strconv"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
@@ -56,11 +57,11 @@ func validateAllowedProviders(i interface{}) error {
 }
 
 // NewIdentity creates a new identity
-func NewIdentity(address, did string) *Identity {
+func NewIdentity(ctx sdk.Context, address, did string) *Identity {
 	return &Identity{
 		Address:          address,
 		Did:              did,
-		RegistrationTime: uint64(time.Now().Unix()),
+		RegistrationTime: uint64(ctx.BlockTime().Unix()),
 		IsVerified:       false,
 	}
 }
@@ -87,15 +88,20 @@ func (i Identity) ValidateBasic() error {
 
 // GenerateMerkleRoot generates a merkle root from identity data
 func (i *Identity) GenerateMerkleRoot() string {
-	// Create data hash
-	data := fmt.Sprintf("%s:%s:%s:%s:%d",
-		i.Address,
-		i.Did,
-		i.VerificationHash,
-		i.VerificationProvider,
-		i.RegistrationTime,
-	)
-	hash := sha256.Sum256([]byte(data))
+	// Performance: 使用 strings.Builder 预分配容量避免多次分配
+	// 估算: 地址40 + DID 50 + 哈希64 + Provider 20 + 时间戳20 + 分隔符4 = ~200字节
+	var data strings.Builder
+	data.Grow(200)
+	data.WriteString(i.Address)
+	data.WriteByte(':')
+	data.WriteString(i.Did)
+	data.WriteByte(':')
+	data.WriteString(i.VerificationHash)
+	data.WriteByte(':')
+	data.WriteString(i.VerificationProvider)
+	data.WriteByte(':')
+	data.WriteString(strconv.FormatUint(i.RegistrationTime, 10))
+	hash := sha256.Sum256([]byte(data.String()))
 	return hex.EncodeToString(hash[:])
 }
 
@@ -109,8 +115,16 @@ func (i *Identity) VerifyIdentityProof(proof []byte, leafIndex int) bool {
 
 // GetVerificationHash generates a hash of verification data
 func GetVerificationHash(provider, providerID, timestamp string) string {
-	data := fmt.Sprintf("%s:%s:%s", provider, providerID, timestamp)
-	hash := sha256.Sum256([]byte(data))
+	// Performance: 使用 strings.Builder 预分配容量
+	// 估算: Provider ~20 + ID ~50 + Timestamp ~20 + 分隔符2 = ~100字节
+	var data strings.Builder
+	data.Grow(100)
+	data.WriteString(provider)
+	data.WriteByte(':')
+	data.WriteString(providerID)
+	data.WriteByte(':')
+	data.WriteString(timestamp)
+	hash := sha256.Sum256([]byte(data.String()))
 	return hex.EncodeToString(hash[:])
 }
 

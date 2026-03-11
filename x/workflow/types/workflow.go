@@ -127,20 +127,32 @@ func (w *Workflow) GetStep(id string) *WorkflowStep {
 	return nil
 }
 
-// GetReadySteps returns steps that are ready to execute
+// GetReadySteps returns steps that are ready to execute.
+//
+// Algorithm: Map-based Dependency Check (O(n))
+// Instead of O(n²) nested loop checking dependencies:
+// 1. Build a map from step ID to step pointer for O(1) lookup (O(n))
+// 2. Iterate through steps once, checking dependencies via map (O(n))
+// Overall complexity: O(n) vs O(n²) before
 func (w *Workflow) GetReadySteps() []*WorkflowStep {
 	var ready []*WorkflowStep
+
+	// Build step map for O(1) lookup instead of O(n) linear search
+	stepMap := make(map[string]*WorkflowStep, len(w.Steps))
+	for i := range w.Steps {
+		stepMap[w.Steps[i].ID] = &w.Steps[i]
+	}
 
 	for i := range w.Steps {
 		if w.Steps[i].Status != StepStatusPending {
 			continue
 		}
 
-		// Check if all dependencies are completed
+		// Check if all dependencies are completed using O(1) map lookup
 		allDepsComplete := true
 		for _, depID := range w.Steps[i].DependsOn {
-			dep := w.GetStep(depID)
-			if dep == nil || dep.Status != StepStatusCompleted {
+			dep, exists := stepMap[depID]
+			if !exists || dep.Status != StepStatusCompleted {
 				allDepsComplete = false
 				break
 			}

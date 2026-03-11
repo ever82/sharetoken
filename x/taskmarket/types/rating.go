@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -209,15 +210,17 @@ func (r *Reputation) UpdateDisputeRate(totalTasks int, disputedTasks int) {
 // GetStars returns a star rating representation
 func (r *Reputation) GetStars() string {
 	stars := int(r.AverageRating + 0.5)
-	result := ""
+	// Performance: 预分配容量，5个Unicode字符 = 15字节
+	var result strings.Builder
+	result.Grow(15)
 	for i := 0; i < 5; i++ {
 		if i < stars {
-			result += "★"
+			result.WriteString("★")
 		} else {
-			result += "☆"
+			result.WriteString("☆")
 		}
 	}
-	return result
+	return result.String()
 }
 
 // IsTrusted checks if user has trusted reputation (> 4.0 average, > 5 ratings)

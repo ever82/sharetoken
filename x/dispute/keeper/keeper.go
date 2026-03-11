@@ -1,8 +1,9 @@
 package keeper
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"sort"
 	"sync"
 	"time"
@@ -46,7 +47,10 @@ func (k *DisputeKeeper) CreateDispute(escrowID, requester, provider, reason stri
 	k.mu.Lock()
 	defer k.mu.Unlock()
 
-	disputeID := generateDisputeID()
+	disputeID, err := generateDisputeID()
+	if err != nil {
+		return nil, err
+	}
 
 	dispute := types.NewDispute(disputeID, escrowID, requester, provider, reason)
 
@@ -114,19 +118,27 @@ func (k *DisputeKeeper) StartJuryVoting(disputeID string, jurySize int) ([]strin
 	return jury, nil
 }
 
-// selectWeightedRandomJurors selects jurors with MQ-weighted random algorithm
+// selectWeightedRandomJurors selects jurors with MQ-weighted random algorithm.
+//
+// Algorithm: Weighted Random Selection with Prefix Sum + Binary Search (O(n log n))
+// Instead of O(n²) repeated linear scan, we:
+// 1. Calculate all weights and build prefix sum array (O(n))
+// 2. Use binary search for each selection (O(log n) per selection)
+// Overall complexity: O(n + count * log n) vs O(n²) before
 func (k *DisputeKeeper) selectWeightedRandomJurors(count int) []string {
 	if len(k.jurorPool) == 0 || count <= 0 {
 		return []string{}
 	}
 
-	// Calculate total weight
+	// Calculate weights and build prefix sum array
+	// This allows O(log n) selection via binary search
 	type weightedJuror struct {
 		address string
 		weight  int64
 	}
 
 	weighted := make([]weightedJuror, 0, len(k.jurorPool))
+	prefixSum := make([]int64, 0, len(k.jurorPool))
 	var totalWeight int64
 
 	for _, juror := range k.jurorPool {
@@ -136,35 +148,59 @@ func (k *DisputeKeeper) selectWeightedRandomJurors(count int) []string {
 		}
 		weighted = append(weighted, weightedJuror{juror, weight})
 		totalWeight += weight
+		prefixSum = append(prefixSum, totalWeight)
 	}
 
 	if totalWeight == 0 {
 		return []string{}
 	}
 
-	// Select jurors based on weights
+	if count > len(weighted) {
+		count = len(weighted)
+	}
+
+	// Weighted random selection using binary search on prefix sum
+	// Complexity: O(count * log n) instead of O(count * n)
 	selected := make([]string, 0, count)
-	used := make(map[string]bool)
+	used := make(map[int]bool) // Track by index to avoid duplicates
 
-	for len(selected) < count && len(used) < len(weighted) {
-		target := rand.Int63n(totalWeight) //nolint:gosec
-		var current int64
-
-		for _, wj := range weighted {
-			if used[wj.address] {
-				continue
-			}
-			current += wj.weight
-			if current >= target {
-				selected = append(selected, wj.address)
-				used[wj.address] = true
-				totalWeight -= wj.weight
-				break
-			}
+	for len(selected) < count {
+		// Generate random number in range [1, totalWeight]
+		targetBig, err := rand.Int(rand.Reader, big.NewInt(totalWeight))
+		if err != nil {
+			// Fallback: if crypto/rand fails, break to avoid infinite loop
+			break
 		}
+		target := targetBig.Int64() + 1 // Range [1, totalWeight]
+
+		// Binary search to find the selected juror
+		idx := binarySearchPrefixSum(prefixSum, target)
+
+		// Skip if already selected
+		if used[idx] {
+			continue
+		}
+
+		used[idx] = true
+		selected = append(selected, weighted[idx].address)
 	}
 
 	return selected
+}
+
+// binarySearchPrefixSum finds the smallest index i such that prefixSum[i] >= target
+// using binary search. Complexity: O(log n)
+func binarySearchPrefixSum(prefixSum []int64, target int64) int {
+	left, right := 0, len(prefixSum)-1
+	for left < right {
+		mid := left + (right-left)/2
+		if prefixSum[mid] < target {
+			left = mid + 1
+		} else {
+			right = mid
+		}
+	}
+	return left
 }
 
 // CastVote casts a vote in a dispute
@@ -262,6 +298,11 @@ func (k *DisputeKeeper) RegisterJuror(address string) {
 }
 
 // generateDisputeID generates a unique dispute ID
-func generateDisputeID() string {
-	return fmt.Sprintf("DISPUTE-%d-%d", time.Now().Unix(), rand.Intn(10000)) //nolint:gosec
+func generateDisputeID() (string, error) {
+	// Generate random number for the ID suffix
+	randBig, err := rand.Int(rand.Reader, big.NewInt(10000))
+	if err != nil {
+		return "", fmt.Errorf("failed to generate random number: %w", err)
+	}
+	return fmt.Sprintf("DISPUTE-%d-%d", time.Now().Unix(), randBig.Int64()), nil
 }

@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"encoding/json"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -9,14 +10,15 @@ import (
 )
 
 // SetLimitConfig sets a limit config in the store
-func (k Keeper) SetLimitConfig(ctx sdk.Context, limitConfig types.LimitConfig) {
+func (k Keeper) SetLimitConfig(ctx sdk.Context, limitConfig types.LimitConfig) error {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetLimitConfigKey(limitConfig.Address)
 	value, err := json.Marshal(limitConfig)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to marshal limit config: %w", err)
 	}
 	store.Set(key, value)
+	return nil
 }
 
 // GetLimitConfig retrieves a limit config by address
@@ -75,7 +77,9 @@ func (k Keeper) UpdateLimitConfig(ctx sdk.Context, targetAddress string, newConf
 	newConfig.UpdatedAt = uint64(ctx.BlockTime().Unix())
 
 	// Store the config
-	k.SetLimitConfig(ctx, newConfig)
+	if err := k.SetLimitConfig(ctx, newConfig); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -87,10 +91,13 @@ func (k Keeper) CheckTransactionLimit(ctx sdk.Context, address string, amount sd
 }
 
 // RecordTransaction records a transaction
-func (k Keeper) RecordTransaction(ctx sdk.Context, address string, amount sdk.Coin) {
+func (k Keeper) RecordTransaction(ctx sdk.Context, address string, amount sdk.Coin) error {
 	limitConfig := k.GetOrCreateLimitConfig(ctx, address)
 	limitConfig.RecordTransaction(amount)
-	k.SetLimitConfig(ctx, limitConfig)
+	if err := k.SetLimitConfig(ctx, limitConfig); err != nil {
+		return err
+	}
+	return nil
 }
 
 // CheckWithdrawalLimit checks if a withdrawal is within limits
@@ -100,10 +107,13 @@ func (k Keeper) CheckWithdrawalLimit(ctx sdk.Context, address string, amount sdk
 }
 
 // RecordWithdrawal records a withdrawal
-func (k Keeper) RecordWithdrawal(ctx sdk.Context, address string, amount sdk.Coin) {
+func (k Keeper) RecordWithdrawal(ctx sdk.Context, address string, amount sdk.Coin) error {
 	limitConfig := k.GetOrCreateLimitConfig(ctx, address)
 	limitConfig.RecordWithdrawal(amount)
-	k.SetLimitConfig(ctx, limitConfig)
+	if err := k.SetLimitConfig(ctx, limitConfig); err != nil {
+		return err
+	}
+	return nil
 }
 
 // CheckDisputeLimit checks if a new dispute can be created
@@ -113,17 +123,23 @@ func (k Keeper) CheckDisputeLimit(ctx sdk.Context, address string) error {
 }
 
 // IncrementActiveDisputes increments the active dispute count
-func (k Keeper) IncrementActiveDisputes(ctx sdk.Context, address string) {
+func (k Keeper) IncrementActiveDisputes(ctx sdk.Context, address string) error {
 	limitConfig := k.GetOrCreateLimitConfig(ctx, address)
 	limitConfig.IncrementActiveDisputes()
-	k.SetLimitConfig(ctx, limitConfig)
+	if err := k.SetLimitConfig(ctx, limitConfig); err != nil {
+		return err
+	}
+	return nil
 }
 
 // DecrementActiveDisputes decrements the active dispute count
-func (k Keeper) DecrementActiveDisputes(ctx sdk.Context, address string) {
+func (k Keeper) DecrementActiveDisputes(ctx sdk.Context, address string) error {
 	limitConfig := k.GetOrCreateLimitConfig(ctx, address)
 	limitConfig.DecrementActiveDisputes()
-	k.SetLimitConfig(ctx, limitConfig)
+	if err := k.SetLimitConfig(ctx, limitConfig); err != nil {
+		return err
+	}
+	return nil
 }
 
 // CheckServiceLimit checks if a service call is within limits
@@ -133,17 +149,23 @@ func (k Keeper) CheckServiceLimit(ctx sdk.Context, address string) error {
 }
 
 // RecordServiceCall records a service call
-func (k Keeper) RecordServiceCall(ctx sdk.Context, address string) {
+func (k Keeper) RecordServiceCall(ctx sdk.Context, address string) error {
 	limitConfig := k.GetOrCreateLimitConfig(ctx, address)
 	limitConfig.RecordServiceCall()
-	k.SetLimitConfig(ctx, limitConfig)
+	if err := k.SetLimitConfig(ctx, limitConfig); err != nil {
+		return err
+	}
+	return nil
 }
 
 // ReleaseServiceCall releases a service call slot
-func (k Keeper) ReleaseServiceCall(ctx sdk.Context, address string) {
+func (k Keeper) ReleaseServiceCall(ctx sdk.Context, address string) error {
 	limitConfig := k.GetOrCreateLimitConfig(ctx, address)
 	limitConfig.ReleaseServiceCall()
-	k.SetLimitConfig(ctx, limitConfig)
+	if err := k.SetLimitConfig(ctx, limitConfig); err != nil {
+		return err
+	}
+	return nil
 }
 
 // ResetDailyLimits resets daily limits for all users
@@ -164,7 +186,10 @@ func (k Keeper) ResetDailyLimits(ctx sdk.Context) uint64 {
 		limitConfig.TxLimit.DailySpent = types.DefaultCoin()
 		limitConfig.WithdrawalLimit.DailyWithdrawn = types.DefaultCoin()
 
-		k.SetLimitConfig(ctx, limitConfig)
+		if err := k.SetLimitConfig(ctx, limitConfig); err != nil {
+			ctx.Logger().Error("failed to reset limit config", "address", limitConfig.Address, "error", err)
+			continue
+		}
 		resetCount++
 	}
 
@@ -181,6 +206,7 @@ func (k Keeper) GetAllLimitConfigs(ctx sdk.Context) []types.LimitConfig {
 	for ; iterator.Valid(); iterator.Next() {
 		var limitConfig types.LimitConfig
 		if err := json.Unmarshal(iterator.Value(), &limitConfig); err != nil {
+			ctx.Logger().Error("failed to unmarshal limit config", "error", err)
 			continue
 		}
 		configs = append(configs, limitConfig)

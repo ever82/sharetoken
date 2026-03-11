@@ -11,18 +11,19 @@ import (
 )
 
 // SetEscrow sets an escrow in the store
-func (k Keeper) SetEscrow(ctx sdk.Context, escrow types.Escrow) {
+func (k Keeper) SetEscrow(ctx sdk.Context, escrow types.Escrow) error {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetEscrowKey(escrow.ID)
 	value, err := json.Marshal(escrow)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to marshal escrow: %w", err)
 	}
 	store.Set(key, value)
 
 	// Update indexes
 	k.setEscrowByRequester(ctx, escrow)
 	k.setEscrowByProvider(ctx, escrow)
+	return nil
 }
 
 // GetEscrow retrieves an escrow by ID
@@ -66,6 +67,7 @@ func (k Keeper) DeleteEscrow(ctx sdk.Context, id string) {
 }
 
 // setEscrowByRequester sets the escrow by requester index
+//go:noinline
 func (k Keeper) setEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetEscrowByRequesterKey(escrow.Requester, escrow.ID)
@@ -73,6 +75,7 @@ func (k Keeper) setEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 }
 
 // deleteEscrowByRequester deletes the escrow by requester index
+//go:noinline
 func (k Keeper) deleteEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetEscrowByRequesterKey(escrow.Requester, escrow.ID)
@@ -80,6 +83,7 @@ func (k Keeper) deleteEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 }
 
 // setEscrowByProvider sets the escrow by provider index
+//go:noinline
 func (k Keeper) setEscrowByProvider(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetEscrowByProviderKey(escrow.Provider, escrow.ID)
@@ -87,6 +91,7 @@ func (k Keeper) setEscrowByProvider(ctx sdk.Context, escrow types.Escrow) {
 }
 
 // deleteEscrowByProvider deletes the escrow by provider index
+//go:noinline
 func (k Keeper) deleteEscrowByProvider(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetEscrowByProviderKey(escrow.Provider, escrow.ID)
@@ -145,6 +150,7 @@ func (k Keeper) GetAllEscrows(ctx sdk.Context) []types.Escrow {
 	for ; iterator.Valid(); iterator.Next() {
 		var escrow types.Escrow
 		if err := json.Unmarshal(iterator.Value(), &escrow); err != nil {
+			ctx.Logger().Error("failed to unmarshal escrow", "error", err)
 			continue
 		}
 		escrows = append(escrows, escrow)
@@ -166,7 +172,9 @@ func (k Keeper) CreateEscrow(ctx sdk.Context, requester, provider string, amount
 	}
 
 	// Store escrow
-	k.SetEscrow(ctx, *escrow)
+	if err := k.SetEscrow(ctx, *escrow); err != nil {
+		return types.Escrow{}, err
+	}
 
 	// Emit event
 	ctx.EventManager().EmitEvent(
@@ -196,7 +204,9 @@ func (k Keeper) Release(ctx sdk.Context, escrowID string) error {
 	// Update status
 	escrow.Status = types.EscrowStatusCompleted
 	escrow.CompletedAt = ctx.BlockTime().Unix()
-	k.SetEscrow(ctx, escrow)
+	if err := k.SetEscrow(ctx, escrow); err != nil {
+		return err
+	}
 
 	// Emit event
 	ctx.EventManager().EmitEvent(
@@ -224,7 +234,9 @@ func (k Keeper) Refund(ctx sdk.Context, escrowID string) error {
 
 	// Update status
 	escrow.Status = types.EscrowStatusRefunded
-	k.SetEscrow(ctx, escrow)
+	if err := k.SetEscrow(ctx, escrow); err != nil {
+		return err
+	}
 
 	// Emit event
 	ctx.EventManager().EmitEvent(
@@ -252,7 +264,9 @@ func (k Keeper) Dispute(ctx sdk.Context, escrowID string) error {
 
 	// Update status
 	escrow.Status = types.EscrowStatusDisputed
-	k.SetEscrow(ctx, escrow)
+	if err := k.SetEscrow(ctx, escrow); err != nil {
+		return err
+	}
 
 	// Emit event
 	ctx.EventManager().EmitEvent(
@@ -286,7 +300,9 @@ func (k Keeper) ResolveDispute(ctx sdk.Context, escrowID string, allocation type
 	// Update escrow
 	escrow.Status = types.EscrowStatusCompleted
 	escrow.CompletedAt = ctx.BlockTime().Unix()
-	k.SetEscrow(ctx, escrow)
+	if err := k.SetEscrow(ctx, escrow); err != nil {
+		return err
+	}
 
 	// Emit event
 	ctx.EventManager().EmitEvent(

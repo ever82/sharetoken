@@ -1,14 +1,13 @@
 package keeper
 
 import (
-	"fmt"
-
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
+	pkgkeeper "sharetoken/pkg/keeper"
 	"sharetoken/x/identity/types"
 )
 
@@ -51,7 +50,7 @@ func NewKeeper(
 
 // Logger returns a module-specific logger.
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+	return pkgkeeper.NewLoggerFunc(types.ModuleName)(ctx)
 }
 
 // GetAuthority returns the module's authority address (x/gov by default)
@@ -61,9 +60,5 @@ func (k Keeper) GetAuthority() string {
 
 // IsAuthority checks if the given address is the authority
 func (k Keeper) IsAuthority(ctx sdk.Context, addr sdk.AccAddress) bool {
-	authorityAddr, err := sdk.AccAddressFromBech32(k.GetAuthority())
-	if err != nil {
-		return false
-	}
-	return addr.Equals(authorityAddr)
+	return addr.String() == k.GetAuthority()
 }

@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"encoding/json"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -9,14 +10,15 @@ import (
 )
 
 // SetIdentity sets an identity in the store
-func (k Keeper) SetIdentity(ctx sdk.Context, identity types.Identity) {
+func (k Keeper) SetIdentity(ctx sdk.Context, identity types.Identity) error {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetIdentityKey(identity.Address)
 	value, err := json.Marshal(identity)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to marshal identity: %w", err)
 	}
 	store.Set(key, value)
+	return nil
 }
 
 // GetIdentity retrieves an identity by address
@@ -63,7 +65,7 @@ func (k Keeper) RegisterIdentity(ctx sdk.Context, address, did, metadataHash str
 	}
 
 	// Create new identity
-	identity := types.NewIdentity(address, did)
+	identity := types.NewIdentity(ctx, address, did)
 	identity.MetadataHash = metadataHash
 
 	// Generate merkle root
@@ -75,7 +77,9 @@ func (k Keeper) RegisterIdentity(ctx sdk.Context, address, did, metadataHash str
 	}
 
 	// Store identity
-	k.SetIdentity(ctx, *identity)
+	if err := k.SetIdentity(ctx, *identity); err != nil {
+		return err
+	}
 
 	// Register DID if provided
 	if did != "" {
@@ -84,7 +88,9 @@ func (k Keeper) RegisterIdentity(ctx sdk.Context, address, did, metadataHash str
 
 	// Initialize default limit config
 	limitConfig := types.NewLimitConfig(address)
-	k.SetLimitConfig(ctx, limitConfig)
+	if err := k.SetLimitConfig(ctx, limitConfig); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -122,7 +128,9 @@ func (k Keeper) VerifyIdentity(ctx sdk.Context, address, provider, verificationH
 	identity.MerkleRoot = identity.GenerateMerkleRoot()
 
 	// Store updated identity
-	k.SetIdentity(ctx, identity)
+	if err := k.SetIdentity(ctx, identity); err != nil {
+		return err
+	}
 
 	// Mark provider as used
 	k.MarkProviderUsed(ctx, provider, address)
@@ -140,6 +148,7 @@ func (k Keeper) GetAllIdentities(ctx sdk.Context) []types.Identity {
 	for ; iterator.Valid(); iterator.Next() {
 		var identity types.Identity
 		if err := json.Unmarshal(iterator.Value(), &identity); err != nil {
+			ctx.Logger().Error("failed to unmarshal identity", "error", err)
 			continue
 		}
 		identities = append(identities, identity)

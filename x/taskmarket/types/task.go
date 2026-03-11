@@ -308,12 +308,15 @@ func (t *Task) RejectMilestone(milestoneID string, reason string) error {
 
 // AllMilestonesCompleted checks if all milestones are approved
 func (t *Task) AllMilestonesCompleted() bool {
+	if len(t.Milestones) == 0 {
+		return false
+	}
 	for _, m := range t.Milestones {
 		if m.Status != MilestoneStatusApproved && m.Status != MilestoneStatusPaid {
 			return false
 		}
 	}
-	return len(t.Milestones) > 0
+	return true
 }
 
 // GetCompletionPercentage returns task completion percentage

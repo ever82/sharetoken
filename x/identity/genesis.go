@@ -15,12 +15,16 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 
 	// Set all identities
 	for _, identity := range genState.Identities {
-		k.SetIdentity(ctx, identity)
+		if err := k.SetIdentity(ctx, identity); err != nil {
+			panic(err)
+		}
 	}
 
 	// Set all limit configs
 	for _, limitConfig := range genState.LimitConfigs {
-		k.SetLimitConfig(ctx, limitConfig)
+		if err := k.SetLimitConfig(ctx, limitConfig); err != nil {
+			panic(err)
+		}
 	}
 }
 

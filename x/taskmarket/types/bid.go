@@ -157,15 +157,17 @@ func (b *Bid) IsLowerThan(other *Bid) bool {
 	return b.Amount < other.Amount
 }
 
-// Auction represents an auction with bids
+// Auction represents an auction with bids.
+// Optimized with bid index map for O(1) bid lookup instead of O(n) linear scan.
 type Auction struct {
-	TaskID        string `json:"task_id"`
-	StartingPrice uint64 `json:"starting_price"`
-	ReservePrice  uint64 `json:"reserve_price"` // Minimum acceptable price
-	EndTime       int64  `json:"end_time"`      // Auction end time
-	Bids          []Bid  `json:"bids"`
-	WinningBidID  string `json:"winning_bid_id"`
-	IsActive      bool   `json:"is_active"`
+	TaskID        string         `json:"task_id"`
+	StartingPrice uint64         `json:"starting_price"`
+	ReservePrice  uint64         `json:"reserve_price"` // Minimum acceptable price
+	EndTime       int64          `json:"end_time"`      // Auction end time
+	Bids          []Bid          `json:"bids"`
+	WinningBidID  string         `json:"winning_bid_id"`
+	IsActive      bool           `json:"is_active"`
+	bidIndexMap   map[string]int // bidID -> index in Bids slice (not exported, not serialized)
 }
 
 // NewAuction creates a new auction
@@ -177,10 +179,12 @@ func NewAuction(taskID string, startingPrice, reservePrice uint64, duration int6
 		EndTime:       time.Now().Unix() + duration,
 		Bids:          []Bid{},
 		IsActive:      true,
+		bidIndexMap:   make(map[string]int),
 	}
 }
 
-// AddBid adds a bid to the auction
+// AddBid adds a bid to the auction.
+// Maintains bidIndexMap for O(1) bid lookup.
 func (a *Auction) AddBid(bid Bid) error {
 	if !a.IsActive {
 		return fmt.Errorf("auction is not active")
@@ -192,18 +196,38 @@ func (a *Auction) AddBid(bid Bid) error {
 		return fmt.Errorf("bid exceeds starting price")
 	}
 
+	// Initialize bidIndexMap if not already done (e.g., after JSON deserialization)
+	if a.bidIndexMap == nil {
+		a.bidIndexMap = make(map[string]int)
+		for i := range a.Bids {
+			a.bidIndexMap[a.Bids[i].ID] = i
+		}
+	}
+
 	a.Bids = append(a.Bids, bid)
+	a.bidIndexMap[bid.ID] = len(a.Bids) - 1
 	a.updateWinningBid()
 	return nil
 }
 
-// updateWinningBid updates the winning bid
+// updateWinningBid updates the winning bid.
+//
+// Algorithm: Single-pass scan for lowest bid + O(1) index lookup for marking outbid
+// Complexity: O(n) instead of O(n²) due to bidIndexMap
 func (a *Auction) updateWinningBid() {
 	if len(a.Bids) == 0 {
 		return
 	}
 
-	// Find lowest bid
+	// Initialize bidIndexMap if not already done
+	if a.bidIndexMap == nil {
+		a.bidIndexMap = make(map[string]int)
+		for i := range a.Bids {
+			a.bidIndexMap[a.Bids[i].ID] = i
+		}
+	}
+
+	// Find lowest bid (O(n))
 	var lowest *Bid
 	for i := range a.Bids {
 		if a.Bids[i].Status == BidStatusPending {
@@ -214,25 +238,35 @@ func (a *Auction) updateWinningBid() {
 	}
 
 	if lowest != nil {
-		// Mark previous winner as outbid
+		// Mark previous winner as outbid using O(1) map lookup instead of O(n) scan
 		if a.WinningBidID != "" {
-			for i := range a.Bids {
-				if a.Bids[i].ID == a.WinningBidID {
-					a.Bids[i].MarkOutbid()
-					break
-				}
+			if idx, exists := a.bidIndexMap[a.WinningBidID]; exists {
+				a.Bids[idx].MarkOutbid()
 			}
 		}
 		a.WinningBidID = lowest.ID
 	}
 }
 
-// GetWinningBid returns the current winning bid
+// GetWinningBid returns the current winning bid using O(1) map lookup.
+//
+// Algorithm: Direct index lookup via bidIndexMap
+// Complexity: O(1) instead of O(n) linear scan
 func (a *Auction) GetWinningBid() *Bid {
-	for i := range a.Bids {
-		if a.Bids[i].ID == a.WinningBidID {
-			return &a.Bids[i]
+	if a.WinningBidID == "" {
+		return nil
+	}
+
+	// Initialize bidIndexMap if not already done
+	if a.bidIndexMap == nil {
+		a.bidIndexMap = make(map[string]int)
+		for i := range a.Bids {
+			a.bidIndexMap[a.Bids[i].ID] = i
 		}
+	}
+
+	if idx, exists := a.bidIndexMap[a.WinningBidID]; exists {
+		return &a.Bids[idx]
 	}
 	return nil
 }

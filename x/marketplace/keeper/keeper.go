@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -19,14 +20,15 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey) *Keeper {
 	return &Keeper{cdc: cdc, storeKey: storeKey}
 }
 
-func (k Keeper) SetService(ctx sdk.Context, service types.Service) {
+func (k Keeper) SetService(ctx sdk.Context, service types.Service) error {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetServiceKey(service.ID)
 	value, err := json.Marshal(service)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to marshal service: %w", err)
 	}
 	store.Set(key, value)
+	return nil
 }
 
 func (k Keeper) GetService(ctx sdk.Context, id string) (types.Service, bool) {

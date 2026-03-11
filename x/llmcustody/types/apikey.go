@@ -88,9 +88,13 @@ func (k APIKey) CanAccess(serviceID string) bool {
 
 	// Check if there's a rule allowing access to this service
 	for _, rule := range k.AccessRules {
-		if rule.ServiceID == serviceID {
-			return k.UsageCount < rule.MaxRequests || rule.MaxRequests == 0
+		if rule.ServiceID != serviceID {
+			continue
 		}
+		if rule.MaxRequests == 0 {
+			return true
+		}
+		return k.UsageCount < rule.MaxRequests
 	}
 	return false
 }

@@ -13,7 +13,9 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 	for _, apiKey := range genState.APIKeys {
 		// Don't restore keys with empty encrypted data (genesis export clears them)
 		if len(apiKey.EncryptedKey) > 0 {
-			k.SetAPIKey(ctx, apiKey)
+			if err := k.SetAPIKey(ctx, apiKey); err != nil {
+				panic(err)
+			}
 		}
 	}
 }

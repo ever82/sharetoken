@@ -31,14 +31,15 @@ func NewKeeper(
 }
 
 // SetPrice sets a price in the store
-func (k Keeper) SetPrice(ctx sdk.Context, price types.Price) {
+func (k Keeper) SetPrice(ctx sdk.Context, price types.Price) error {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetPriceKey(price.Symbol)
 	value, err := json.Marshal(price)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to marshal price: %w", err)
 	}
 	store.Set(key, value)
+	return nil
 }
 
 // GetPrice retrieves a price by symbol
@@ -68,6 +69,7 @@ func (k Keeper) GetAllPrices(ctx sdk.Context) []types.Price {
 	for ; iterator.Valid(); iterator.Next() {
 		var price types.Price
 		if err := json.Unmarshal(iterator.Value(), &price); err != nil {
+			ctx.Logger().Error("failed to unmarshal price", "error", err)
 			continue
 		}
 		prices = append(prices, price)
@@ -124,13 +126,20 @@ func (k Keeper) CalculateLLMPrice(ctx sdk.Context, model string, inputTokens, ou
 
 	// Calculate USD cost
 	totalTokens := inputTokens + outputTokens
-	usdCost := (float64(totalTokens) / 1000.0) * usdPricePer1K
 
-	// Convert to STT - sttPrice.Price is sdk.Dec
-	// Convert float64 usdCost to sdk.Dec then divide
-	usdCostDec := sdk.NewDec(int64(usdCost * 1000000))
+	// Convert to STT using precise decimal arithmetic
+	// usdPricePer1K is float64 (e.g., 0.03 for gpt-4)
+	// sttPrice.Price is sdk.Dec (e.g., 0.001 for 1 STT = $0.001)
+	// Formula: STT cost = (totalTokens / 1000) * usdPricePer1K / sttPriceInUSD
+
+	// Create sdk.Dec from token count
+	totalTokensDec := sdk.NewDec(totalTokens)
+	usdPriceDec := sdk.NewDecFromIntWithPrec(sdk.NewInt(int64(usdPricePer1K*1e6)), 6)
 	sttRate := sttPrice.Price
-	sttCost := usdCostDec.Quo(sttRate)
+
+	// Calculate: (totalTokens / 1000) * usdPricePer1K / sttRate
+	// = totalTokens * usdPricePer1K / (1000 * sttRate)
+	sttCost := totalTokensDec.Mul(usdPriceDec).Quo(sttRate.MulInt64(1000))
 
 	return sdk.NewCoins(sdk.NewCoin("ustt", sttCost.TruncateInt())), nil
 }
@@ -201,7 +210,9 @@ func (k Keeper) UpdatePrices(ctx sdk.Context) error {
 		// In production, this would fetch from actual sources
 		// For now, use mock data
 		price := types.NewPrice(symbol, sdk.NewDec(1), types.PriceSourceManual, 100)
-		k.SetPrice(ctx, *price)
+		if err := k.SetPrice(ctx, *price); err != nil {
+			return err
+		}
 	}
 
 	return nil
