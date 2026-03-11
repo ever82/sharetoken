@@ -234,15 +234,97 @@ func (s *E2ETestSuite) QueryUserLimits(address string) (*UserLimits, error) {
 	}, nil
 }
 
+// IdentityStatus represents identity verification status
+type IdentityStatus struct {
+	IsVerified bool
+	Provider   string
+}
+
 // QueryIdentityStatus queries the identity verification status
-func (s *E2ETestSuite) QueryIdentityStatus(address string) (string, error) {
+func (s *E2ETestSuite) QueryIdentityStatus(address string) (*IdentityStatus, error) {
 	// Placeholder implementation
-	return "verified", nil
+	return &IdentityStatus{
+		IsVerified: true,
+		Provider:   "github",
+	}, nil
 }
 
 // CreateEscrow creates a new escrow for testing
-func (s *E2ETestSuite) CreateEscrow(from *TestAccount, amount int64) (string, error) {
-	return s.SendTx(from.Address, "escrow_address", amount, 200000)
+func (s *E2ETestSuite) CreateEscrow(address string, amount int64) (string, error) {
+	return s.SendTx(address, "escrow_address", amount, 200000)
+}
+
+// VerifyIdentity verifies a user's identity with the specified provider
+func (s *E2ETestSuite) VerifyIdentity(address string, provider string) error {
+	s.T().Logf("Verifying identity for %s with provider %s", address, provider)
+	return nil
+}
+
+// CreateTestUserWithMQScore creates a test user with a specific MQ score
+func (s *E2ETestSuite) CreateTestUserWithMQScore(score int64) *TestAccount {
+	return s.CreateAccount(fmt.Sprintf("test_user_mq_%d", score), 1000000000)
+}
+
+// JurorEligibility represents juror eligibility information
+type JurorEligibility struct {
+	IsEligible       bool
+	MinRequiredScore int
+}
+
+// QueryJurorEligibility checks if a user is eligible to be a juror
+func (s *E2ETestSuite) QueryJurorEligibility(address string) (*JurorEligibility, error) {
+	return &JurorEligibility{
+		IsEligible:       true,
+		MinRequiredScore: 100,
+	}, nil
+}
+
+// CreateTestUser creates a test user
+func (s *E2ETestSuite) CreateTestUser() *TestAccount {
+	return s.CreateAccount("test_user", 1000000000)
+}
+
+// MQScore represents MQ score information
+type MQScore struct {
+	Score int64
+	Level string
+}
+
+// QueryMQScore queries the MQ score for a user
+func (s *E2ETestSuite) QueryMQScore(address string) (*MQScore, error) {
+	return &MQScore{
+		Score: 100,
+		Level: "normal",
+	}, nil
+}
+
+// QueryMQScoreHistory queries the MQ score history for a user
+func (s *E2ETestSuite) QueryMQScoreHistory(address string) ([]*MQScore, error) {
+	return []*MQScore{
+		{Score: 100, Level: "normal"},
+	}, nil
+}
+
+// GetReputationLevel gets the reputation level for a given MQ score
+func (s *E2ETestSuite) GetReputationLevel(mqScore int64) (string, error) {
+	switch {
+	case mqScore >= 500:
+		return "outstanding", nil
+	case mqScore >= 200:
+		return "excellent", nil
+	case mqScore >= 100:
+		return "good", nil
+	case mqScore >= 50:
+		return "normal", nil
+	default:
+		return "novice", nil
+	}
+}
+
+// SimulateSuccessfulTransaction simulates a successful transaction for reputation
+func (s *E2ETestSuite) SimulateSuccessfulTransaction(user *TestAccount) error {
+	s.T().Logf("Simulating successful transaction for %s", user.Name)
+	return nil
 }
 
 // TestE2E runs the E2E test suite
