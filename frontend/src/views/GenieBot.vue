@@ -2,55 +2,52 @@
   <div class="geniebot-container">
     <div class="chat-header">
       <h2>🧞 GenieBot</h2>
-      <p class="subtitle">AI Assistant - Describe what you need, I'll find the best service</p>
+      <p class="subtitle">AI Assistant - Connected to local Agent Gateway</p>
     </div>
 
-    <div class="model-selector">
-      <label>AI Model:</label>
-      <select v-model="selectedModel" class="model-select">
-        <option value="openai/gpt-4">OpenAI GPT-4</option>
-        <option value="openai/gpt-3.5-turbo">OpenAI GPT-3.5</option>
-        <option value="anthropic/claude-3">Anthropic Claude 3</option>
-        <option value="anthropic/claude-instant">Claude Instant</option>
-        <option value="google/gemini-pro">Google Gemini Pro</option>
+    <div class="connection-status">
+      <span :class="['status-dot', connectionStatus]"></span>
+      <span class="status-text">{{ connectionStatusText }}</span>
+      <span v-if="agentGatewayUrl" class="gateway-url">@ {{ agentGatewayUrl }}</span>
+    </div>
+
+    <div class="agent-selector">
+      <label>AI Agent:</label>
+      <select v-model="selectedAgent" class="agent-select">
+        <option value="local">🧞 GenieBot (Local)</option>
+        <option value="claude-code" :disabled="!hasClaudeCode">🤖 Claude Code {{ hasClaudeCode ? '' : '(Not Available)' }}</option>
+        <option value="custom">⚙️ Custom MCP Agent</option>
       </select>
-      <span class="cost-estimate">Est. cost: {{ estimatedCost }} STT/token</span>
+      <span class="cost-estimate" v-if="selectedAgent === 'local'">Cost: 0.001 STT/message</span>
+      <span class="cost-estimate free" v-else>Free (uses your own agent)</span>
     </div>
 
     <div class="chat-messages" ref="messagesContainer">
       <div v-for="(message, index) in messages" :key="index" class="message" :class="message.role">
         <div class="message-avatar">
-          {{ message.role === 'user' ? '👤' : '🧞' }}
+          {{ message.role === 'user' ? '👤' : message.agent === 'claude-code' ? '🤖' : '🧞' }}
         </div>
         <div class="message-content">
           <div class="message-text">{{ message.content }}</div>
-          <div v-if="message.serviceRecommendations" class="service-recommendations">
-            <h4>Recommended Services:</h4>
-            <div v-for="service in message.serviceRecommendations" :key="service.id" class="service-card" @click="selectService(service)">
-              <div class="service-header">
-                <span class="service-name">{{ service.name }}</span>
-                <span class="service-price">{{ service.price }} STT</span>
-              </div>
-              <div class="service-description">{{ service.description }}</div>
-              <div class="service-meta">
-                <span class="provider">by {{ service.provider }}</span>
-                <span class="rating">⭐ {{ service.rating }}</span>
-              </div>
+          <div v-if="message.toolCalls" class="tool-calls">
+            <div v-for="(tool, idx) in message.toolCalls" :key="idx" class="tool-call">
+              <span class="tool-icon">🔧</span>
+              <span class="tool-name">{{ tool.name }}</span>
+              <span class="tool-status">{{ tool.status }}</span>
             </div>
-          </div>
-          <div v-if="message.intent" class="intent-tag">
-            Detected: {{ message.intent }}
           </div>
           <div class="message-meta">
             <span class="timestamp">{{ formatTime(message.timestamp) }}</span>
-            <span v-if="message.tokens" class="tokens">{{ message.tokens }} tokens</span>
-            <span v-if="message.cost" class="cost">{{ message.cost }} STT</span>
+            <span v-if="message.cost !== undefined" class="cost" :class="{ free: message.cost === 0 }">
+              {{ message.cost === 0 ? 'Free' : message.cost + ' STT' }}
+            </span>
+            <span v-if="message.agent" class="agent-tag">{{ message.agent }}</span>
           </div>
         </div>
       </div>
 
       <div v-if="isTyping" class="message assistant typing">
-        <div class="message-avatar">🧞</div>
+        <div class="message-avatar">{{ selectedAgent === 'claude-code' ? '🤖' : '🧞' }}</div>
         <div class="message-content">
           <div class="typing-indicator">
             <span></span>
@@ -59,23 +56,29 @@
           </div>
         </div>
       </div>
+
+      <div v-if="error" class="error-message">
+        <span class="error-icon">⚠️</span>
+        {{ error }}
+      </div>
     </div>
 
     <div class="chat-input-area">
       <div class="quick-actions">
-        <button @click="sendQuick('Write a blog post about blockchain')" class="quick-btn">📝 Write blog</button>
-        <button @click="sendQuick('Code review for my smart contract')" class="quick-btn">💻 Code review</button>
-        <button @click="sendQuick('Research on DeFi protocols')" class="quick-btn">🔍 Research</button>
-        <button @click="sendQuick('Translate this to Chinese')" class="quick-btn">🌐 Translate</button>
+        <button @click="sendQuick('查询我的余额')" class="quick-btn">💰 查余额</button>
+        <button @click="sendQuick('创建一个新任务')" class="quick-btn">📋 创建任务</button>
+        <button @click="sendQuick('查看可用服务')" class="quick-btn">🔍 浏览服务</button>
+        <button @click="sendQuick('我想做任务赚STT')" class="quick-btn">💎 赚STT</button>
       </div>
 
       <div class="input-container">
         <textarea
           v-model="inputMessage"
           @keydown.enter.prevent="sendMessage"
-          placeholder="Describe what you need... (e.g., 'Write a Python script to analyze blockchain data')"
+          placeholder="输入消息... (支持连接本地 Claude Code 或 OpenClaw)"
           rows="3"
           class="chat-input"
+          :disabled="isTyping"
         ></textarea>
         <button @click="sendMessage" :disabled="!inputMessage.trim() || isTyping" class="send-btn">
           {{ isTyping ? '...' : '➤' }}
@@ -83,37 +86,43 @@
       </div>
 
       <div class="input-footer">
-        <span class="hint">Press Enter to send, Shift+Enter for new line</span>
+        <span class="hint">Press Enter to send</span>
         <span class="balance" v-if="userBalance !== null">Balance: {{ userBalance }} STT</span>
       </div>
     </div>
 
-    <!-- Service Details Modal -->
-    <div v-if="selectedService" class="modal-overlay" @click.self="closeModal">
+    <!-- Agent Configuration Modal -->
+    <div v-if="showAgentConfig" class="modal-overlay" @click.self="closeAgentConfig">
       <div class="modal">
-        <h3>{{ selectedService.name }}</h3>
-        <p class="modal-description">{{ selectedService.description }}</p>
-        <div class="modal-details">
-          <div class="detail-row">
-            <span>Price:</span>
-            <strong>{{ selectedService.price }} STT</strong>
+        <h3>Configure Local Agent</h3>
+        <div class="modal-content">
+          <div class="form-group">
+            <label>Agent Type:</label>
+            <select v-model="customAgentConfig.type" class="form-select">
+              <option value="stdio">Stdio (Claude Code, OpenClaw)</option>
+              <option value="http">HTTP Endpoint</option>
+            </select>
           </div>
-          <div class="detail-row">
-            <span>Provider:</span>
-            <span>{{ selectedService.provider }}</span>
+          <div class="form-group">
+            <label>Command/URL:</label>
+            <input
+              v-model="customAgentConfig.command"
+              :placeholder="customAgentConfig.type === 'stdio' ? 'claude' : 'http://localhost:8080/mcp'"
+              class="form-input"
+            />
           </div>
-          <div class="detail-row">
-            <span>Rating:</span>
-            <span>⭐ {{ selectedService.rating }}/5</span>
-          </div>
-          <div class="detail-row">
-            <span>Est. Time:</span>
-            <span>{{ selectedService.estimatedTime }}</span>
+          <div class="form-group" v-if="customAgentConfig.type === 'stdio'">
+            <label>Arguments (comma separated):</label>
+            <input
+              v-model="customAgentConfig.args"
+              placeholder="--transport,stdio"
+              class="form-input"
+            />
           </div>
         </div>
         <div class="modal-actions">
-          <button @click="confirmService" class="btn-primary">Confirm & Pay</button>
-          <button @click="closeModal" class="btn-secondary">Cancel</button>
+          <button @click="saveAgentConfig" class="btn-primary">Save</button>
+          <button @click="closeAgentConfig" class="btn-secondary">Cancel</button>
         </div>
       </div>
     </div>
@@ -128,36 +137,101 @@ export default {
       messages: [
         {
           role: 'assistant',
-          content: 'Hello! I\'m GenieBot, your AI assistant. I can help you with:\n\n• Writing and content creation\n• Code review and development\n• Research and analysis\n• Translation and summarization\n• And much more!\n\nJust describe what you need, and I\'ll find the best service for you.',
+          content: '你好！我是 GenieBot，已连接到本地 Agent Gateway。\n\n我可以帮你：\n• 查询余额、创建任务\n• 使用本地 Claude Code / OpenClaw (免费)\n• 浏览服务市场并接单赚 STT\n\n直接输入你的需求即可开始！',
           timestamp: Date.now(),
-          intent: 'greeting'
+          cost: 0,
+          agent: 'local'
         }
       ],
       inputMessage: '',
-      selectedModel: 'openai/gpt-4',
+      selectedAgent: 'local',
       isTyping: false,
       userBalance: null,
-      selectedService: null,
-      serviceRecommendations: []
+      error: null,
+      connectionStatus: 'connecting',
+      agentGatewayUrl: '',
+      hasClaudeCode: false,
+      showAgentConfig: false,
+      customAgentConfig: {
+        type: 'stdio',
+        command: '',
+        args: ''
+      },
+      sessionId: 'geniebot-session-' + Date.now()
     };
   },
   computed: {
-    estimatedCost() {
-      const costs = {
-        'openai/gpt-4': '0.03',
-        'openai/gpt-3.5-turbo': '0.002',
-        'anthropic/claude-3': '0.008',
-        'anthropic/claude-instant': '0.0016',
-        'google/gemini-pro': '0.001'
+    connectionStatusText() {
+      const texts = {
+        connected: 'Connected',
+        connecting: 'Connecting...',
+        error: 'Connection Error'
       };
-      return costs[this.selectedModel] || '0.01';
+      return texts[this.connectionStatus] || 'Unknown';
     }
   },
-  mounted() {
+  async mounted() {
     this.scrollToBottom();
-    this.fetchUserBalance();
+    await this.checkAgentGateway();
+    await this.fetchUserBalance();
+    await this.checkLocalAgents();
   },
   methods: {
+    async checkAgentGateway() {
+      // Try different possible gateway URLs
+      const urls = [
+        'http://localhost:18080',
+        'http://127.0.0.1:18080',
+        window.location.origin + ':18080'
+      ];
+
+      for (const url of urls) {
+        try {
+          const response = await fetch(url + '/health', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            this.connectionStatus = 'connected';
+            this.agentGatewayUrl = url;
+            console.log('Agent Gateway connected:', data);
+            return;
+          }
+        } catch (e) {
+          console.log('Failed to connect to:', url);
+        }
+      }
+
+      this.connectionStatus = 'error';
+      this.error = 'Agent Gateway not available. Please start it with: ./bin/agent-gateway -transport=http -port=18080';
+    },
+
+    async checkLocalAgents() {
+      // Check if user has Claude Code configured
+      const savedConfig = localStorage.getItem('geniebot_agent_config');
+      if (savedConfig) {
+        this.customAgentConfig = JSON.parse(savedConfig);
+      }
+
+      // Check for Claude Code MCP config
+      const claudeConfig = localStorage.getItem('claude_mcp_config');
+      if (claudeConfig) {
+        this.hasClaudeCode = true;
+      }
+
+      // Also try to detect if claude command is available (in Electron)
+      if (window.electronAPI && window.electronAPI.checkClaudeCode) {
+        try {
+          const result = await window.electronAPI.checkClaudeCode();
+          this.hasClaudeCode = result.available;
+        } catch (e) {
+          console.log('Could not check Claude Code:', e);
+        }
+      }
+    },
+
     async sendMessage() {
       if (!this.inputMessage.trim() || this.isTyping) return;
 
@@ -168,14 +242,101 @@ export default {
       };
 
       this.messages.push(userMessage);
+      const messageText = this.inputMessage.trim();
       this.inputMessage = '';
       this.isTyping = true;
+      this.error = null;
       this.scrollToBottom();
 
-      // Simulate AI response with intent recognition
-      setTimeout(() => {
-        this.generateResponse(userMessage.content);
-      }, 1500);
+      try {
+        if (this.selectedAgent === 'local') {
+          await this.callLocalGenieBot(messageText);
+        } else if (this.selectedAgent === 'claude-code') {
+          await this.callClaudeCode(messageText);
+        } else {
+          await this.callCustomAgent(messageText);
+        }
+      } catch (err) {
+        this.error = 'Error: ' + err.message;
+        this.messages.push({
+          role: 'assistant',
+          content: 'Sorry, I encountered an error: ' + err.message,
+          timestamp: Date.now(),
+          cost: 0,
+          agent: 'error'
+        });
+      } finally {
+        this.isTyping = false;
+        this.scrollToBottom();
+      }
+    },
+
+    async callLocalGenieBot(message) {
+      // Call Agent Gateway MCP endpoint
+      const response = await fetch(this.agentGatewayUrl + '/mcp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          id: Date.now(),
+          params: {
+            name: 'chat_with_genie',
+            arguments: {
+              message: message,
+              session_id: this.sessionId
+            }
+          }
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+
+      const resultText = data.result?.content?.[0]?.text;
+      if (!resultText) {
+        throw new Error('Invalid response format');
+      }
+
+      const result = JSON.parse(resultText);
+
+      this.messages.push({
+        role: 'assistant',
+        content: result.content,
+        timestamp: Date.now(),
+        cost: result.cost,
+        agent: 'local'
+      });
+
+      // Update balance if there's a cost
+      if (result.cost && this.userBalance !== null) {
+        this.userBalance = Math.max(0, this.userBalance - result.cost);
+      }
+    },
+
+    async callClaudeCode(message) {
+      // This would require a backend proxy to call Claude Code MCP
+      // For now, show instructions
+      this.messages.push({
+        role: 'assistant',
+        content: `🤖 **Claude Code Integration**\n\nTo use your local Claude Code:\n\n1. Configure Claude Code MCP:\n\`\`\`json\n{\n  "mcpServers": {\n    "sharetoken": {\n      "command": "/path/to/agent-gateway",\n      "args": ["-transport", "stdio"]\n    }\n  }\n}\n\`\`\`\n\n2. Or run Claude Code with:\n\`claude --mcp-server sharetoken\`\n\nThis lets you use Claude Code for free while still earning STT by completing tasks!`,
+        timestamp: Date.now(),
+        cost: 0,
+        agent: 'claude-code'
+      });
+    },
+
+    async callCustomAgent(message) {
+      this.messages.push({
+        role: 'assistant',
+        content: `⚙️ **Custom Agent: ${this.customAgentConfig.command}**\n\nMessage: "${message}"\n\nCustom agent integration requires backend support. Please configure in settings.`,
+        timestamp: Date.now(),
+        cost: 0,
+        agent: 'custom'
+      });
     },
 
     sendQuick(text) {
@@ -183,127 +344,53 @@ export default {
       this.sendMessage();
     },
 
-    generateResponse(userInput) {
-      // Simple intent recognition simulation
-      const intents = this.recognizeIntent(userInput);
-      const response = this.createResponse(intents, userInput);
-
-      this.messages.push({
-        role: 'assistant',
-        content: response.text,
-        serviceRecommendations: response.recommendations,
-        intent: intents.primary,
-        tokens: Math.floor(userInput.length / 4) + 50,
-        cost: (Math.floor(userInput.length / 4) + 50) * parseFloat(this.estimatedCost),
-        timestamp: Date.now()
-      });
-
-      this.isTyping = false;
-      this.scrollToBottom();
-    },
-
-    recognizeIntent(text) {
-      const lowerText = text.toLowerCase();
-      const intents = [];
-
-      // Writing intent
-      if (lowerText.includes('write') || lowerText.includes('blog') || lowerText.includes('article') || lowerText.includes('content')) {
-        intents.push({ type: 'writing', confidence: 0.92 });
-      }
-
-      // Code intent
-      if (lowerText.includes('code') || lowerText.includes('program') || lowerText.includes('script') || lowerText.includes('review')) {
-        intents.push({ type: 'coding', confidence: 0.88 });
-      }
-
-      // Research intent
-      if (lowerText.includes('research') || lowerText.includes('analyze') || lowerText.includes('study') || lowerText.includes('investigate')) {
-        intents.push({ type: 'research', confidence: 0.85 });
-      }
-
-      // Translation intent
-      if (lowerText.includes('translate') || lowerText.includes('translation') || lowerText.includes('language')) {
-        intents.push({ type: 'translation', confidence: 0.90 });
-      }
-
-      // Default intent
-      if (intents.length === 0) {
-        intents.push({ type: 'general', confidence: 0.70 });
-      }
-
-      return {
-        primary: intents[0].type,
-        confidence: intents[0].confidence,
-        all: intents
-      };
-    },
-
-    createResponse(intents, userInput) {
-      const responses = {
-        writing: {
-          text: 'I can help you with writing! Here are some professional writing services available:',
-          recommendations: [
-            { id: '1', name: 'Pro Content Writer', description: 'High-quality blog posts, articles, and marketing copy', price: '50', provider: 'AliceWriter', rating: 4.8, estimatedTime: '2 hours' },
-            { id: '2', name: 'Technical Writer', description: 'Documentation, whitepapers, and technical guides', price: '80', provider: 'TechWrite Pro', rating: 4.9, estimatedTime: '4 hours' },
-            { id: '3', name: 'Creative Writing', description: 'Stories, scripts, and creative content', price: '60', provider: 'CreativeAI', rating: 4.7, estimatedTime: '3 hours' }
-          ]
-        },
-        coding: {
-          text: 'I found several coding experts who can help you! Check out these services:',
-          recommendations: [
-            { id: '4', name: 'Smart Contract Auditor', description: 'Security audit for blockchain smart contracts', price: '200', provider: 'SecureCode', rating: 4.9, estimatedTime: '24 hours' },
-            { id: '5', name: 'Python Developer', description: 'Data analysis scripts and automation tools', price: '100', provider: 'PyExpert', rating: 4.8, estimatedTime: '6 hours' },
-            { id: '6', name: 'Code Reviewer', description: 'Professional code review and optimization', price: '75', provider: 'CodeQuality', rating: 4.7, estimatedTime: '4 hours' }
-          ]
-        },
-        research: {
-          text: 'For research tasks, here are specialized services:',
-          recommendations: [
-            { id: '7', name: 'DeFi Analyst', description: 'Deep dive into DeFi protocols and yield strategies', price: '150', provider: 'DeFiResearch', rating: 4.8, estimatedTime: '12 hours' },
-            { id: '8', name: 'Market Researcher', description: 'Market analysis and competitive intelligence', price: '120', provider: 'MarketIntel', rating: 4.6, estimatedTime: '8 hours' }
-          ]
-        },
-        translation: {
-          text: 'Translation services available in 50+ languages:',
-          recommendations: [
-            { id: '9', name: 'Professional Translator', description: 'Native-level translation with cultural adaptation', price: '30', provider: 'LinguaPro', rating: 4.9, estimatedTime: '2 hours' },
-            { id: '10', name: 'Technical Translator', description: 'Technical documents and manuals', price: '50', provider: 'TechLingua', rating: 4.7, estimatedTime: '4 hours' }
-          ]
-        },
-        general: {
-          text: 'Here are some popular AI services that might help you:',
-          recommendations: [
-            { id: '11', name: 'AI Assistant', description: 'General-purpose AI assistance', price: '20', provider: 'GenieBot', rating: 4.5, estimatedTime: '1 hour' },
-            { id: '12', name: 'Data Analyst', description: 'Data processing and visualization', price: '100', provider: 'DataWiz', rating: 4.8, estimatedTime: '6 hours' }
-          ]
-        }
-      };
-
-      return responses[intents.primary] || responses.general;
-    },
-
-    selectService(service) {
-      this.selectedService = service;
-    },
-
-    closeModal() {
-      this.selectedService = null;
-    },
-
-    confirmService() {
-      // Add confirmation message
-      this.messages.push({
-        role: 'assistant',
-        content: `Service "${this.selectedService.name}" selected! The task has been submitted to the provider. You'll be notified when it's complete.`,
-        timestamp: Date.now()
-      });
-      this.closeModal();
-      this.scrollToBottom();
-    },
-
     async fetchUserBalance() {
-      // TODO: Fetch actual balance from wallet
-      this.userBalance = 1000; // Placeholder
+      if (!this.agentGatewayUrl) return;
+
+      try {
+        // Get wallet address from electron API or use a default
+        let address = 'cosmos1user';
+        if (window.electronAPI && window.electronAPI.walletGetAddress) {
+          address = await window.electronAPI.walletGetAddress();
+        }
+
+        const response = await fetch(this.agentGatewayUrl + '/mcp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'tools/call',
+            id: Date.now(),
+            params: {
+              name: 'query_balance',
+              arguments: { address }
+            }
+          })
+        });
+
+        const data = await response.json();
+        if (data.result?.content?.[0]?.text) {
+          const result = JSON.parse(data.result.content[0].text);
+          this.userBalance = result.balance / 1000000; // Convert to STT
+        }
+      } catch (e) {
+        console.log('Could not fetch balance:', e);
+        this.userBalance = 0;
+      }
+    },
+
+    showAgentConfiguration() {
+      this.showAgentConfig = true;
+    },
+
+    closeAgentConfig() {
+      this.showAgentConfig = false;
+    },
+
+    saveAgentConfig() {
+      localStorage.setItem('geniebot_agent_config', JSON.stringify(this.customAgentConfig));
+      this.showAgentConfig = false;
+      this.hasClaudeCode = true;
     },
 
     scrollToBottom() {
@@ -350,7 +437,52 @@ export default {
   font-size: 0.95rem;
 }
 
-.model-selector {
+.connection-status {
+  padding: 0.5rem 1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.connected {
+  background: #28a745;
+}
+
+.status-dot.connecting {
+  background: #ffc107;
+  animation: pulse 1.5s infinite;
+}
+
+.status-dot.error {
+  background: #dc3545;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-text {
+  color: #6c757d;
+}
+
+.gateway-url {
+  color: #17a2b8;
+  margin-left: auto;
+  font-family: monospace;
+}
+
+.agent-selector {
   padding: 1rem 1.5rem;
   background: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
@@ -359,7 +491,7 @@ export default {
   gap: 1rem;
 }
 
-.model-select {
+.agent-select {
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -370,6 +502,10 @@ export default {
   color: #28a745;
   font-weight: bold;
   font-size: 0.9rem;
+}
+
+.cost-estimate.free {
+  color: #17a2b8;
 }
 
 .chat-messages {
@@ -418,6 +554,7 @@ export default {
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   line-height: 1.5;
+  white-space: pre-wrap;
 }
 
 .message.user .message-text {
@@ -437,66 +574,65 @@ export default {
   justify-content: flex-end;
 }
 
-.intent-tag {
-  margin-top: 0.5rem;
-  font-size: 0.75rem;
-  color: #17a2b8;
-  font-weight: bold;
-}
-
-.service-recommendations {
-  margin-top: 1rem;
-}
-
-.service-recommendations h4 {
-  margin: 0 0 0.75rem;
-  color: #495057;
-  font-size: 0.9rem;
-}
-
-.service-card {
-  background: white;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.service-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.15);
-}
-
-.service-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.service-name {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-.service-price {
+.cost {
   color: #28a745;
   font-weight: bold;
 }
 
-.service-description {
-  color: #6c757d;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+.cost.free {
+  color: #17a2b8;
 }
 
-.service-meta {
+.agent-tag {
+  background: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+}
+
+.tool-calls {
+  margin-top: 0.5rem;
+}
+
+.tool-call {
   display: flex;
-  gap: 1rem;
-  font-size: 0.8rem;
-  color: #adb5bd;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.tool-icon {
+  font-size: 1rem;
+}
+
+.tool-name {
+  font-weight: bold;
+  color: #495057;
+}
+
+.tool-status {
+  margin-left: auto;
+  color: #6c757d;
+  font-size: 0.75rem;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-icon {
+  font-size: 1.2rem;
 }
 
 .chat-input-area {
@@ -548,6 +684,11 @@ export default {
   border-color: #667eea;
 }
 
+.chat-input:disabled {
+  background: #f8f9fa;
+  cursor: not-allowed;
+}
+
 .send-btn {
   padding: 0.75rem 1.25rem;
   background: #667eea;
@@ -581,7 +722,6 @@ export default {
   font-weight: bold;
 }
 
-/* Typing indicator */
 .typing-indicator {
   display: flex;
   gap: 4px;
@@ -636,27 +776,34 @@ export default {
   color: #2c3e50;
 }
 
-.modal-description {
-  color: #6c757d;
+.modal-content {
   margin-bottom: 1.5rem;
 }
 
-.modal-details {
-  background: #f8f9fa;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
+.form-group {
+  margin-bottom: 1rem;
 }
 
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #e9ecef;
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #495057;
+  font-weight: 500;
 }
 
-.detail-row:last-child {
-  border-bottom: none;
+.form-select,
+.form-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.form-select:focus,
+.form-input:focus {
+  outline: none;
+  border-color: #667eea;
 }
 
 .modal-actions {

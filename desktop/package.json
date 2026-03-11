@@ -29,7 +29,8 @@
         "from": "../bin",
         "to": "bin",
         "filter": [
-          "sharetokend*"
+          "sharetokend*",
+          "agent-gateway*"
         ]
       },
       {
