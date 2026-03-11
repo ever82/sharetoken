@@ -107,6 +107,12 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "sharetoken",
+      "repo": "sharetoken",
+      "releaseType": "release"
     }
   },
   "keywords": [
@@ -129,6 +135,7 @@
     "@cosmjs/encoding": "^0.32.4",
     "@cosmjs/proto-signing": "^0.32.4",
     "@cosmjs/stargate": "^0.32.4",
+    "electron-updater": "^6.1.7",
     "node-fetch": "^3.3.2"
   }
 }

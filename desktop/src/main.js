@@ -6,6 +6,9 @@ const fs = require('fs');
 // Wallet manager
 const walletManager = require('./wallet');
 
+// Auto updater
+const { initAutoUpdater, checkForUpdates, startAutoCheck } = require('./updater');
+
 // 保持全局窗口对象，防止被垃圾回收
 let mainWindow;
 let sharetokenProcess = null;
@@ -340,6 +343,10 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow();
 
+  // 初始化自动更新
+  initAutoUpdater(mainWindow);
+  startAutoCheck(mainWindow);
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
@@ -637,3 +644,27 @@ ipcMain.handle('mcp-initialize', async () => {
 console.log('ShareToken Desktop starting...');
 console.log('Platform:', platform);
 console.log('UserData:', app.getPath('userData'));
+
+// ============ Auto Updater IPC Handlers ============
+
+// 手动检查更新
+ipcMain.handle('updater-check', async () => {
+  checkForUpdates(mainWindow, true);
+  return { success: true };
+});
+
+// 获取更新状态
+ipcMain.handle('updater-get-status', () => {
+  const { getUpdateStatus } = require('./updater');
+  return getUpdateStatus();
+});
+
+// 立即安装更新
+ipcMain.handle('updater-install', () => {
+  const { installUpdate } = require('./updater');
+  installUpdate();
+  return { success: true };
+});
+
+// 监听更新状态并转发到渲染进程
+// （已经在 updater.js 中通过 mainWindow.webContents.send 实现）
