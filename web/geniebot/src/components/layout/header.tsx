@@ -3,6 +3,8 @@ import { Bot, Menu, Settings, User } from 'lucide-react'
 import { cn } from '@/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { WalletButton } from '@/components/wallet/wallet-button'
+import { AuthButton } from '@/components/auth/auth-button'
 
 interface HeaderProps {
   className?: string
@@ -28,14 +30,11 @@ export function Header({ className, onMenuClick }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2">
+        <AuthButton className="hidden sm:flex" />
+        <WalletButton />
         <Button variant="ghost" size="icon">
           <Settings className="h-5 w-5" />
         </Button>
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>
-            <User className="h-4 w-4" />
-          </AvatarFallback>
-        </Avatar>
       </div>
     </header>
   )

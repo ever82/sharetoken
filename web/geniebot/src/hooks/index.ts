@@ -1,6 +1,15 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import type { Message, Task, ChatSession, ServiceRecommendation, Intent } from '@/types'
+import type {
+  Message,
+  Task,
+  ChatSession,
+  ServiceRecommendation,
+  Intent,
+} from '@/types'
 import { apiService } from '@/services/api'
+import { a2aService } from '@/services/a2a'
+import { walletService } from '@/services/wallet'
+import { authService } from '@/services/auth'
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -8,17 +17,18 @@ export function useChat() {
   const [currentIntent, setCurrentIntent] = useState<Intent | null>(null)
   const [recommendations, setRecommendations] = useState<ServiceRecommendation[]>([])
 
-  const sendMessage = useCallback(async (content: string) => {
+  const sendMessage = useCallback(async (content: string, signed = false) => {
     setIsLoading(true)
 
     // Add user message
+    const userMessageId = Date.now().toString()
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: userMessageId,
       role: 'user',
       content,
       timestamp: Date.now(),
     }
-    setMessages(prev => [...prev, userMessage])
+    setMessages((prev) => [...prev, userMessage])
 
     try {
       // Detect intent
@@ -31,19 +41,21 @@ export function useChat() {
         setRecommendations(recs)
       }
 
-      // Send message to API
-      const response = await apiService.sendMessage(content)
+      // Send message with signature if requested
+      let response: Message
+      if (signed && authService.isAuthenticated()) {
+        response = await apiService.signAndSendMessage(content)
+      } else {
+        response = await apiService.sendMessage(content)
+      }
 
       // Add assistant message
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response.content,
-        timestamp: Date.now(),
+        ...response,
         intent,
-        services: recommendations,
+        services: recommendations.length > 0 ? recommendations : undefined,
       }
-      setMessages(prev => [...prev, assistantMessage])
+      setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
       // Add error message
       const errorMessage: Message = {
@@ -52,7 +64,7 @@ export function useChat() {
         content: 'Sorry, I encountered an error. Please try again.',
         timestamp: Date.now(),
       }
-      setMessages(prev => [...prev, errorMessage])
+      setMessages((prev) => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
     }
@@ -82,38 +94,90 @@ export function useTasks() {
     setIsLoading(true)
     try {
       const data = await apiService.getTasks()
-      setTasks(data)
+      // Merge with A2A tasks
+      const a2aTasks = a2aService.getCachedTasks().map((task) => ({
+        id: task.id,
+        name: task.agentId,
+        description: `A2A task for skill ${task.skillId}`,
+        status: task.status === 'completed' ? 'completed' : 'running',
+        progress: task.status === 'completed' ? 100 : 0,
+        createdAt: task.createdAt,
+        result: task.result
+          ? {
+              content: task.result.content,
+              format: task.result.format as 'text' | 'json' | 'markdown' | 'code',
+            }
+          : undefined,
+      }))
+      setTasks([...a2aTasks, ...data])
     } finally {
       setIsLoading(false)
     }
   }, [])
 
-  const invokeService = useCallback(async (serviceId: string, params: Record<string, unknown>) => {
-    setIsLoading(true)
-    try {
-      const task = await apiService.invokeService(serviceId, params)
-      setTasks(prev => [task, ...prev])
-      return task
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+  const invokeService = useCallback(
+    async (serviceId: string, params: Record<string, unknown>) => {
+      setIsLoading(true)
+      try {
+        // Check if this is an A2A agent
+        const agent = await a2aService.getAgent(serviceId)
+        if (agent) {
+          const task = await a2aService.submitTask(
+            serviceId,
+            'default',
+            params,
+            undefined // Will sign if authenticated
+          )
+          const newTask: Task = {
+            id: task.id,
+            name: agent.name,
+            description: `A2A task from ${agent.name}`,
+            status: 'pending',
+            progress: 0,
+            createdAt: task.createdAt,
+          }
+          setTasks((prev) => [newTask, ...prev])
+          return newTask
+        }
+
+        const task = await apiService.invokeService(serviceId, params)
+        setTasks((prev) => [task, ...prev])
+        return task
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    []
+  )
 
   const updateTaskProgress = useCallback((taskId: string, progress: number) => {
-    setTasks(prev =>
-      prev.map(task =>
+    setTasks((prev) =>
+      prev.map((task) =>
         task.id === taskId ? { ...task, progress } : task
       )
     )
   }, [])
 
   const updateTaskStatus = useCallback((taskId: string, status: Task['status']) => {
-    setTasks(prev =>
-      prev.map(task =>
+    setTasks((prev) =>
+      prev.map((task) =>
         task.id === taskId ? { ...task, status } : task
       )
     )
   }, [])
+
+  const pollTaskResult = useCallback(
+    async (taskId: string, onUpdate: (task: Task) => void) => {
+      try {
+        const result = await apiService.pollTaskResult(taskId, onUpdate)
+        return result
+      } catch (error) {
+        console.error('Failed to poll task result:', error)
+        throw error
+      }
+    },
+    []
+  )
 
   useEffect(() => {
     fetchTasks()
@@ -125,6 +189,7 @@ export function useTasks() {
     invokeService,
     updateTaskProgress,
     updateTaskStatus,
+    pollTaskResult,
     refreshTasks: fetchTasks,
   }
 }
@@ -173,7 +238,7 @@ export function useSessions() {
     try {
       const session = await apiService.createSession()
       setCurrentSession(session)
-      setSessions(prev => [session, ...prev])
+      setSessions((prev) => [session, ...prev])
       return session
     } finally {
       setIsLoading(false)
@@ -195,5 +260,74 @@ export function useSessions() {
     createSession,
     selectSession,
     refreshSessions: fetchSessions,
+  }
+}
+
+export function useA2A() {
+  const [agents, setAgents] = useState<Agent[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  const discoverAgents = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const discovered = await a2aService.discoverAgents()
+      setAgents(discovered)
+      return discovered
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  const submitTask = useCallback(
+    async (
+      agentId: string,
+      skillId: string,
+      parameters: Record<string, unknown>
+    ) => {
+      return a2aService.submitTask(agentId, skillId, parameters)
+    },
+    []
+  )
+
+  const pollForResult = useCallback(
+    async (
+      taskId: string,
+      onUpdate: (task: { id: string; status: string; progress: number }) => void
+    ) => {
+      return a2aService.pollForResult(taskId, (a2aTask) => {
+        onUpdate({
+          id: a2aTask.id,
+          status: a2aTask.status,
+          progress: a2aTask.status === 'completed' ? 100 : 0,
+        })
+      })
+    },
+    []
+  )
+
+  useEffect(() => {
+    // Get cached agents
+    const cached = a2aService.getCachedAgents()
+    if (cached.length > 0) {
+      setAgents(cached)
+    }
+
+    // Discover agents
+    discoverAgents()
+
+    // Connect WebSocket
+    a2aService.connectWebSocket()
+
+    return () => {
+      a2aService.disconnectWebSocket()
+    }
+  }, [discoverAgents])
+
+  return {
+    agents,
+    isLoading,
+    discoverAgents,
+    submitTask,
+    pollForResult,
   }
 }
