@@ -175,7 +175,8 @@ func (s *MCPHandlerTestSuite) TestCreateTaskTool() {
 	content, ok := result["content"].([]map[string]interface{})
 	require.True(s.T(), ok)
 
-	text := content[0]["text"].(string)
+	text, ok := content[0]["text"].(string)
+	require.True(s.T(), ok, "text should be a string")
 	require.Contains(s.T(), text, "task-")
 	require.Contains(s.T(), text, "created")
 }
@@ -208,7 +209,8 @@ func (s *MCPHandlerTestSuite) TestCreateEscrowTool() {
 	content, ok := result["content"].([]map[string]interface{})
 	require.True(s.T(), ok)
 
-	text := content[0]["text"].(string)
+	text, ok := content[0]["text"].(string)
+	require.True(s.T(), ok, "text should be a string")
 	require.Contains(s.T(), text, "escrow-")
 	require.Contains(s.T(), text, "locked")
 }
@@ -425,7 +427,8 @@ func (s *MCPHandlerTestSuite) TestSearchCodeTool() {
 	content, ok := result["content"].([]map[string]interface{})
 	require.True(s.T(), ok)
 
-	text := content[0]["text"].(string)
+	text, ok := content[0]["text"].(string)
+	require.True(s.T(), ok, "text should be a string")
 	require.Contains(s.T(), text, "query")
 	require.Contains(s.T(), text, "results")
 }
