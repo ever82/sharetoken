@@ -2,7 +2,6 @@ syntax = "proto3";
 package sharetoken.llmcustody;
 
 import "gogoproto/gogo.proto";
-import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "sharetoken/x/llmcustody/types";
 
@@ -49,12 +48,4 @@ message APIKey {
   int64 usage_count = 9;
   // active indicates if the key is active
   bool active = 10;
-}
-
-// GenesisState defines the llmcustody module's genesis state
-message GenesisState {
-  // api_keys is the list of API keys
-  repeated APIKey api_keys = 1 [(gogoproto.nullable) = false];
-  // encryption_key is the key encryption key (KEK)
-  bytes encryption_key = 2;
 }
