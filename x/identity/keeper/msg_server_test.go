@@ -3,7 +3,6 @@ package keeper
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	tmdb "github.com/cometbft/cometbft-db"
 	"github.com/cometbft/cometbft/libs/log"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -13,6 +12,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	typesparams "github.com/cosmos/cosmos-sdk/x/params/types"
+	"github.com/stretchr/testify/require"
 
 	"sharetoken/testutil/sample"
 	"sharetoken/x/identity/types"
