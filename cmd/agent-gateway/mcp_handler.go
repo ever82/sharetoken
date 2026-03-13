@@ -521,7 +521,11 @@ func (s *MCPServer) handleToolCall(ctx context.Context, req MCPRequest) MCPRespo
 
 // toJSON 转换为 JSON 字符串
 func toJSON(v interface{}) string {
-	b, _ := json.Marshal(v)
+	b, err := json.Marshal(v)
+	if err != nil {
+		log.Printf("JSON marshal error: %v", err)
+		return fmt.Sprintf("{\"error\": \"failed to marshal result: %v\"}", err)
+	}
 	return string(b)
 }
 

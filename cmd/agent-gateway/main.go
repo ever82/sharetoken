@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"sharetoken/x/agentgateway/a2a"
 	"sharetoken/x/agentgateway/keeper"
@@ -100,7 +101,15 @@ func runHTTP(k *keeper.Keeper, port string) {
 	log.Printf("A2A endpoint: http://localhost%s/a2a/", addr)
 	log.Printf("Agent Card: http://localhost%s/.well-known/agent.json", addr)
 
-	if err := http.ListenAndServe(addr, mux); err != nil {
+	server := &http.Server{
+		Addr:         addr,
+		Handler:      mux,
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Server error: %v", err)
 	}
 }
