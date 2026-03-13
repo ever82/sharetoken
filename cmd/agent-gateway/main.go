@@ -14,8 +14,8 @@ import (
 
 func main() {
 	var (
-		transport   = flag.String("transport", "stdio", "Transport type: stdio or http")
-		httpPort    = flag.String("port", "8080", "HTTP server port")
+		transport     = flag.String("transport", "stdio", "Transport type: stdio or http")
+		httpPort      = flag.String("port", "8080", "HTTP server port")
 		chainEndpoint = flag.String("chain-endpoint", "http://localhost:26657", "Chain RPC endpoint")
 	)
 	flag.Parse()

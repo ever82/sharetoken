@@ -141,7 +141,7 @@ func (c *LLMClient) Invoke(model string, prompt string) (*AIModelResult, error) 
 // callLLM 调用LLM API
 func (c *LLMClient) callLLM(prompt string) (string, error) {
 	// 构建Anthropic API请求
-	reqBody := map[string]interface{
+	reqBody := map[string]interface {
 	}{
 		"model":      c.model,
 		"max_tokens": 1024,
@@ -205,42 +205,42 @@ func (c *LLMClient) callLLM(prompt string) (string, error) {
 // recognizeIntentLocal 本地意图识别 (当API不可用时)
 func (c *LLMClient) recognizeIntentLocal(intent string) *IntentResult {
 	keywords := map[string]string{
-		"翻译":      "translation",
+		"翻译":        "translation",
 		"translate": "translation",
-		"代码":      "coding",
+		"代码":        "coding",
 		"code":      "coding",
-		"写":       "writing",
+		"写":         "writing",
 		"write":     "writing",
-		"画":       "image_generation",
+		"画":         "image_generation",
 		"draw":      "image_generation",
-		"图":       "image_generation",
+		"图":         "image_generation",
 		"image":     "image_generation",
-		"分析":      "data_analysis",
+		"分析":        "data_analysis",
 		"analyze":   "data_analysis",
-		"总结":      "summarization",
+		"总结":        "summarization",
 		"summarize": "summarization",
-		"解释":      "explanation",
+		"解释":        "explanation",
 		"explain":   "explanation",
-		"优化":      "optimization",
+		"优化":        "optimization",
 		"optimize":  "optimization",
-		"修复":      "debugging",
+		"修复":        "debugging",
 		"fix":       "debugging",
 		"bug":       "debugging",
-		"测试":      "test_generation",
+		"测试":        "test_generation",
 		"test":      "test_generation",
-		"推荐":      "recommendation",
+		"推荐":        "recommendation",
 		"recommend": "recommendation",
-		"比较":      "comparison",
+		"比较":        "comparison",
 		"compare":   "comparison",
-		"预测":      "prediction",
+		"预测":        "prediction",
 		"predict":   "prediction",
-		"分类":      "classification",
+		"分类":        "classification",
 		"classify":  "classification",
-		"提取":      "extraction",
+		"提取":        "extraction",
 		"extract":   "extraction",
-		"回答":      "qa",
+		"回答":        "qa",
 		"answer":    "qa",
-		"计算":      "calculation",
+		"计算":        "calculation",
 		"calculate": "calculation",
 	}
 
@@ -271,13 +271,13 @@ func (c *LLMClient) cleanResponse(response string) string {
 // getPricePerToken 获取模型单价
 func (c *LLMClient) getPricePerToken(model string) float64 {
 	prices := map[string]float64{
-		"openai/gpt-4":             0.00003,
-		"gpt-4":                    0.00003,
-		"anthropic/claude-3":       0.00003,
-		"claude-3":                 0.00003,
-		"gpt-3.5-turbo":            0.000002,
+		"openai/gpt-4":               0.00003,
+		"gpt-4":                      0.00003,
+		"anthropic/claude-3":         0.00003,
+		"claude-3":                   0.00003,
+		"gpt-3.5-turbo":              0.000002,
 		"stability/stable-diffusion": 0.0001,
-		"cohere/command":           0.000015,
+		"cohere/command":             0.000015,
 	}
 
 	if price, ok := prices[model]; ok {

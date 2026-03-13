@@ -29,5 +29,4 @@
 //	func (msg MsgMyMessage) GetSigners() []sdk.AccAddress {
 //	    return validation.MustGetSigners(msg.Sender)
 //	}
-//
 package validation

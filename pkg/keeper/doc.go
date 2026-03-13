@@ -28,5 +28,4 @@
 //
 //	// Using message server utilities
 //	sdkCtx := keeper.UnwrapContext(ctx)
-//
 package keeper

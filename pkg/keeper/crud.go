@@ -21,9 +21,9 @@ type StoreAccessor func(ctx sdk.Context) sdk.KVStore
 // CRUDKeeper provides generic CRUD operations for any type that implements KVStoreItem.
 // This reduces boilerplate code in keepers that perform similar operations.
 type CRUDKeeper[T KVStoreItem] struct {
-	cdc       codec.BinaryCodec
-	storeKey  storetypes.StoreKey
-	prefix    []byte
+	cdc      codec.BinaryCodec
+	storeKey storetypes.StoreKey
+	prefix   []byte
 }
 
 // NewCRUDKeeper creates a new CRUD keeper for the given type

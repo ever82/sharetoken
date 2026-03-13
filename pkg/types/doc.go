@@ -18,5 +18,4 @@
 //	    accountKeeper pkgtypes.AccountKeeper
 //	    bankKeeper    pkgtypes.BankKeeper
 //	}
-//
 package types
