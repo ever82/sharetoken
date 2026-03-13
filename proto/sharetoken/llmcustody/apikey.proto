@@ -1,0 +1,60 @@
+syntax = "proto3";
+package sharetoken.llmcustody;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "sharetoken/x/llmcustody/types";
+
+// Provider represents LLM provider type
+enum Provider {
+  PROVIDER_UNSPECIFIED = 0;
+  PROVIDER_OPENAI = 1;
+  PROVIDER_ANTHROPIC = 2;
+}
+
+// AccessRule represents an access control rule
+message AccessRule {
+  // service_id is the allowed service ID
+  string service_id = 1;
+  // allowed indicates if access is allowed
+  bool allowed = 2;
+  // rate_limit is the maximum requests per minute
+  int64 rate_limit = 3;
+  // max_requests is the total request limit
+  int64 max_requests = 4;
+  // price_per_req is the price per request in ustt
+  int64 price_per_req = 5;
+}
+
+// APIKey represents an encrypted API key stored on chain
+message APIKey {
+  // id is the unique API key ID
+  string id = 1;
+  // provider is the LLM provider
+  Provider provider = 2;
+  // encrypted_key is the AES-256-GCM encrypted key
+  bytes encrypted_key = 3;
+  // hash is the SHA-256 hash for verification
+  string hash = 4;
+  // owner is the owner's address
+  string owner = 5;
+  // access_rules defines access control rules
+  repeated AccessRule access_rules = 6 [(gogoproto.nullable) = false];
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 7;
+  // last_used_at is the Unix timestamp of last use
+  int64 last_used_at = 8;
+  // usage_count is the number of times the key has been used
+  int64 usage_count = 9;
+  // active indicates if the key is active
+  bool active = 10;
+}
+
+// GenesisState defines the llmcustody module's genesis state
+message GenesisState {
+  // api_keys is the list of API keys
+  repeated APIKey api_keys = 1 [(gogoproto.nullable) = false];
+  // encryption_key is the key encryption key (KEK)
+  bytes encryption_key = 2;
+}

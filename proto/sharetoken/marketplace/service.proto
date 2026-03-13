@@ -1,0 +1,54 @@
+syntax = "proto3";
+package sharetoken.marketplace;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "sharetoken/x/marketplace/types";
+
+// ServiceLevel represents the level of service
+enum ServiceLevel {
+  SERVICE_LEVEL_UNSPECIFIED = 0;
+  SERVICE_LEVEL_LLM = 1;
+  SERVICE_LEVEL_AGENT = 2;
+  SERVICE_LEVEL_WORKFLOW = 3;
+}
+
+// PricingMode represents the pricing mode
+enum PricingMode {
+  PRICING_MODE_UNSPECIFIED = 0;
+  PRICING_MODE_FIXED = 1;
+  PRICING_MODE_DYNAMIC = 2;
+  PRICING_MODE_AUCTION = 3;
+}
+
+// Service represents a service offering
+message Service {
+  // id is the unique service ID
+  string id = 1;
+  // provider is the provider's address
+  string provider = 2;
+  // name is the service name
+  string name = 3;
+  // description is the service description
+  string description = 4;
+  // level is the service level
+  ServiceLevel level = 5;
+  // pricing_mode is the pricing mode
+  PricingMode pricing_mode = 6;
+  // price is the service price
+  repeated cosmos.base.v1beta1.Coin price = 7 [
+    (gogoproto.nullable) = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // active indicates if the service is active
+  bool active = 8;
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 9;
+}
+
+// GenesisState defines the marketplace module's genesis state
+message GenesisState {
+  // services is the list of services
+  repeated Service services = 1 [(gogoproto.nullable) = false];
+}

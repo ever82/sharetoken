@@ -1,0 +1,57 @@
+syntax = "proto3";
+package sharetoken.oracle;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "sharetoken/x/oracle/types";
+
+// PriceSource represents the source of price data
+enum PriceSource {
+  PRICE_SOURCE_UNSPECIFIED = 0;
+  PRICE_SOURCE_CHAINLINK = 1;
+  PRICE_SOURCE_MANUAL = 2;
+}
+
+// Price represents a price data point
+message Price {
+  // symbol is the price symbol (e.g., "STT/USD")
+  string symbol = 1;
+  // price is the price value
+  string price = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  // timestamp is the Unix timestamp
+  int64 timestamp = 3;
+  // source is the price source
+  PriceSource source = 4;
+  // confidence is the confidence level (0-100)
+  int32 confidence = 5;
+}
+
+// LLMPrice represents LLM API pricing
+message LLMPrice {
+  // provider is the LLM provider (e.g., "openai", "anthropic")
+  string provider = 1;
+  // model is the model name (e.g., "gpt-4", "claude-3")
+  string model = 2;
+  // input_price is the price per 1K input tokens
+  string input_price = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  // output_price is the price per 1K output tokens
+  string output_price = 4 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  // currency is the currency (e.g., "USD")
+  string currency = 5;
+}
+
+// GenesisState defines the oracle module's genesis state
+message GenesisState {
+  // prices is the list of prices
+  repeated Price prices = 1 [(gogoproto.nullable) = false];
+}
