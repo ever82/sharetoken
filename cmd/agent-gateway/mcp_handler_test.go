@@ -69,7 +69,9 @@ func (s *MCPHandlerTestSuite) TestToolsList() {
 	// 验证工具名称
 	toolNames := make([]string, len(tools))
 	for i, tool := range tools {
-		toolNames[i] = tool["name"].(string)
+		name, ok := tool["name"].(string)
+		require.True(s.T(), ok, "tool name should be a string")
+		toolNames[i] = name
 	}
 	require.Contains(s.T(), toolNames, "query_balance")
 	require.Contains(s.T(), toolNames, "chat_with_genie")
@@ -105,7 +107,8 @@ func (s *MCPHandlerTestSuite) TestQueryBalanceTool() {
 	require.True(s.T(), ok)
 	require.Len(s.T(), content, 1)
 
-	text := content[0]["text"].(string)
+	text, ok := content[0]["text"].(string)
+	require.True(s.T(), ok, "text should be a string")
 	require.Contains(s.T(), text, "cosmos1test123")
 	require.Contains(s.T(), text, "balance")
 }
@@ -139,7 +142,8 @@ func (s *MCPHandlerTestSuite) TestChatWithGenieTool() {
 	require.True(s.T(), ok)
 	require.Len(s.T(), content, 1)
 
-	text := content[0]["text"].(string)
+	text, ok := content[0]["text"].(string)
+	require.True(s.T(), ok, "text should be a string")
 	require.NotEmpty(s.T(), text)
 }
 

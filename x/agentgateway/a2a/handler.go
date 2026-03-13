@@ -163,13 +163,13 @@ func (h *Handler) handleNegotiate(w http.ResponseWriter, r *http.Request) {
 		"message":   "Bid accepted",
 	}
 
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // writeError 写入错误响应
 func (h *Handler) writeError(w http.ResponseWriter, status int, message string) {
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{
 		"error": message,
 	})
 }
