@@ -1,6 +1,6 @@
 module sharetoken
 
-go 1.19
+go 1.22
 
 require (
 	cosmossdk.io/api v0.3.1

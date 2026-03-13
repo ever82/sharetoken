@@ -4,7 +4,7 @@
 
 **一个基于 Cosmos SDK 的去中心化平台，让用户安全地使用和提供 AI 服务**
 
-[![Go Version](https://img.shields.io/badge/go-1.21+-blue.svg)](https://golang.org)
+[![Go Version](https://img.shields.io/badge/go-1.22+-blue.svg)](https://golang.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 [快速开始](#快速开始) | [安装指南](#安装指南) | [功能特性](#功能特性) | [使用教程](#使用教程)
@@ -28,7 +28,7 @@ ShareToken 是一个**去中心化的 AI 服务市场**，让您能够：
 
 | 组件 | 最低版本 | 说明 |
 |------|---------|------|
-| **Go** | 1.21+ | 区块链节点运行环境 |
+| **Go** | 1.22+ | 区块链节点运行环境 |
 | **Node.js** | 18+ | 前端界面运行环境 |
 | **操作系统** | macOS/Linux | Windows 需使用 WSL2 |
 | **内存** | 4GB+ | 推荐 8GB |
