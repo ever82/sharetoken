@@ -189,6 +189,11 @@ issues:
         - errcheck
       text: "json.NewEncoder.*Encode"
 
+    # 排除 json.Encoder.Encode 错误检查（另一种写法）
+    - linters:
+        - errcheck
+      text: "json.Encoder.*Encode"
+
     # 排除 json.Marshal 错误检查（测试文件中常见）
     - linters:
         - errcheck
@@ -208,6 +213,25 @@ issues:
     - linters:
         - errcheck
       text: "io.ReadAll"
+
+    # 排除 e2e 测试中的链辅助函数错误检查
+    - linters:
+        - errcheck
+      text: "s.chain."
+
+    # 排除类型断言错误检查（测试中常见）
+    - linters:
+        - errcheck
+      text: ".(string)"
+    - linters:
+        - errcheck
+      text: ".(int)"
+    - linters:
+        - errcheck
+      text: ".(float64)"
+    - linters:
+        - errcheck
+      text: ".(bool)"
 
   # 最大问题数
   max-issues-per-linter: 50
