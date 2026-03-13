@@ -3,41 +3,55 @@ package keeper
 import (
 	"fmt"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"sharetoken/x/taskmarket/types"
 )
 
 // SubmitRating submits a rating
-func (lk *LegacyKeeper) SubmitRating(rating *types.Rating) error {
+func (k Keeper) SubmitRating(ctx sdk.Context, rating types.Rating) error {
 	if err := rating.Validate(); err != nil {
 		return fmt.Errorf("invalid rating: %w", err)
 	}
-	task := lk.GetTask(rating.TaskID)
-	if task == nil {
+	task, found := k.GetTask(ctx, rating.TaskID)
+	if !found {
 		return fmt.Errorf("task not found: %s", rating.TaskID)
 	}
 	if task.Status != types.TaskStatusCompleted {
 		return fmt.Errorf("task is not completed")
 	}
-	lk.ratings[rating.ID] = rating
-	rep, exists := lk.reputations[rating.RatedID]
-	if !exists {
-		rep = types.NewReputation(rating.RatedID)
+
+	// Check if rater has already rated this task
+	existingRatings := k.GetRatingsByTask(ctx, rating.TaskID)
+	for _, existing := range existingRatings {
+		if existing.RaterID == rating.RaterID {
+			return fmt.Errorf("rater has already submitted a rating for this task")
+		}
 	}
-	rep.AddRating(rating)
-	lk.reputations[rating.RatedID] = rep
+
+	k.SetRating(ctx, rating)
+
+	// Update reputation
+	rep, found := k.GetReputation(ctx, rating.RatedID)
+	if !found {
+		rep = *types.NewReputation(rating.RatedID)
+	}
+	rep.AddRating(&rating)
+	k.SetReputation(ctx, rep)
+
 	return nil
 }
 
-// GetRating gets a rating by ID
-func (lk *LegacyKeeper) GetRating(id string) *types.Rating {
-	return lk.ratings[id]
-}
-
-// GetReputation gets reputation for a user
-func (lk *LegacyKeeper) GetReputation(userID string) *types.Reputation {
-	rep, exists := lk.reputations[userID]
-	if !exists {
+// GetReputationByUserID gets reputation for a user (alias for GetReputation for consistency)
+func (k Keeper) GetReputationByUserID(ctx sdk.Context, userID string) *types.Reputation {
+	rep, found := k.GetReputation(ctx, userID)
+	if !found {
 		return types.NewReputation(userID)
 	}
-	return rep
+	return &rep
+}
+
+// UpdateReputation updates a user's reputation
+func (k Keeper) UpdateReputation(ctx sdk.Context, rep types.Reputation) {
+	k.SetReputation(ctx, rep)
 }

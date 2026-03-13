@@ -119,9 +119,7 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 
 // RegisterInvariants registers the taskmarket module's invariants.
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
-	if am.keeper.GetLegacyKeeper() != nil {
-		am.keeper.GetLegacyKeeper().RegisterInvariants(ir)
-	}
+	// Invariants registered via the keeper if needed
 }
 
 // InitGenesis performs the taskmarket module's genesis initialization.

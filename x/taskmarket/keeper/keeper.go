@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"sharetoken/x/taskmarket/types"
@@ -31,13 +32,13 @@ func (c JSONCodec) Unmarshal(b []byte, o interface{}) error {
 
 // Keeper manages task marketplace state using Cosmos SDK KVStore
 type Keeper struct {
-	storeKey   StoreKey
+	storeKey   storetypes.StoreKey
 	cdc        codec
 	paramSpace types.ParamSubspace
 }
 
 // NewKeeper creates a new task marketplace keeper
-func NewKeeper(storeKey StoreKey, cdc codec, paramSpace types.ParamSubspace) *Keeper {
+func NewKeeper(storeKey storetypes.StoreKey, cdc codec, paramSpace types.ParamSubspace) *Keeper {
 	return &Keeper{
 		storeKey:   storeKey,
 		cdc:        cdc,
@@ -45,24 +46,32 @@ func NewKeeper(storeKey StoreKey, cdc codec, paramSpace types.ParamSubspace) *Ke
 	}
 }
 
-// NewKeeperWithDefaultCodec creates a keeper with default JSON codec
-func NewKeeperWithDefaultCodec(storeKey StoreKey) *Keeper {
+// NewKeeperWithCodec creates a keeper with the provided codec
+func NewKeeperWithCodec(storeKey storetypes.StoreKey, cdc codec) *Keeper {
 	return &Keeper{
 		storeKey: storeKey,
-		cdc:      JSONCodec{},
+		cdc:      cdc,
 	}
 }
 
 // NewKeeperSimple creates a new task marketplace keeper without dependencies (for tests)
 func NewKeeperSimple() *Keeper {
 	return &Keeper{
-		storeKey: []byte(types.StoreKey),
+		storeKey: storetypes.NewKVStoreKey(types.StoreKey),
+		cdc:      JSONCodec{},
+	}
+}
+
+// NewKeeperWithDefaultCodec creates a keeper with default JSON codec (backward compatible)
+func NewKeeperWithDefaultCodec(storeKey storetypes.StoreKey) *Keeper {
+	return &Keeper{
+		storeKey: storeKey,
 		cdc:      JSONCodec{},
 	}
 }
 
 // GetStoreKey returns the store key
-func (k Keeper) GetStoreKey() StoreKey {
+func (k Keeper) GetStoreKey() storetypes.StoreKey {
 	return k.storeKey
 }
 
@@ -351,4 +360,384 @@ func (k Keeper) RejectMilestone(ctx sdk.Context, taskID, milestoneID, reason str
 		return err
 	}
 	return k.UpdateTask(ctx, task)
+}
+
+// Application CRUD Operations
+
+// SetApplication stores an application in the KVStore
+func (k Keeper) SetApplication(ctx sdk.Context, app types.Application) {
+	store := k.getStore(ctx)
+	key := types.GetApplicationKey(app.ID)
+	value, err := k.cdc.Marshal(app)
+	if err != nil {
+		panic(fmt.Errorf("failed to marshal application: %w", err))
+	}
+	store.Set(key, value)
+
+	// Update index
+	k.setApplicationByTask(ctx, app)
+}
+
+// GetApplication retrieves an application by ID from KVStore
+func (k Keeper) GetApplication(ctx sdk.Context, id string) (types.Application, bool) {
+	store := k.getStore(ctx)
+	key := types.GetApplicationKey(id)
+	value := store.Get(key)
+	if value == nil {
+		return types.Application{}, false
+	}
+
+	var app types.Application
+	if err := k.cdc.Unmarshal(value, &app); err != nil {
+		panic(fmt.Errorf("failed to unmarshal application: %w", err))
+	}
+	return app, true
+}
+
+// GetAllApplications returns all applications from KVStore
+func (k Keeper) GetAllApplications(ctx sdk.Context) []types.Application {
+	var apps []types.Application
+	store := k.getStore(ctx)
+	iterator := sdk.KVStorePrefixIterator(store, types.ApplicationKeyPrefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		var app types.Application
+		if err := k.cdc.Unmarshal(iterator.Value(), &app); err != nil {
+			panic(fmt.Errorf("failed to unmarshal application: %w", err))
+		}
+		apps = append(apps, app)
+	}
+	return apps
+}
+
+func (k Keeper) setApplicationByTask(ctx sdk.Context, app types.Application) {
+	store := k.getStore(ctx)
+	key := types.GetApplicationByTaskKey(app.TaskID, app.ID)
+	store.Set(key, []byte(app.ID))
+}
+
+// GetApplicationsByTask returns applications by task using composite index
+func (k Keeper) GetApplicationsByTask(ctx sdk.Context, taskID string) []types.Application {
+	var apps []types.Application
+	store := k.getStore(ctx)
+	prefix := types.GetApplicationByTaskPrefix(taskID)
+	iterator := sdk.KVStorePrefixIterator(store, prefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		appID := string(iterator.Value())
+		app, found := k.GetApplication(ctx, appID)
+		if found {
+			apps = append(apps, app)
+		}
+	}
+	return apps
+}
+
+// Auction CRUD Operations
+
+// SetAuction stores an auction in the KVStore
+func (k Keeper) SetAuction(ctx sdk.Context, auction types.Auction) {
+	store := k.getStore(ctx)
+	key := types.GetAuctionKey(auction.TaskID)
+	value, err := k.cdc.Marshal(auction)
+	if err != nil {
+		panic(fmt.Errorf("failed to marshal auction: %w", err))
+	}
+	store.Set(key, value)
+}
+
+// GetAuction retrieves an auction by task ID from KVStore
+func (k Keeper) GetAuction(ctx sdk.Context, taskID string) (types.Auction, bool) {
+	store := k.getStore(ctx)
+	key := types.GetAuctionKey(taskID)
+	value := store.Get(key)
+	if value == nil {
+		return types.Auction{}, false
+	}
+
+	var auction types.Auction
+	if err := k.cdc.Unmarshal(value, &auction); err != nil {
+		panic(fmt.Errorf("failed to unmarshal auction: %w", err))
+	}
+	return auction, true
+}
+
+// GetAllAuctions returns all auctions from KVStore
+func (k Keeper) GetAllAuctions(ctx sdk.Context) []types.Auction {
+	var auctions []types.Auction
+	store := k.getStore(ctx)
+	iterator := sdk.KVStorePrefixIterator(store, types.AuctionKeyPrefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		var auction types.Auction
+		if err := k.cdc.Unmarshal(iterator.Value(), &auction); err != nil {
+			panic(fmt.Errorf("failed to unmarshal auction: %w", err))
+		}
+		auctions = append(auctions, auction)
+	}
+	return auctions
+}
+
+// Bid CRUD Operations
+
+// SetBid stores a bid in the KVStore
+func (k Keeper) SetBid(ctx sdk.Context, bid types.Bid) {
+	store := k.getStore(ctx)
+	key := types.GetBidKey(bid.ID)
+	value, err := k.cdc.Marshal(bid)
+	if err != nil {
+		panic(fmt.Errorf("failed to marshal bid: %w", err))
+	}
+	store.Set(key, value)
+
+	// Update index
+	k.setBidByTask(ctx, bid)
+}
+
+// GetBid retrieves a bid by ID from KVStore
+func (k Keeper) GetBid(ctx sdk.Context, id string) (types.Bid, bool) {
+	store := k.getStore(ctx)
+	key := types.GetBidKey(id)
+	value := store.Get(key)
+	if value == nil {
+		return types.Bid{}, false
+	}
+
+	var bid types.Bid
+	if err := k.cdc.Unmarshal(value, &bid); err != nil {
+		panic(fmt.Errorf("failed to unmarshal bid: %w", err))
+	}
+	return bid, true
+}
+
+// GetAllBids returns all bids from KVStore
+func (k Keeper) GetAllBids(ctx sdk.Context) []types.Bid {
+	var bids []types.Bid
+	store := k.getStore(ctx)
+	iterator := sdk.KVStorePrefixIterator(store, types.BidKeyPrefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		var bid types.Bid
+		if err := k.cdc.Unmarshal(iterator.Value(), &bid); err != nil {
+			panic(fmt.Errorf("failed to unmarshal bid: %w", err))
+		}
+		bids = append(bids, bid)
+	}
+	return bids
+}
+
+func (k Keeper) setBidByTask(ctx sdk.Context, bid types.Bid) {
+	store := k.getStore(ctx)
+	key := types.GetBidByTaskKey(bid.TaskID, bid.ID)
+	store.Set(key, []byte(bid.ID))
+}
+
+// GetBidsByTask returns bids by task using composite index
+func (k Keeper) GetBidsByTask(ctx sdk.Context, taskID string) []types.Bid {
+	var bids []types.Bid
+	store := k.getStore(ctx)
+	prefix := types.GetBidByTaskPrefix(taskID)
+	iterator := sdk.KVStorePrefixIterator(store, prefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		bidID := string(iterator.Value())
+		bid, found := k.GetBid(ctx, bidID)
+		if found {
+			bids = append(bids, bid)
+		}
+	}
+	return bids
+}
+
+// Rating CRUD Operations
+
+// SetRating stores a rating in the KVStore
+func (k Keeper) SetRating(ctx sdk.Context, rating types.Rating) {
+	store := k.getStore(ctx)
+	key := types.GetRatingKey(rating.ID)
+	value, err := k.cdc.Marshal(rating)
+	if err != nil {
+		panic(fmt.Errorf("failed to marshal rating: %w", err))
+	}
+	store.Set(key, value)
+
+	// Update indexes
+	k.setRatingByTask(ctx, rating)
+	k.setRatingByRatedUser(ctx, rating)
+}
+
+// GetRating retrieves a rating by ID from KVStore
+func (k Keeper) GetRating(ctx sdk.Context, id string) (types.Rating, bool) {
+	store := k.getStore(ctx)
+	key := types.GetRatingKey(id)
+	value := store.Get(key)
+	if value == nil {
+		return types.Rating{}, false
+	}
+
+	var rating types.Rating
+	if err := k.cdc.Unmarshal(value, &rating); err != nil {
+		panic(fmt.Errorf("failed to unmarshal rating: %w", err))
+	}
+	return rating, true
+}
+
+// GetAllRatings returns all ratings from KVStore
+func (k Keeper) GetAllRatings(ctx sdk.Context) []types.Rating {
+	var ratings []types.Rating
+	store := k.getStore(ctx)
+	iterator := sdk.KVStorePrefixIterator(store, types.RatingKeyPrefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		var rating types.Rating
+		if err := k.cdc.Unmarshal(iterator.Value(), &rating); err != nil {
+			panic(fmt.Errorf("failed to unmarshal rating: %w", err))
+		}
+		ratings = append(ratings, rating)
+	}
+	return ratings
+}
+
+func (k Keeper) setRatingByTask(ctx sdk.Context, rating types.Rating) {
+	store := k.getStore(ctx)
+	key := types.GetRatingByTaskKey(rating.TaskID, rating.ID)
+	store.Set(key, []byte(rating.ID))
+}
+
+func (k Keeper) setRatingByRatedUser(ctx sdk.Context, rating types.Rating) {
+	store := k.getStore(ctx)
+	key := types.GetRatingByRatedUserKey(rating.RatedID, rating.ID)
+	store.Set(key, []byte(rating.ID))
+}
+
+// GetRatingsByTask returns ratings by task using composite index
+func (k Keeper) GetRatingsByTask(ctx sdk.Context, taskID string) []types.Rating {
+	var ratings []types.Rating
+	store := k.getStore(ctx)
+	prefix := types.GetRatingByTaskPrefix(taskID)
+	iterator := sdk.KVStorePrefixIterator(store, prefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		ratingID := string(iterator.Value())
+		rating, found := k.GetRating(ctx, ratingID)
+		if found {
+			ratings = append(ratings, rating)
+		}
+	}
+	return ratings
+}
+
+// GetRatingsByRatedUser returns ratings by rated user using composite index
+func (k Keeper) GetRatingsByRatedUser(ctx sdk.Context, ratedID string) []types.Rating {
+	var ratings []types.Rating
+	store := k.getStore(ctx)
+	prefix := types.GetRatingByRatedUserPrefix(ratedID)
+	iterator := sdk.KVStorePrefixIterator(store, prefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		ratingID := string(iterator.Value())
+		rating, found := k.GetRating(ctx, ratingID)
+		if found {
+			ratings = append(ratings, rating)
+		}
+	}
+	return ratings
+}
+
+// Reputation CRUD Operations
+
+// SetReputation stores a reputation in the KVStore
+func (k Keeper) SetReputation(ctx sdk.Context, rep types.Reputation) {
+	store := k.getStore(ctx)
+	key := types.GetReputationKey(rep.UserID)
+	value, err := k.cdc.Marshal(rep)
+	if err != nil {
+		panic(fmt.Errorf("failed to marshal reputation: %w", err))
+	}
+	store.Set(key, value)
+}
+
+// GetReputation retrieves a reputation by user ID from KVStore
+func (k Keeper) GetReputation(ctx sdk.Context, userID string) (types.Reputation, bool) {
+	store := k.getStore(ctx)
+	key := types.GetReputationKey(userID)
+	value := store.Get(key)
+	if value == nil {
+		return types.Reputation{}, false
+	}
+
+	var rep types.Reputation
+	if err := k.cdc.Unmarshal(value, &rep); err != nil {
+		panic(fmt.Errorf("failed to unmarshal reputation: %w", err))
+	}
+	return rep, true
+}
+
+// GetAllReputations returns all reputations from KVStore
+func (k Keeper) GetAllReputations(ctx sdk.Context) []types.Reputation {
+	var reps []types.Reputation
+	store := k.getStore(ctx)
+	iterator := sdk.KVStorePrefixIterator(store, types.ReputationKeyPrefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		var rep types.Reputation
+		if err := k.cdc.Unmarshal(iterator.Value(), &rep); err != nil {
+			panic(fmt.Errorf("failed to unmarshal reputation: %w", err))
+		}
+		reps = append(reps, rep)
+	}
+	return reps
+}
+
+// GetTaskStatistics returns task statistics
+func (k Keeper) GetTaskStatistics(ctx sdk.Context) map[string]interface{} {
+	stats := map[string]interface{}{
+		"total_tasks":        0,
+		"open_tasks":         0,
+		"assigned_tasks":     0,
+		"in_progress_tasks":  0,
+		"completed_tasks":    0,
+		"cancelled_tasks":    0,
+		"total_applications": 0,
+		"total_bids":         0,
+		"total_ratings":      0,
+	}
+
+	tasks := k.GetAllTasks(ctx)
+	stats["total_tasks"] = len(tasks)
+
+	for _, task := range tasks {
+		switch task.Status {
+		case types.TaskStatusOpen:
+			stats["open_tasks"] = stats["open_tasks"].(int) + 1
+		case types.TaskStatusAssigned:
+			stats["assigned_tasks"] = stats["assigned_tasks"].(int) + 1
+		case types.TaskStatusInProgress:
+			stats["in_progress_tasks"] = stats["in_progress_tasks"].(int) + 1
+		case types.TaskStatusCompleted:
+			stats["completed_tasks"] = stats["completed_tasks"].(int) + 1
+		case types.TaskStatusCancelled:
+			stats["cancelled_tasks"] = stats["cancelled_tasks"].(int) + 1
+		}
+	}
+
+	stats["total_applications"] = len(k.GetAllApplications(ctx))
+	stats["total_ratings"] = len(k.GetAllRatings(ctx))
+
+	// Count bids from auctions
+	auctions := k.GetAllAuctions(ctx)
+	for _, auction := range auctions {
+		stats["total_bids"] = stats["total_bids"].(int) + len(auction.Bids)
+	}
+
+	return stats
 }

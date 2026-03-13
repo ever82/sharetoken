@@ -3,16 +3,18 @@ package keeper
 import (
 	"fmt"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"sharetoken/x/taskmarket/types"
 )
 
 // SubmitApplication submits an application
-func (lk *LegacyKeeper) SubmitApplication(app *types.Application) error {
+func (k Keeper) SubmitApplication(ctx sdk.Context, app types.Application) error {
 	if err := app.Validate(); err != nil {
 		return fmt.Errorf("invalid application: %w", err)
 	}
-	task := lk.GetTask(app.TaskID)
-	if task == nil {
+	task, found := k.GetTask(ctx, app.TaskID)
+	if !found {
 		return fmt.Errorf("task not found: %s", app.TaskID)
 	}
 	if task.Type != types.TaskTypeOpen {
@@ -21,60 +23,72 @@ func (lk *LegacyKeeper) SubmitApplication(app *types.Application) error {
 	if !task.IsOpen() {
 		return fmt.Errorf("task is not accepting applications")
 	}
-	lk.applications[app.ID] = app
+
+	// Check for existing application from this worker
+	existingApps := k.GetApplicationsByTask(ctx, app.TaskID)
+	for _, existing := range existingApps {
+		if existing.WorkerID == app.WorkerID {
+			return fmt.Errorf("worker already applied to this task")
+		}
+	}
+
+	k.SetApplication(ctx, app)
+
+	// Update task application count
 	task.ApplicationCount++
+	k.SetTask(ctx, task)
+
 	return nil
 }
 
-// GetApplication gets an application by ID
-func (lk *LegacyKeeper) GetApplication(id string) *types.Application {
-	return lk.applications[id]
-}
-
-// GetApplicationsByTask returns applications for a task
-func (lk *LegacyKeeper) GetApplicationsByTask(taskID string) []*types.Application {
-	var apps []*types.Application
-	for _, app := range lk.applications {
-		if app.TaskID == taskID {
-			apps = append(apps, app)
-		}
-	}
-	return apps
-}
-
 // AcceptApplication accepts an application
-func (lk *LegacyKeeper) AcceptApplication(appID string) error {
-	app := lk.GetApplication(appID)
-	if app == nil {
+func (k Keeper) AcceptApplication(ctx sdk.Context, appID string) error {
+	app, found := k.GetApplication(ctx, appID)
+	if !found {
 		return fmt.Errorf("application not found: %s", appID)
 	}
 	if app.Status != types.ApplicationStatusPending {
 		return fmt.Errorf("application is not pending")
 	}
-	task := lk.GetTask(app.TaskID)
-	if task == nil {
+
+	task, found := k.GetTask(ctx, app.TaskID)
+	if !found {
 		return fmt.Errorf("task not found: %s", app.TaskID)
 	}
 
-	// Update status indexes
-	lk.tasksByStatus[string(task.Status)] = removeFromSlice(lk.tasksByStatus[string(task.Status)], task.ID)
+	// Delete old indexes
+	k.deleteTaskIndexes(ctx, task)
 
 	app.Accept()
 	task.Assign(app.WorkerID)
 
-	// Update new status
-	lk.tasksByStatus[string(task.Status)] = append(lk.tasksByStatus[string(task.Status)], task.ID)
-	// Update worker index
-	lk.tasksByWorker[task.WorkerID] = append(lk.tasksByWorker[task.WorkerID], task.ID)
+	// Update new indexes
+	k.setTaskByWorker(ctx, task)
+	k.setTaskByStatus(ctx, task)
+	k.SetTask(ctx, task)
+	k.SetApplication(ctx, app)
+
 	return nil
 }
 
 // RejectApplication rejects an application
-func (lk *LegacyKeeper) RejectApplication(appID string) error {
-	app := lk.GetApplication(appID)
-	if app == nil {
+func (k Keeper) RejectApplication(ctx sdk.Context, appID string) error {
+	app, found := k.GetApplication(ctx, appID)
+	if !found {
 		return fmt.Errorf("application not found: %s", appID)
 	}
 	app.Reject()
+	k.SetApplication(ctx, app)
+	return nil
+}
+
+// WithdrawApplication withdraws an application
+func (k Keeper) WithdrawApplication(ctx sdk.Context, appID string) error {
+	app, found := k.GetApplication(ctx, appID)
+	if !found {
+		return fmt.Errorf("application not found: %s", appID)
+	}
+	app.Withdraw()
+	k.SetApplication(ctx, app)
 	return nil
 }

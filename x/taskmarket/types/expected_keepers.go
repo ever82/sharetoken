@@ -1,7 +1,9 @@
 package types
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
+	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
 // AccountI is the interface for accounts
@@ -12,44 +14,26 @@ type AccountI interface {
 
 // AccountKeeper defines the expected account keeper
 type AccountKeeper interface {
-	GetAccount(ctx Context, addr AccAddress) AccountI
-	SetAccount(ctx Context, acc AccountI)
-	NewAccountWithAddress(ctx Context, addr AccAddress) AccountI
+	GetAccount(ctx sdk.Context, addr sdk.AccAddress) AccountI
+	SetAccount(ctx sdk.Context, acc AccountI)
+	NewAccountWithAddress(ctx sdk.Context, addr sdk.AccAddress) AccountI
 }
-
-// Context is a type alias for sdk.Context
-type Context struct{}
-
-// AccAddress is a type alias for sdk.AccAddress
-type AccAddress []byte
 
 // BankKeeper defines the expected bank keeper
 type BankKeeper interface {
-	GetBalance(ctx Context, addr AccAddress, denom string) Coin
-	SendCoins(ctx Context, fromAddr AccAddress, toAddr AccAddress, amt Coins) error
-	SendCoinsFromAccountToModule(ctx Context, senderAddr AccAddress, recipientModule string, amt Coins) error
-	SendCoinsFromModuleToAccount(ctx Context, senderModule string, recipientAddr AccAddress, amt Coins) error
+	GetBalance(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin
+	SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) error
+	SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error
+	SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) error
 }
-
-// Coin represents a coin
-type Coin struct {
-	Denom  string
-	Amount int64
-}
-
-// Coins represents multiple coins
-type Coins []Coin
 
 // ParamSubspace defines the expected Subspace interface for module parameters
 type ParamSubspace interface {
-	Get(ctx Context, key []byte, ptr interface{})
-	Set(ctx Context, key []byte, param interface{})
+	Get(ctx sdk.Context, key []byte, ptr interface{})
+	Set(ctx sdk.Context, key []byte, param interface{})
 	HasKeyTable() bool
-	WithKeyTable(table KeyTable) ParamSubspace
+	WithKeyTable(table paramtypes.KeyTable) ParamSubspace
 }
-
-// KeyTable is a type alias for the paramspace KeyTable
-type KeyTable struct{}
 
 // PageRequest is a type alias for query PageRequest
 type PageRequest = query.PageRequest

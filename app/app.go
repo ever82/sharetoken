@@ -620,7 +620,9 @@ func New(
 
 	app.LLMCustodyKeeper = *llmcustodymodulekeeper.NewKeeper(appCodec, keys[llmcustodymoduletypes.StoreKey])
 
-	app.TaskMarketKeeper = *taskmarketmodulekeeper.NewKeeper()
+	app.TaskMarketKeeper = *taskmarketmodulekeeper.NewKeeperWithDefaultCodec(
+		keys[taskmarketmoduletypes.StoreKey],
+	)
 
 	app.OracleKeeper = *oraclemodulekeeper.NewKeeper(appCodec, keys[oraclemoduletypes.StoreKey])
 
