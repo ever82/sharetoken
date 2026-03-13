@@ -3,6 +3,8 @@ package types
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/msgservice"
 )
 
 func RegisterCodec(cdc *codec.LegacyAmino) {
@@ -14,22 +16,17 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgRotateAPIKey{}, "llmcustody/RotateAPIKey", nil)
 }
 
-// MsgServer registration helpers
-func RegisterMsgServer(server interface{}, srv MsgServer) {
-	// This is a placeholder for when proto-generated code is available
-	// The actual implementation would call the generated RegisterMsgServer function
-}
-
-// RegisterQueryServer registers the query server
-func RegisterQueryServer(server interface{}, srv QueryServer) {
-	// This is a placeholder for when proto-generated code is available
-	// The actual implementation would call the generated RegisterQueryServer function
-}
-
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
-	// TODO: Register when proto files are generated
-	// For now, skip registration
-	_ = registry
+	// Register messages
+	registry.RegisterImplementations((*sdk.Msg)(nil),
+		&MsgRegisterAPIKey{},
+		&MsgUpdateAPIKey{},
+		&MsgRevokeAPIKey{},
+		&MsgRecordUsage{},
+		&MsgRotateAPIKey{},
+	)
+
+	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
 }
 
 var (

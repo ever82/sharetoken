@@ -1,10 +1,8 @@
 package types
 
 import (
-	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,50 +18,13 @@ const (
 )
 
 // MsgServer is the message server interface
-type MsgServer interface {
-	RegisterAPIKey(ctx context.Context, msg *MsgRegisterAPIKey) (*MsgRegisterAPIKeyResponse, error)
-	UpdateAPIKey(ctx context.Context, msg *MsgUpdateAPIKey) (*MsgUpdateAPIKeyResponse, error)
-	RevokeAPIKey(ctx context.Context, msg *MsgRevokeAPIKey) (*MsgRevokeAPIKeyResponse, error)
-	RecordUsage(ctx context.Context, msg *MsgRecordUsage) (*MsgRecordUsageResponse, error)
-	RotateAPIKey(ctx context.Context, msg *MsgRotateAPIKey) (*MsgRotateAPIKeyResponse, error)
-}
-
-// Response types
-type MsgRegisterAPIKeyResponse struct {
-	APIKeyID string `json:"api_key_id"`
-}
-
-type MsgUpdateAPIKeyResponse struct{}
-type MsgRevokeAPIKeyResponse struct{}
-type MsgRecordUsageResponse struct{}
+// Note: Using protobuf-generated interface from tx.pb.go
 
 // GenerateAPIKeyID generates a unique API key ID
 func GenerateAPIKeyID() string {
 	b := make([]byte, 16)
 	rand.Read(b)
 	return base64.URLEncoding.EncodeToString(b)
-}
-
-// -----------------------------------------------------------------------------
-// MsgRegisterAPIKey
-// -----------------------------------------------------------------------------
-
-// MsgRegisterAPIKey is the message for registering a new API key
-type MsgRegisterAPIKey struct {
-	Owner        string       `json:"owner"`
-	Provider     string       `json:"provider"`
-	EncryptedKey []byte       `json:"encrypted_key"`
-	AccessRules  []AccessRule `json:"access_rules"`
-}
-
-// NewMsgRegisterAPIKey creates a new MsgRegisterAPIKey
-func NewMsgRegisterAPIKey(owner string, provider string, encryptedKey []byte, rules []AccessRule) *MsgRegisterAPIKey {
-	return &MsgRegisterAPIKey{
-		Owner:        owner,
-		Provider:     provider,
-		EncryptedKey: encryptedKey,
-		AccessRules:  rules,
-	}
 }
 
 // Route returns the module route
@@ -81,12 +42,6 @@ func (msg MsgRegisterAPIKey) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{addr}
 }
 
-// GetSignBytes returns the bytes to sign
-func (msg MsgRegisterAPIKey) GetSignBytes() []byte {
-	b, _ := json.Marshal(&msg)
-	return sdk.MustSortJSON(b)
-}
-
 // ValidateBasic performs basic validation
 func (msg MsgRegisterAPIKey) ValidateBasic() error {
 	if msg.Owner == "" {
@@ -99,28 +54,6 @@ func (msg MsgRegisterAPIKey) ValidateBasic() error {
 		return fmt.Errorf("encrypted key cannot be empty")
 	}
 	return nil
-}
-
-// -----------------------------------------------------------------------------
-// MsgUpdateAPIKey
-// -----------------------------------------------------------------------------
-
-// MsgUpdateAPIKey is the message for updating an API key
-type MsgUpdateAPIKey struct {
-	Owner       string       `json:"owner"`
-	APIKeyID    string       `json:"api_key_id"`
-	AccessRules []AccessRule `json:"access_rules"`
-	Active      bool         `json:"active"`
-}
-
-// NewMsgUpdateAPIKey creates a new MsgUpdateAPIKey
-func NewMsgUpdateAPIKey(owner string, apiKeyID string, rules []AccessRule, active bool) *MsgUpdateAPIKey {
-	return &MsgUpdateAPIKey{
-		Owner:       owner,
-		APIKeyID:    apiKeyID,
-		AccessRules: rules,
-		Active:      active,
-	}
 }
 
 // Route returns the module route
@@ -138,39 +71,15 @@ func (msg MsgUpdateAPIKey) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{addr}
 }
 
-// GetSignBytes returns the bytes to sign
-func (msg MsgUpdateAPIKey) GetSignBytes() []byte {
-	b, _ := json.Marshal(&msg)
-	return sdk.MustSortJSON(b)
-}
-
 // ValidateBasic performs basic validation
 func (msg MsgUpdateAPIKey) ValidateBasic() error {
 	if msg.Owner == "" {
 		return fmt.Errorf("owner cannot be empty")
 	}
-	if msg.APIKeyID == "" {
+	if msg.ApiKeyId == "" {
 		return fmt.Errorf("API key ID cannot be empty")
 	}
 	return nil
-}
-
-// -----------------------------------------------------------------------------
-// MsgRevokeAPIKey
-// -----------------------------------------------------------------------------
-
-// MsgRevokeAPIKey is the message for revoking an API key
-type MsgRevokeAPIKey struct {
-	Owner    string `json:"owner"`
-	APIKeyID string `json:"api_key_id"`
-}
-
-// NewMsgRevokeAPIKey creates a new MsgRevokeAPIKey
-func NewMsgRevokeAPIKey(owner string, apiKeyID string) *MsgRevokeAPIKey {
-	return &MsgRevokeAPIKey{
-		Owner:    owner,
-		APIKeyID: apiKeyID,
-	}
 }
 
 // Route returns the module route
@@ -188,45 +97,15 @@ func (msg MsgRevokeAPIKey) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{addr}
 }
 
-// GetSignBytes returns the bytes to sign
-func (msg MsgRevokeAPIKey) GetSignBytes() []byte {
-	b, _ := json.Marshal(&msg)
-	return sdk.MustSortJSON(b)
-}
-
 // ValidateBasic performs basic validation
 func (msg MsgRevokeAPIKey) ValidateBasic() error {
 	if msg.Owner == "" {
 		return fmt.Errorf("owner cannot be empty")
 	}
-	if msg.APIKeyID == "" {
+	if msg.ApiKeyId == "" {
 		return fmt.Errorf("API key ID cannot be empty")
 	}
 	return nil
-}
-
-// -----------------------------------------------------------------------------
-// MsgRecordUsage
-// -----------------------------------------------------------------------------
-
-// MsgRecordUsage is the message for recording API usage
-type MsgRecordUsage struct {
-	APIKeyID     string `json:"api_key_id"`
-	ServiceID    string `json:"service_id"`
-	RequestCount int64  `json:"request_count"`
-	TokenCount   int64  `json:"token_count"`
-	Cost         int64  `json:"cost"` // in ustt
-}
-
-// NewMsgRecordUsage creates a new MsgRecordUsage
-func NewMsgRecordUsage(apiKeyID string, serviceID string, requests int64, tokens int64, cost int64) *MsgRecordUsage {
-	return &MsgRecordUsage{
-		APIKeyID:     apiKeyID,
-		ServiceID:    serviceID,
-		RequestCount: requests,
-		TokenCount:   tokens,
-		Cost:         cost,
-	}
 }
 
 // Route returns the module route
@@ -241,18 +120,12 @@ func (msg MsgRecordUsage) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{}
 }
 
-// GetSignBytes returns the bytes to sign
-func (msg MsgRecordUsage) GetSignBytes() []byte {
-	b, _ := json.Marshal(&msg)
-	return sdk.MustSortJSON(b)
-}
-
 // ValidateBasic performs basic validation
 func (msg MsgRecordUsage) ValidateBasic() error {
-	if msg.APIKeyID == "" {
+	if msg.ApiKeyId == "" {
 		return fmt.Errorf("API key ID cannot be empty")
 	}
-	if msg.ServiceID == "" {
+	if msg.ServiceId == "" {
 		return fmt.Errorf("service ID cannot be empty")
 	}
 	if msg.RequestCount < 0 {
@@ -262,28 +135,6 @@ func (msg MsgRecordUsage) ValidateBasic() error {
 		return fmt.Errorf("token count cannot be negative")
 	}
 	return nil
-}
-
-// -----------------------------------------------------------------------------
-// MsgRotateAPIKey
-// -----------------------------------------------------------------------------
-
-// MsgRotateAPIKey is the message for rotating an API key
-type MsgRotateAPIKey struct {
-	Owner        string `json:"owner"`
-	APIKeyID     string `json:"api_key_id"`
-	NewEncryptedKey []byte `json:"new_encrypted_key"`
-	Reason       string `json:"reason"`
-}
-
-// NewMsgRotateAPIKey creates a new MsgRotateAPIKey
-func NewMsgRotateAPIKey(owner, apiKeyID string, newEncryptedKey []byte, reason string) *MsgRotateAPIKey {
-	return &MsgRotateAPIKey{
-		Owner:           owner,
-		APIKeyID:        apiKeyID,
-		NewEncryptedKey: newEncryptedKey,
-		Reason:          reason,
-	}
 }
 
 // Route returns the module route
@@ -301,18 +152,12 @@ func (msg MsgRotateAPIKey) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{addr}
 }
 
-// GetSignBytes returns the bytes to sign
-func (msg MsgRotateAPIKey) GetSignBytes() []byte {
-	b, _ := json.Marshal(&msg)
-	return sdk.MustSortJSON(b)
-}
-
 // ValidateBasic performs basic validation
 func (msg MsgRotateAPIKey) ValidateBasic() error {
 	if msg.Owner == "" {
 		return fmt.Errorf("owner cannot be empty")
 	}
-	if msg.APIKeyID == "" {
+	if msg.ApiKeyId == "" {
 		return fmt.Errorf("API key ID cannot be empty")
 	}
 	if len(msg.NewEncryptedKey) == 0 {
@@ -321,7 +166,51 @@ func (msg MsgRotateAPIKey) ValidateBasic() error {
 	return nil
 }
 
-// Response types
-type MsgRotateAPIKeyResponse struct {
-	NewAPIKeyID string `json:"new_api_key_id"`
+// NewMsgRegisterAPIKey creates a new MsgRegisterAPIKey
+func NewMsgRegisterAPIKey(owner string, provider string, encryptedKey []byte, rules []AccessRule) *MsgRegisterAPIKey {
+	return &MsgRegisterAPIKey{
+		Owner:        owner,
+		Provider:     provider,
+		EncryptedKey: encryptedKey,
+		AccessRules:  rules,
+	}
+}
+
+// NewMsgUpdateAPIKey creates a new MsgUpdateAPIKey
+func NewMsgUpdateAPIKey(owner string, apiKeyID string, rules []AccessRule, active bool) *MsgUpdateAPIKey {
+	return &MsgUpdateAPIKey{
+		Owner:       owner,
+		ApiKeyId:    apiKeyID,
+		AccessRules: rules,
+		Active:      active,
+	}
+}
+
+// NewMsgRevokeAPIKey creates a new MsgRevokeAPIKey
+func NewMsgRevokeAPIKey(owner string, apiKeyID string) *MsgRevokeAPIKey {
+	return &MsgRevokeAPIKey{
+		Owner:    owner,
+		ApiKeyId: apiKeyID,
+	}
+}
+
+// NewMsgRecordUsage creates a new MsgRecordUsage
+func NewMsgRecordUsage(apiKeyID string, serviceID string, requests int64, tokens int64, cost int64) *MsgRecordUsage {
+	return &MsgRecordUsage{
+		ApiKeyId:     apiKeyID,
+		ServiceId:    serviceID,
+		RequestCount: requests,
+		TokenCount:   tokens,
+		Cost:         cost,
+	}
+}
+
+// NewMsgRotateAPIKey creates a new MsgRotateAPIKey
+func NewMsgRotateAPIKey(owner, apiKeyID string, newEncryptedKey []byte, reason string) *MsgRotateAPIKey {
+	return &MsgRotateAPIKey{
+		Owner:           owner,
+		ApiKeyId:        apiKeyID,
+		NewEncryptedKey: newEncryptedKey,
+		Reason:          reason,
+	}
 }

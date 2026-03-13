@@ -171,7 +171,7 @@ func (pc *PricingConfig) UpdateDynamicMultiplier(demand, supply int64) {
 // CanAccess 检查是否允许访问
 func (pc *PricingConfig) CanAccess(serviceID string, usageCount int64) bool {
 	for _, rule := range pc.AccessRules {
-		if rule.ServiceID == serviceID {
+		if rule.ServiceId == serviceID {
 			if !rule.Allowed {
 				return false
 			}
@@ -188,7 +188,7 @@ func (pc *PricingConfig) CanAccess(serviceID string, usageCount int64) bool {
 // GetServicePrice 获取服务特定价格
 func (pc *PricingConfig) GetServicePrice(serviceID string) int64 {
 	for _, rule := range pc.AccessRules {
-		if rule.ServiceID == serviceID && rule.PricePerReq > 0 {
+		if rule.ServiceId == serviceID && rule.PricePerReq > 0 {
 			return rule.PricePerReq
 		}
 	}
