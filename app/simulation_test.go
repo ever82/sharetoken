@@ -37,6 +37,15 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"sharetoken/app"
+	crowdfundingtypes "sharetoken/x/crowdfunding/types"
+	disputetypes "sharetoken/x/dispute/types"
+	escrowtypes "sharetoken/x/escrow/types"
+	identitytypes "sharetoken/x/identity/types"
+	llmcustodytypes "sharetoken/x/llmcustody/types"
+	marketplacetypes "sharetoken/x/marketplace/types"
+	sharetokentypes "sharetoken/x/sharetoken/types"
+	taskmarkettypes "sharetoken/x/taskmarket/types"
+	trusttypes "sharetoken/x/trust/types"
 )
 
 type storeKeysPrefixes struct {
@@ -356,6 +365,16 @@ func TestAppImportExport(t *testing.T) {
 		{bApp.GetKey(evidencetypes.StoreKey), newApp.GetKey(evidencetypes.StoreKey), [][]byte{}},
 		{bApp.GetKey(capabilitytypes.StoreKey), newApp.GetKey(capabilitytypes.StoreKey), [][]byte{}},
 		{bApp.GetKey(authzkeeper.StoreKey), newApp.GetKey(authzkeeper.StoreKey), [][]byte{authzkeeper.GrantKey, authzkeeper.GrantQueuePrefix}},
+		// Custom module store keys
+		{bApp.GetKey(sharetokentypes.StoreKey), newApp.GetKey(sharetokentypes.StoreKey), [][]byte{}},
+		{bApp.GetKey(identitytypes.StoreKey), newApp.GetKey(identitytypes.StoreKey), [][]byte{}},
+		{bApp.GetKey(escrowtypes.StoreKey), newApp.GetKey(escrowtypes.StoreKey), [][]byte{}},
+		{bApp.GetKey(marketplacetypes.StoreKey), newApp.GetKey(marketplacetypes.StoreKey), [][]byte{}},
+		{bApp.GetKey(taskmarkettypes.StoreKey), newApp.GetKey(taskmarkettypes.StoreKey), [][]byte{}},
+		{bApp.GetKey(disputetypes.StoreKey), newApp.GetKey(disputetypes.StoreKey), [][]byte{}},
+		{bApp.GetKey(trusttypes.StoreKey), newApp.GetKey(trusttypes.StoreKey), [][]byte{}},
+		{bApp.GetKey(crowdfundingtypes.StoreKey), newApp.GetKey(crowdfundingtypes.StoreKey), [][]byte{}},
+		{bApp.GetKey(llmcustodytypes.StoreKey), newApp.GetKey(llmcustodytypes.StoreKey), [][]byte{}},
 	}
 
 	for _, skp := range storeKeysPrefixes {

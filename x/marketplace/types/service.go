@@ -7,11 +7,6 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 )
 
-const (
-	ModuleName = "marketplace"
-	StoreKey   = ModuleName
-)
-
 // ServiceLevel represents the level of service
 type ServiceLevel int32
 

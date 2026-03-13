@@ -7,7 +7,6 @@ import (
 const (
 	// ModuleName is the name of the trust module
 	ModuleName = "trust"
-	StoreKey   = ModuleName
 )
 
 // MQ errors
