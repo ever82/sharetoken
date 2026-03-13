@@ -1,0 +1,199 @@
+syntax = "proto3";
+package sharetoken.workflow;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/workflow/types";
+
+// WorkflowStatus represents the status of a workflow
+enum WorkflowStatus {
+  WORKFLOW_STATUS_UNSPECIFIED = 0;
+  WORKFLOW_STATUS_PENDING = 1;
+  WORKFLOW_STATUS_RUNNING = 2;
+  WORKFLOW_STATUS_PAUSED = 3;
+  WORKFLOW_STATUS_COMPLETED = 4;
+  WORKFLOW_STATUS_FAILED = 5;
+  WORKFLOW_STATUS_CANCELLED = 6;
+}
+
+// StepStatus represents the status of a workflow step
+enum StepStatus {
+  STEP_STATUS_UNSPECIFIED = 0;
+  STEP_STATUS_PENDING = 1;
+  STEP_STATUS_READY = 2;
+  STEP_STATUS_RUNNING = 3;
+  STEP_STATUS_COMPLETED = 4;
+  STEP_STATUS_FAILED = 5;
+  STEP_STATUS_SKIPPED = 6;
+}
+
+// StepType represents the type of workflow step
+enum StepType {
+  STEP_TYPE_UNSPECIFIED = 0;
+  STEP_TYPE_AGENT = 1;
+  STEP_TYPE_PARALLEL = 2;
+  STEP_TYPE_SEQUENCE = 3;
+  STEP_TYPE_CONDITION = 4;
+  STEP_TYPE_MILESTONE = 5;
+}
+
+// Capability represents an autonomous capability package
+enum Capability {
+  CAPABILITY_UNSPECIFIED = 0;
+  CAPABILITY_COLLECTOR = 1;
+  CAPABILITY_LEAD = 2;
+  CAPABILITY_RESEARCHER = 3;
+  CAPABILITY_WRITER = 4;
+  CAPABILITY_ANALYST = 5;
+  CAPABILITY_TESTER = 6;
+  CAPABILITY_REVIEWER = 7;
+}
+
+// MilestoneStatus represents the status of a milestone
+enum MilestoneStatus {
+  MILESTONE_STATUS_UNSPECIFIED = 0;
+  MILESTONE_STATUS_PENDING = 1;
+  MILESTONE_STATUS_ACTIVE = 2;
+  MILESTONE_STATUS_COMPLETED = 3;
+  MILESTONE_STATUS_FAILED = 4;
+  MILESTONE_STATUS_PAID = 5;
+}
+
+// Workflow represents a multi-agent workflow
+message Workflow {
+  // id is the unique workflow identifier
+  string id = 1;
+
+  // name is the workflow name
+  string name = 2;
+
+  // description is the workflow description
+  string description = 3;
+
+  // owner is the workflow owner address
+  string owner = 4;
+
+  // status is the workflow status
+  WorkflowStatus status = 5;
+
+  // steps is the list of workflow steps
+  repeated WorkflowStep steps = 6 [(gogoproto.nullable) = false];
+
+  // inputs is the workflow inputs
+  map<string, string> inputs = 7;
+
+  // outputs is the workflow outputs
+  map<string, string> outputs = 8;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 9;
+
+  // started_at is the Unix timestamp when workflow started
+  int64 started_at = 10;
+
+  // completed_at is the Unix timestamp when workflow completed
+  int64 completed_at = 11;
+}
+
+// WorkflowStep represents a single step in a workflow
+message WorkflowStep {
+  // id is the unique step identifier
+  string id = 1;
+
+  // name is the step name
+  string name = 2;
+
+  // description is the step description
+  string description = 3;
+
+  // type is the step type
+  StepType type = 4;
+
+  // capability is the required capability
+  Capability capability = 5;
+
+  // depends_on is the list of dependent step IDs
+  repeated string depends_on = 6;
+
+  // params is the step parameters
+  map<string, string> params = 7;
+
+  // status is the step status
+  StepStatus status = 8;
+
+  // output is the step output
+  string output = 9;
+
+  // error is the error message if failed
+  string error = 10;
+
+  // started_at is the Unix timestamp when step started
+  int64 started_at = 11;
+
+  // completed_at is the Unix timestamp when step completed
+  int64 completed_at = 12;
+
+  // sub_steps is the list of sub-steps for parallel/sequence
+  repeated WorkflowStep sub_steps = 13 [(gogoproto.nullable) = false];
+
+  // condition is the condition expression for condition steps
+  string condition = 14;
+
+  // milestone_id is the associated milestone ID for milestone steps
+  string milestone_id = 15;
+}
+
+// Milestone represents a payment milestone in a workflow
+message Milestone {
+  // id is the unique milestone identifier
+  string id = 1;
+
+  // workflow_id is the associated workflow ID
+  string workflow_id = 2;
+
+  // name is the milestone name
+  string name = 3;
+
+  // description is the milestone description
+  string description = 4;
+
+  // amount is the amount in STT
+  uint64 amount = 5;
+
+  // status is the milestone status
+  MilestoneStatus status = 6;
+
+  // order is the execution order
+  int32 order = 7;
+
+  // criteria is the completion criteria
+  string criteria = 8;
+
+  // escrow_id is the associated escrow ID
+  string escrow_id = 9;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 10;
+
+  // completed_at is the Unix timestamp when completed
+  int64 completed_at = 11;
+
+  // paid_at is the Unix timestamp when paid
+  int64 paid_at = 12;
+}
+
+// CapabilityConfig represents configuration for a capability
+message CapabilityConfig {
+  // name is the capability name
+  string name = 1;
+
+  // description is the capability description
+  string description = 2;
+
+  // params is the capability parameters
+  map<string, string> params = 3;
+
+  // timeout is the timeout in seconds
+  int64 timeout = 4;
+}

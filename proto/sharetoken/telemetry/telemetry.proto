@@ -1,0 +1,80 @@
+syntax = "proto3";
+package sharetoken.telemetry;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/telemetry/types";
+
+// LogLevel represents the logging level
+enum LogLevel {
+  LOG_LEVEL_UNSPECIFIED = 0;
+  LOG_LEVEL_DEBUG = 1;
+  LOG_LEVEL_INFO = 2;
+  LOG_LEVEL_WARN = 3;
+  LOG_LEVEL_ERROR = 4;
+  LOG_LEVEL_FATAL = 5;
+}
+
+// LoggerConfig represents logger configuration
+message LoggerConfig {
+  // format is the log format (json, text)
+  string format = 1;
+
+  // level is the minimum log level
+  LogLevel level = 2;
+
+  // output is the output destination (stdout, file)
+  string output = 3;
+
+  // file_path is the log file path if output is file
+  string file_path = 4;
+}
+
+// MetricsConfig represents metrics configuration
+message MetricsConfig {
+  // enabled enables metrics collection
+  bool enabled = 1;
+
+  // namespace is the metrics namespace
+  string namespace = 2;
+
+  // subsystem is the metrics subsystem
+  string subsystem = 3;
+}
+
+// TracerConfig represents tracer configuration
+message TracerConfig {
+  // enabled enables tracing
+  bool enabled = 1;
+
+  // exporter_type is the exporter type (jaeger, zipkin, otlp)
+  string exporter_type = 2;
+
+  // jaeger_endpoint is the Jaeger endpoint
+  string jaeger_endpoint = 3;
+
+  // zipkin_endpoint is the Zipkin endpoint
+  string zipkin_endpoint = 4;
+
+  // otlp_endpoint is the OTLP endpoint
+  string otlp_endpoint = 5;
+
+  // service_name is the service name
+  string service_name = 6;
+
+  // service_version is the service version
+  string service_version = 7;
+}
+
+// TelemetryConfig represents the telemetry module configuration
+message TelemetryConfig {
+  // logger_config is the logger configuration
+  LoggerConfig logger_config = 1 [(gogoproto.nullable) = false];
+
+  // metrics_config is the metrics configuration
+  MetricsConfig metrics_config = 2 [(gogoproto.nullable) = false];
+
+  // tracer_config is the tracer configuration
+  TracerConfig tracer_config = 3 [(gogoproto.nullable) = false];
+}

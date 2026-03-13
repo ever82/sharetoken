@@ -1,0 +1,32 @@
+syntax = "proto3";
+package sharetoken.workflow;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/workflow/workflow.proto";
+
+option go_package = "sharetoken/x/workflow/types";
+
+// GenesisState defines the workflow module's genesis state.
+message GenesisState {
+  // workflows is the list of workflows
+  repeated Workflow workflows = 1 [(gogoproto.nullable) = false];
+
+  // milestones is the list of milestones
+  repeated Milestone milestones = 2 [(gogoproto.nullable) = false];
+}
+
+// Params defines the parameters for the workflow module.
+message Params {
+  option (amino.name) = "sharetoken/x/workflow/Params";
+  option (gogoproto.equal) = true;
+
+  // max_steps_per_workflow is the maximum number of steps per workflow
+  int64 max_steps_per_workflow = 1;
+
+  // max_workflows_per_user is the maximum number of workflows per user
+  int64 max_workflows_per_user = 2;
+
+  // min_milestone_amount is the minimum milestone amount
+  uint64 min_milestone_amount = 3;
+}

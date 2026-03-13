@@ -1,0 +1,145 @@
+syntax = "proto3";
+package sharetoken.workflow;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/workflow/workflow.proto";
+
+option go_package = "sharetoken/x/workflow/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Workflows queries all workflows
+  rpc Workflows(QueryWorkflowsRequest) returns (QueryWorkflowsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/workflow/workflows";
+  }
+
+  // Workflow queries a workflow by ID
+  rpc Workflow(QueryWorkflowRequest) returns (QueryWorkflowResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/workflow/workflows/{workflow_id}";
+  }
+
+  // WorkflowsByOwner queries workflows by owner
+  rpc WorkflowsByOwner(QueryWorkflowsByOwnerRequest) returns (QueryWorkflowsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/workflow/owner/{owner}";
+  }
+
+  // Milestones queries all milestones
+  rpc Milestones(QueryMilestonesRequest) returns (QueryMilestonesResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/workflow/milestones";
+  }
+
+  // Milestone queries a milestone by ID
+  rpc Milestone(QueryMilestoneRequest) returns (QueryMilestoneResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/workflow/milestones/{milestone_id}";
+  }
+
+  // MilestonesByWorkflow queries milestones by workflow ID
+  rpc MilestonesByWorkflow(QueryMilestonesByWorkflowRequest) returns (QueryMilestonesResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/workflow/workflow/{workflow_id}/milestones";
+  }
+
+  // Params queries the module parameters
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/workflow/params";
+  }
+}
+
+// QueryWorkflowsRequest is the request type for the Query/Workflows RPC method.
+message QueryWorkflowsRequest {
+  // status filters by workflow status
+  WorkflowStatus status = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryWorkflowsResponse is the response type for the Query/Workflows RPC method.
+message QueryWorkflowsResponse {
+  // workflows is the list of workflows
+  repeated Workflow workflows = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryWorkflowRequest is the request type for the Query/Workflow RPC method.
+message QueryWorkflowRequest {
+  // workflow_id is the workflow ID
+  string workflow_id = 1;
+}
+
+// QueryWorkflowResponse is the response type for the Query/Workflow RPC method.
+message QueryWorkflowResponse {
+  // workflow is the workflow
+  Workflow workflow = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryWorkflowsByOwnerRequest is the request type for the Query/WorkflowsByOwner RPC method.
+message QueryWorkflowsByOwnerRequest {
+  // owner is the owner address
+  string owner = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryMilestonesRequest is the request type for the Query/Milestones RPC method.
+message QueryMilestonesRequest {
+  // status filters by milestone status
+  MilestoneStatus status = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryMilestonesResponse is the response type for the Query/Milestones RPC method.
+message QueryMilestonesResponse {
+  // milestones is the list of milestones
+  repeated Milestone milestones = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryMilestoneRequest is the request type for the Query/Milestone RPC method.
+message QueryMilestoneRequest {
+  // milestone_id is the milestone ID
+  string milestone_id = 1;
+}
+
+// QueryMilestoneResponse is the response type for the Query/Milestone RPC method.
+message QueryMilestoneResponse {
+  // milestone is the milestone
+  Milestone milestone = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryMilestonesByWorkflowRequest is the request type for the Query/MilestonesByWorkflow RPC method.
+message QueryMilestonesByWorkflowRequest {
+  // workflow_id is the workflow ID
+  string workflow_id = 1;
+
+  // status filters by milestone status
+  MilestoneStatus status = 2;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params is the module parameters
+  Params params = 1 [(gogoproto.nullable) = false];
+}

@@ -1,0 +1,29 @@
+syntax = "proto3";
+package sharetoken.telemetry;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/telemetry/telemetry.proto";
+
+option go_package = "sharetoken/x/telemetry/types";
+
+// GenesisState defines the telemetry module's genesis state.
+message GenesisState {
+  // config is the telemetry configuration
+  TelemetryConfig config = 1 [(gogoproto.nullable) = false];
+}
+
+// Params defines the parameters for the telemetry module.
+message Params {
+  option (amino.name) = "sharetoken/x/telemetry/Params";
+  option (gogoproto.equal) = true;
+
+  // default_log_level is the default log level
+  LogLevel default_log_level = 1;
+
+  // metrics_enabled indicates if metrics are enabled by default
+  bool metrics_enabled = 2;
+
+  // tracing_enabled indicates if tracing is enabled by default
+  bool tracing_enabled = 3;
+}

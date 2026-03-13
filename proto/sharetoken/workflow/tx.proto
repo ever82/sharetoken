@@ -1,0 +1,156 @@
+syntax = "proto3";
+package sharetoken.workflow;
+
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/workflow/workflow.proto";
+
+option go_package = "sharetoken/x/workflow/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // CreateWorkflow creates a new workflow
+  rpc CreateWorkflow(MsgCreateWorkflow) returns (MsgCreateWorkflowResponse);
+
+  // StartWorkflow starts a workflow
+  rpc StartWorkflow(MsgStartWorkflow) returns (MsgStartWorkflowResponse);
+
+  // UpdateWorkflowStep updates a workflow step status
+  rpc UpdateWorkflowStep(MsgUpdateWorkflowStep) returns (MsgUpdateWorkflowStepResponse);
+
+  // CancelWorkflow cancels a workflow
+  rpc CancelWorkflow(MsgCancelWorkflow) returns (MsgCancelWorkflowResponse);
+
+  // CreateMilestone creates a milestone
+  rpc CreateMilestone(MsgCreateMilestone) returns (MsgCreateMilestoneResponse);
+
+  // CompleteMilestone marks a milestone as completed
+  rpc CompleteMilestone(MsgCompleteMilestone) returns (MsgCompleteMilestoneResponse);
+}
+
+// MsgCreateWorkflow is the Msg/CreateWorkflow request type.
+message MsgCreateWorkflow {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the workflow owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // name is the workflow name
+  string name = 2;
+
+  // description is the workflow description
+  string description = 3;
+
+  // steps is the list of workflow steps
+  repeated WorkflowStep steps = 4 [(gogoproto.nullable) = false];
+
+  // inputs is the workflow inputs
+  map<string, string> inputs = 5;
+}
+
+// MsgCreateWorkflowResponse is the Msg/CreateWorkflow response type.
+message MsgCreateWorkflowResponse {
+  // workflow_id is the ID of the created workflow
+  string workflow_id = 1;
+}
+
+// MsgStartWorkflow is the Msg/StartWorkflow request type.
+message MsgStartWorkflow {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the workflow owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // workflow_id is the workflow ID
+  string workflow_id = 2;
+}
+
+// MsgStartWorkflowResponse is the Msg/StartWorkflow response type.
+message MsgStartWorkflowResponse {}
+
+// MsgUpdateWorkflowStep is the Msg/UpdateWorkflowStep request type.
+message MsgUpdateWorkflowStep {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the workflow owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // workflow_id is the workflow ID
+  string workflow_id = 2;
+
+  // step_id is the step ID
+  string step_id = 3;
+
+  // status is the new step status
+  StepStatus status = 4;
+
+  // output is the step output
+  string output = 5;
+
+  // error is the error message if failed
+  string error = 6;
+}
+
+// MsgUpdateWorkflowStepResponse is the Msg/UpdateWorkflowStep response type.
+message MsgUpdateWorkflowStepResponse {}
+
+// MsgCancelWorkflow is the Msg/CancelWorkflow request type.
+message MsgCancelWorkflow {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the workflow owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // workflow_id is the workflow ID
+  string workflow_id = 2;
+}
+
+// MsgCancelWorkflowResponse is the Msg/CancelWorkflow response type.
+message MsgCancelWorkflowResponse {}
+
+// MsgCreateMilestone is the Msg/CreateMilestone request type.
+message MsgCreateMilestone {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the workflow owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // workflow_id is the workflow ID
+  string workflow_id = 2;
+
+  // name is the milestone name
+  string name = 3;
+
+  // description is the milestone description
+  string description = 4;
+
+  // amount is the milestone amount
+  uint64 amount = 5;
+
+  // order is the execution order
+  int32 order = 6;
+
+  // criteria is the completion criteria
+  string criteria = 7;
+}
+
+// MsgCreateMilestoneResponse is the Msg/CreateMilestone response type.
+message MsgCreateMilestoneResponse {
+  // milestone_id is the ID of the created milestone
+  string milestone_id = 1;
+}
+
+// MsgCompleteMilestone is the Msg/CompleteMilestone request type.
+message MsgCompleteMilestone {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the workflow owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // milestone_id is the milestone ID
+  string milestone_id = 2;
+}
+
+// MsgCompleteMilestoneResponse is the Msg/CompleteMilestone response type.
+message MsgCompleteMilestoneResponse {}

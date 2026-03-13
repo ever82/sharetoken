@@ -1,0 +1,78 @@
+syntax = "proto3";
+package sharetoken.telemetry;
+
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/telemetry/telemetry.proto";
+
+option go_package = "sharetoken/x/telemetry/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Config queries the telemetry configuration
+  rpc Config(QueryConfigRequest) returns (QueryConfigResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/telemetry/config";
+  }
+
+  // Params queries the module parameters
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/telemetry/params";
+  }
+
+  // Metrics queries metrics information
+  rpc Metrics(QueryMetricsRequest) returns (QueryMetricsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/telemetry/metrics";
+  }
+}
+
+// QueryConfigRequest is the request type for the Query/Config RPC method.
+message QueryConfigRequest {}
+
+// QueryConfigResponse is the response type for the Query/Config RPC method.
+message QueryConfigResponse {
+  // config is the telemetry configuration
+  TelemetryConfig config = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params is the module parameters
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryMetricsRequest is the request type for the Query/Metrics RPC method.
+message QueryMetricsRequest {
+  // module filters by module name
+  string module = 1;
+}
+
+// QueryMetricsResponse is the response type for the Query/Metrics RPC method.
+message QueryMetricsResponse {
+  // metrics_enabled indicates if metrics are enabled
+  bool metrics_enabled = 1;
+
+  // module_metrics is the list of module metrics
+  repeated ModuleMetrics module_metrics = 2 [(gogoproto.nullable) = false];
+}
+
+// ModuleMetrics represents metrics for a module
+message ModuleMetrics {
+  // module is the module name
+  string module = 1;
+
+  // transaction_count is the transaction count
+  int64 transaction_count = 2;
+
+  // query_count is the query count
+  int64 query_count = 3;
+
+  // error_count is the error count
+  int64 error_count = 4;
+}
