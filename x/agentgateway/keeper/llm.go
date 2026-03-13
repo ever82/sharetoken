@@ -121,7 +121,7 @@ func (k *Keeper) createLLMRequest(messages []Message, apiKey string) (*http.Requ
 // parseLLMResponse 解析 LLM API 响应
 func (k *Keeper) parseLLMResponse(resp *http.Response) (string, float64, error) {
 	if resp.StatusCode == 403 {
-		return "", 0, errors.New("LLM API 403: 请检查 API Key 是否有效，或在 https://console.anthropic.com/ 生成新的 API Key")
+		return "", 0, errors.New("LLM API 403: please check if API Key is valid, or generate a new one at https://console.anthropic.com/")
 	}
 	if resp.StatusCode != 200 {
 		return "", 0, fmt.Errorf("LLM API error: %d", resp.StatusCode)
