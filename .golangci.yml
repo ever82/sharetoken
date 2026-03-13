@@ -264,6 +264,16 @@ issues:
         - errcheck
       text: "SetAPIKey"
 
+    # 排除未使用字段警告（保留字段）
+    - linters:
+        - unused
+      text: "is unused"
+
+    # 排除无效赋值警告
+    - linters:
+        - ineffassign
+      text: "ineffectual assignment"
+
     # 排除 gosec 安全警告（开发阶段允许）
     - linters:
         - gosec

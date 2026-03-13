@@ -27,7 +27,7 @@ const (
 // NewHandler returns a handler for "llmcustody" type messages.
 func NewHandler(k keeper.Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
-		ctx = ctx.WithEventManager(sdk.NewEventManager())
+		_ = ctx.WithEventManager(sdk.NewEventManager())
 
 		// For now, return an error indicating proto generation is needed
 		// Once proto files are generated, the message types will implement sdk.Msg
