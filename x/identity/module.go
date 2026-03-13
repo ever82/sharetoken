@@ -119,7 +119,9 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 }
 
 // RegisterInvariants registers the identity module's invariants.
-func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
+func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
+	am.keeper.RegisterInvariants(ir)
+}
 
 // InitGenesis performs the identity module's genesis initialization.
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {

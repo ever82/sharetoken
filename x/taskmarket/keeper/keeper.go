@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"encoding/json"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -11,204 +12,10 @@ import (
 // StoreKey is a type alias for byte slices
 type StoreKey []byte
 
-// Keeper manages task marketplace state using Cosmos SDK store
-type Keeper struct {
-	storeKey   StoreKey
-	cdc        interface{} // Simplified - not using protobuf codec for now
-	paramSpace types.ParamSubspace
-
-	// Legacy in-memory keeper for backward compatibility
-	legacyKeeper *LegacyKeeper
-}
-
-// LegacyKeeper provides backward compatibility with existing tests.
-// Optimized with composite indexes for O(1) lookups.
-type LegacyKeeper struct {
-	tasks        map[string]*types.Task
-	applications map[string]*types.Application
-	auctions     map[string]*types.Auction
-	ratings      map[string]*types.Rating
-	reputations  map[string]*types.Reputation
-
-	// Composite indexes for O(1) lookup instead of O(n) scan
-	tasksByRequester map[string][]string // requesterID -> taskIDs
-	tasksByWorker    map[string][]string // workerID -> taskIDs
-	tasksByStatus    map[string][]string // status -> taskIDs
-}
-
-// NewLegacyKeeper creates a new legacy keeper for in-memory operations
-func NewLegacyKeeper() *LegacyKeeper {
-	return &LegacyKeeper{
-		tasks:            make(map[string]*types.Task),
-		applications:     make(map[string]*types.Application),
-		auctions:         make(map[string]*types.Auction),
-		ratings:          make(map[string]*types.Rating),
-		reputations:      make(map[string]*types.Reputation),
-		tasksByRequester: make(map[string][]string),
-		tasksByWorker:    make(map[string][]string),
-		tasksByStatus:    make(map[string][]string),
-	}
-}
-
-// NewKeeper creates a new task marketplace keeper
-func NewKeeper() *Keeper {
-	return &Keeper{
-		legacyKeeper: NewLegacyKeeper(),
-	}
-}
-
-// GetLegacyKeeper returns the legacy keeper for tests and migration
-func (k Keeper) GetLegacyKeeper() *LegacyKeeper {
-	return k.legacyKeeper
-}
-
-// Backward compatible methods (no context)
-
-// CreateTask creates a new task
-func (k Keeper) CreateTask(task *types.Task) error {
-	return k.legacyKeeper.CreateTask(task)
-}
-
-// GetTask retrieves a task by ID
-func (k Keeper) GetTask(id string) *types.Task {
-	return k.legacyKeeper.GetTask(id)
-}
-
-// UpdateTask updates a task
-func (k Keeper) UpdateTask(task *types.Task) error {
-	return k.legacyKeeper.UpdateTask(task)
-}
-
-// GetAllTasks returns all tasks
-func (k Keeper) GetAllTasks() []*types.Task {
-	return k.legacyKeeper.GetAllTasks()
-}
-
-// GetTasksByRequester returns tasks by requester
-func (k Keeper) GetTasksByRequester(requesterID string) []*types.Task {
-	return k.legacyKeeper.GetTasksByRequester(requesterID)
-}
-
-// GetTasksByWorker returns tasks by worker
-func (k Keeper) GetTasksByWorker(workerID string) []*types.Task {
-	return k.legacyKeeper.GetTasksByWorker(workerID)
-}
-
-// GetOpenTasks returns open tasks
-func (k Keeper) GetOpenTasks() []*types.Task {
-	return k.legacyKeeper.GetOpenTasks()
-}
-
-// StartTask starts a task
-func (k Keeper) StartTask(taskID string) error {
-	return k.legacyKeeper.StartTask(taskID)
-}
-
-// SubmitMilestone submits a milestone
-func (k Keeper) SubmitMilestone(taskID, milestoneID, deliverables string) error {
-	return k.legacyKeeper.SubmitMilestone(taskID, milestoneID, deliverables)
-}
-
-// ApproveMilestone approves a milestone
-func (k Keeper) ApproveMilestone(taskID, milestoneID string) error {
-	return k.legacyKeeper.ApproveMilestone(taskID, milestoneID)
-}
-
-// SubmitApplication submits an application
-func (k Keeper) SubmitApplication(app *types.Application) error {
-	return k.legacyKeeper.SubmitApplication(app)
-}
-
-// GetApplication gets an application
-func (k Keeper) GetApplication(id string) *types.Application {
-	return k.legacyKeeper.GetApplication(id)
-}
-
-// GetApplicationsByTask gets applications for a task
-func (k Keeper) GetApplicationsByTask(taskID string) []*types.Application {
-	return k.legacyKeeper.GetApplicationsByTask(taskID)
-}
-
-// AcceptApplication accepts an application
-func (k Keeper) AcceptApplication(appID string) error {
-	return k.legacyKeeper.AcceptApplication(appID)
-}
-
-// RejectApplication rejects an application
-func (k Keeper) RejectApplication(appID string) error {
-	return k.legacyKeeper.RejectApplication(appID)
-}
-
-// CreateAuction creates an auction
-func (k Keeper) CreateAuction(taskID string, startingPrice, reservePrice uint64, duration int64) (*types.Auction, error) {
-	return k.legacyKeeper.CreateAuction(taskID, startingPrice, reservePrice, duration)
-}
-
-// GetAuction gets an auction
-func (k Keeper) GetAuction(taskID string) *types.Auction {
-	return k.legacyKeeper.GetAuction(taskID)
-}
-
-// SubmitBid submits a bid
-func (k Keeper) SubmitBid(bid *types.Bid) error {
-	return k.legacyKeeper.SubmitBid(bid)
-}
-
-// CloseAuction closes an auction
-func (k Keeper) CloseAuction(taskID string) error {
-	return k.legacyKeeper.CloseAuction(taskID)
-}
-
-// SubmitRating submits a rating
-func (k Keeper) SubmitRating(rating *types.Rating) error {
-	return k.legacyKeeper.SubmitRating(rating)
-}
-
-// GetRating gets a rating
-func (k Keeper) GetRating(id string) *types.Rating {
-	return k.legacyKeeper.GetRating(id)
-}
-
-// GetReputation gets reputation
-func (k Keeper) GetReputation(userID string) *types.Reputation {
-	return k.legacyKeeper.GetReputation(userID)
-}
-
-// GetTaskStatistics gets statistics
-func (k Keeper) GetTaskStatistics() map[string]interface{} {
-	return k.legacyKeeper.GetTaskStatistics()
-}
-
-// SDK-compatible methods (with context)
-
-// SetTask sets a task in the store
-func (k Keeper) SetTask(ctx sdk.Context, task types.Task) {
-	k.legacyKeeper.tasks[task.ID] = &task
-}
-
-// SetApplication sets an application in the store
-func (k Keeper) SetApplication(ctx sdk.Context, app types.Application) {
-	k.legacyKeeper.applications[app.ID] = &app
-}
-
-// SetAuction sets an auction in the store
-func (k Keeper) SetAuction(ctx sdk.Context, auction types.Auction) {
-	k.legacyKeeper.auctions[auction.TaskID] = &auction
-}
-
-// SetBid sets a bid in the store
-func (k Keeper) SetBid(ctx sdk.Context, bid types.Bid) {
-	// Bids are stored within auctions in the legacy keeper
-}
-
-// SetRating sets a rating in the store
-func (k Keeper) SetRating(ctx sdk.Context, rating types.Rating) {
-	k.legacyKeeper.ratings[rating.ID] = &rating
-}
-
-// SetReputation sets a reputation in the store
-func (k Keeper) SetReputation(ctx sdk.Context, rep types.Reputation) {
-	k.legacyKeeper.reputations[rep.UserID] = &rep
+// codec is a simple interface for marshaling/unmarshaling
+type codec interface {
+	Marshal(o interface{}) ([]byte, error)
+	Unmarshal(b []byte, o interface{}) error
 }
 
 // JSONCodec wraps encoding/json for SDK-like interface
@@ -220,4 +27,328 @@ func (c JSONCodec) Marshal(o interface{}) ([]byte, error) {
 
 func (c JSONCodec) Unmarshal(b []byte, o interface{}) error {
 	return json.Unmarshal(b, o)
+}
+
+// Keeper manages task marketplace state using Cosmos SDK KVStore
+type Keeper struct {
+	storeKey   StoreKey
+	cdc        codec
+	paramSpace types.ParamSubspace
+}
+
+// NewKeeper creates a new task marketplace keeper
+func NewKeeper(storeKey StoreKey, cdc codec, paramSpace types.ParamSubspace) *Keeper {
+	return &Keeper{
+		storeKey:   storeKey,
+		cdc:        cdc,
+		paramSpace: paramSpace,
+	}
+}
+
+// NewKeeperWithDefaultCodec creates a keeper with default JSON codec
+func NewKeeperWithDefaultCodec(storeKey StoreKey) *Keeper {
+	return &Keeper{
+		storeKey: storeKey,
+		cdc:      JSONCodec{},
+	}
+}
+
+// NewKeeperSimple creates a new task marketplace keeper without dependencies (for tests)
+func NewKeeperSimple() *Keeper {
+	return &Keeper{
+		storeKey: []byte(types.StoreKey),
+		cdc:      JSONCodec{},
+	}
+}
+
+// GetStoreKey returns the store key
+func (k Keeper) GetStoreKey() StoreKey {
+	return k.storeKey
+}
+
+// getStore returns the KVStore for this module
+func (k Keeper) getStore(ctx sdk.Context) sdk.KVStore {
+	return ctx.KVStore(k.storeKey)
+}
+
+// Task CRUD Operations
+
+// SetTask stores a task in the KVStore
+func (k Keeper) SetTask(ctx sdk.Context, task types.Task) {
+	store := k.getStore(ctx)
+	key := types.GetTaskKey(task.ID)
+	value, err := k.cdc.Marshal(task)
+	if err != nil {
+		panic(fmt.Errorf("failed to marshal task: %w", err))
+	}
+	store.Set(key, value)
+
+	// Update indexes
+	k.setTaskByRequester(ctx, task)
+	k.setTaskByWorker(ctx, task)
+	k.setTaskByStatus(ctx, task)
+}
+
+// GetTask retrieves a task by ID from KVStore
+func (k Keeper) GetTask(ctx sdk.Context, id string) (types.Task, bool) {
+	store := k.getStore(ctx)
+	key := types.GetTaskKey(id)
+	value := store.Get(key)
+	if value == nil {
+		return types.Task{}, false
+	}
+
+	var task types.Task
+	if err := k.cdc.Unmarshal(value, &task); err != nil {
+		panic(fmt.Errorf("failed to unmarshal task: %w", err))
+	}
+	return task, true
+}
+
+// DeleteTask removes a task from the KVStore
+func (k Keeper) DeleteTask(ctx sdk.Context, id string) {
+	store := k.getStore(ctx)
+
+	// Get task first to clean up indexes
+	task, found := k.GetTask(ctx, id)
+	if found {
+		k.deleteTaskIndexes(ctx, task)
+	}
+
+	key := types.GetTaskKey(id)
+	store.Delete(key)
+}
+
+// HasTask checks if a task exists
+func (k Keeper) HasTask(ctx sdk.Context, id string) bool {
+	store := k.getStore(ctx)
+	key := types.GetTaskKey(id)
+	return store.Has(key)
+}
+
+// GetAllTasks returns all tasks from KVStore
+func (k Keeper) GetAllTasks(ctx sdk.Context) []types.Task {
+	var tasks []types.Task
+	store := k.getStore(ctx)
+	iterator := sdk.KVStorePrefixIterator(store, types.TaskKeyPrefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		var task types.Task
+		if err := k.cdc.Unmarshal(iterator.Value(), &task); err != nil {
+			panic(fmt.Errorf("failed to unmarshal task: %w", err))
+		}
+		tasks = append(tasks, task)
+	}
+	return tasks
+}
+
+// CreateTask creates a new task (SDK version)
+func (k Keeper) CreateTask(ctx sdk.Context, task types.Task) error {
+	if k.HasTask(ctx, task.ID) {
+		return fmt.Errorf("task already exists: %s", task.ID)
+	}
+
+	if err := task.Validate(); err != nil {
+		return fmt.Errorf("invalid task: %w", err)
+	}
+
+	if len(task.Milestones) > 0 {
+		if err := task.ValidateMilestones(); err != nil {
+			return err
+		}
+	}
+
+	k.SetTask(ctx, task)
+	return nil
+}
+
+// UpdateTask updates a task in the store
+func (k Keeper) UpdateTask(ctx sdk.Context, task types.Task) error {
+	if !k.HasTask(ctx, task.ID) {
+		return fmt.Errorf("task not found: %s", task.ID)
+	}
+
+	// Delete old indexes
+	oldTask, _ := k.GetTask(ctx, task.ID)
+	k.deleteTaskIndexes(ctx, oldTask)
+
+	// Set new task with updated indexes
+	k.SetTask(ctx, task)
+	return nil
+}
+
+// Index management functions
+
+func (k Keeper) setTaskByRequester(ctx sdk.Context, task types.Task) {
+	if task.RequesterID == "" {
+		return
+	}
+	store := k.getStore(ctx)
+	key := types.GetTaskByRequesterKey(task.RequesterID, task.ID)
+	store.Set(key, []byte(task.ID))
+}
+
+func (k Keeper) setTaskByWorker(ctx sdk.Context, task types.Task) {
+	if task.WorkerID == "" {
+		return
+	}
+	store := k.getStore(ctx)
+	key := types.GetTaskByWorkerKey(task.WorkerID, task.ID)
+	store.Set(key, []byte(task.ID))
+}
+
+func (k Keeper) setTaskByStatus(ctx sdk.Context, task types.Task) {
+	store := k.getStore(ctx)
+	key := types.GetTaskByStatusKey(string(task.Status), task.ID)
+	store.Set(key, []byte(task.ID))
+}
+
+func (k Keeper) deleteTaskIndexes(ctx sdk.Context, task types.Task) {
+	store := k.getStore(ctx)
+
+	// Delete requester index
+	if task.RequesterID != "" {
+		key := types.GetTaskByRequesterKey(task.RequesterID, task.ID)
+		store.Delete(key)
+	}
+
+	// Delete worker index
+	if task.WorkerID != "" {
+		key := types.GetTaskByWorkerKey(task.WorkerID, task.ID)
+		store.Delete(key)
+	}
+
+	// Delete status index
+	key := types.GetTaskByStatusKey(string(task.Status), task.ID)
+	store.Delete(key)
+}
+
+// GetTasksByRequester returns tasks by requester using composite index
+func (k Keeper) GetTasksByRequester(ctx sdk.Context, requesterID string) []types.Task {
+	var tasks []types.Task
+	store := k.getStore(ctx)
+	prefix := types.GetTaskByRequesterPrefix(requesterID)
+	iterator := sdk.KVStorePrefixIterator(store, prefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		taskID := string(iterator.Value())
+		task, found := k.GetTask(ctx, taskID)
+		if found {
+			tasks = append(tasks, task)
+		}
+	}
+	return tasks
+}
+
+// GetTasksByWorker returns tasks by worker using composite index
+func (k Keeper) GetTasksByWorker(ctx sdk.Context, workerID string) []types.Task {
+	var tasks []types.Task
+	store := k.getStore(ctx)
+	prefix := types.GetTaskByWorkerPrefix(workerID)
+	iterator := sdk.KVStorePrefixIterator(store, prefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		taskID := string(iterator.Value())
+		task, found := k.GetTask(ctx, taskID)
+		if found {
+			tasks = append(tasks, task)
+		}
+	}
+	return tasks
+}
+
+// GetTasksByStatus returns tasks by status
+func (k Keeper) GetTasksByStatus(ctx sdk.Context, status string) []types.Task {
+	var tasks []types.Task
+	store := k.getStore(ctx)
+	prefix := types.GetTaskByStatusPrefix(status)
+	iterator := sdk.KVStorePrefixIterator(store, prefix)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		taskID := string(iterator.Value())
+		task, found := k.GetTask(ctx, taskID)
+		if found {
+			tasks = append(tasks, task)
+		}
+	}
+	return tasks
+}
+
+// GetOpenTasks returns all open tasks
+func (k Keeper) GetOpenTasks(ctx sdk.Context) []types.Task {
+	return k.GetTasksByStatus(ctx, string(types.TaskStatusOpen))
+}
+
+// Task Lifecycle Operations
+
+// StartTask starts a task
+func (k Keeper) StartTask(ctx sdk.Context, taskID string) error {
+	task, found := k.GetTask(ctx, taskID)
+	if !found {
+		return fmt.Errorf("task not found: %s", taskID)
+	}
+
+	// Delete old status index
+	k.deleteTaskIndexes(ctx, task)
+
+	task.Start()
+
+	if len(task.Milestones) > 0 {
+		for i := range task.Milestones {
+			if task.Milestones[i].Status == types.MilestoneStatusPending {
+				task.Milestones[i].Status = types.MilestoneStatusActive
+				break
+			}
+		}
+	}
+
+	k.SetTask(ctx, task)
+	return nil
+}
+
+// SubmitMilestone submits a milestone
+func (k Keeper) SubmitMilestone(ctx sdk.Context, taskID, milestoneID, deliverables string) error {
+	task, found := k.GetTask(ctx, taskID)
+	if !found {
+		return fmt.Errorf("task not found: %s", taskID)
+	}
+	if err := task.SubmitMilestone(milestoneID, deliverables); err != nil {
+		return err
+	}
+	return k.UpdateTask(ctx, task)
+}
+
+// ApproveMilestone approves a milestone
+func (k Keeper) ApproveMilestone(ctx sdk.Context, taskID, milestoneID string) error {
+	task, found := k.GetTask(ctx, taskID)
+	if !found {
+		return fmt.Errorf("task not found: %s", taskID)
+	}
+
+	// Delete old indexes before status change
+	k.deleteTaskIndexes(ctx, task)
+
+	err := task.ApproveMilestone(milestoneID)
+	if task.AllMilestonesCompleted() {
+		task.Complete()
+	}
+
+	k.SetTask(ctx, task)
+	return err
+}
+
+// RejectMilestone rejects a milestone
+func (k Keeper) RejectMilestone(ctx sdk.Context, taskID, milestoneID, reason string) error {
+	task, found := k.GetTask(ctx, taskID)
+	if !found {
+		return fmt.Errorf("task not found: %s", taskID)
+	}
+	if err := task.RejectMilestone(milestoneID, reason); err != nil {
+		return err
+	}
+	return k.UpdateTask(ctx, task)
 }

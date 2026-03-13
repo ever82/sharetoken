@@ -45,30 +45,22 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) types.GenesisState {
 	var gs types.GenesisState
 
 	// Export all tasks
-	allTasks := k.GetAllTasks()
-	for _, task := range allTasks {
-		gs.Tasks = append(gs.Tasks, *task)
-	}
+	gs.Tasks = k.GetAllTasks(ctx)
 
 	// Export all applications
-	gs.Applications = []types.Application{}
-	// Note: In full implementation, iterate through all applications
+	gs.Applications = k.GetAllApplications(ctx)
 
 	// Export all auctions
-	gs.Auctions = []types.Auction{}
-	// Note: In full implementation, iterate through all auctions
+	gs.Auctions = k.GetAllAuctions(ctx)
 
 	// Export all bids
-	gs.Bids = []types.Bid{}
-	// Note: In full implementation, iterate through all bids
+	gs.Bids = k.GetAllBids(ctx)
 
 	// Export all ratings
-	gs.Ratings = []types.Rating{}
-	// Note: In full implementation, iterate through all ratings
+	gs.Ratings = k.GetAllRatings(ctx)
 
 	// Export all reputations
-	gs.Reputations = []types.Reputation{}
-	// Note: In full implementation, iterate through all reputations
+	gs.Reputations = k.GetAllReputations(ctx)
 
 	return gs
 }

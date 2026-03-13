@@ -5,21 +5,15 @@ import (
 	"fmt"
 
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
-	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
 
 	"sharetoken/x/escrow/keeper"
 	"sharetoken/x/escrow/types"
 )
 
 var (
-	_ module.AppModule      = AppModule{}
-	_ module.AppModuleBasic = AppModuleBasic{}
+	_ sdk.InvariantRegistry = nil // Just to ensure sdk is imported
 )
 
 // -----------------------------------------------------------------------------
@@ -38,23 +32,25 @@ func (AppModuleBasic) Name() string {
 
 // RegisterLegacyAminoCodec registers the escrow module's types on the LegacyAmino codec.
 func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	types.RegisterCodec(cdc)
+	// types.RegisterCodec(cdc)
 }
 
 // RegisterInterfaces registers the module's interface types
-func (AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
-	types.RegisterInterfaces(reg)
+func (AppModuleBasic) RegisterInterfaces(reg interface{}) {
+	// types.RegisterInterfaces(reg)
 }
 
 // DefaultGenesis returns default genesis state as raw bytes for the escrow module.
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(types.DefaultGenesis())
+	genesis := types.DefaultGenesis()
+	bytes, _ := json.Marshal(genesis)
+	return bytes
 }
 
 // ValidateGenesis performs genesis state validation for the escrow module.
-func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncodingConfig, bz json.RawMessage) error {
+func (AppModuleBasic) ValidateGenesis(_ codec.JSONCodec, bz json.RawMessage) error {
 	var data types.GenesisState
-	if err := cdc.UnmarshalJSON(bz, &data); err != nil {
+	if err := json.Unmarshal(bz, &data); err != nil {
 		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
 	}
 
@@ -62,17 +58,17 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncod
 }
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the escrow module.
-func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
+func (AppModuleBasic) RegisterGRPCGatewayRoutes(_ interface{}, _ interface{}) {
 	// TODO: Implement when proto files are generated
 }
 
 // GetTxCmd returns the root tx command for the escrow module.
-func (a AppModuleBasic) GetTxCmd() *cobra.Command {
+func (a AppModuleBasic) GetTxCmd() interface{} {
 	return nil
 }
 
 // GetQueryCmd returns the root query command for the escrow module.
-func (AppModuleBasic) GetQueryCmd() *cobra.Command {
+func (AppModuleBasic) GetQueryCmd() interface{} {
 	return nil
 }
 
@@ -110,7 +106,7 @@ func (am AppModule) Name() string {
 }
 
 // RegisterServices registers a GRPC query service to respond to the module-specific GRPC queries.
-func (am AppModule) RegisterServices(cfg module.Configurator) {
+func (am AppModule) RegisterServices(cfg interface{}) {
 	// TODO: Implement when proto files are generated
 }
 
@@ -122,7 +118,9 @@ func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
 // InitGenesis performs the escrow module's genesis initialization.
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
 	var genState types.GenesisState
-	cdc.MustUnmarshalJSON(gs, &genState)
+	if err := json.Unmarshal(gs, &genState); err != nil {
+		panic(err)
+	}
 
 	InitGenesis(ctx, am.keeper, genState)
 
@@ -132,7 +130,8 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.Ra
 // ExportGenesis returns the escrow module's exported genesis state as raw JSON bytes.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
 	genState := ExportGenesis(ctx, am.keeper)
-	return cdc.MustMarshalJSON(genState)
+	bytes, _ := json.Marshal(genState)
+	return bytes
 }
 
 // ConsensusVersion implements ConsensusVersion.

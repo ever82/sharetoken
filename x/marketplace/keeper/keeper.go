@@ -44,3 +44,22 @@ func (k Keeper) GetService(ctx sdk.Context, id string) (types.Service, bool) {
 	}
 	return service, true
 }
+
+// GetAllServices returns all services from the store
+func (k Keeper) GetAllServices(ctx sdk.Context) []types.Service {
+	store := ctx.KVStore(k.storeKey)
+	iterator := sdk.KVStorePrefixIterator(store, types.ServiceKey)
+	defer iterator.Close()
+
+	var services []types.Service
+	for ; iterator.Valid(); iterator.Next() {
+		var service types.Service
+		if err := json.Unmarshal(iterator.Value(), &service); err != nil {
+			ctx.Logger().Error("failed to unmarshal service", "error", err)
+			continue
+		}
+		services = append(services, service)
+	}
+
+	return services
+}

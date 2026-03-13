@@ -44,8 +44,7 @@ func (m msgServer) CreateTask(ctx sdk.Context, msg *types.MsgCreateTask) (*types
 		return nil, err
 	}
 
-	// Use legacy keeper for now
-	if err := m.K.legacyKeeper.CreateTask(task); err != nil {
+	if err := m.K.CreateTask(ctx, *task); err != nil {
 		return nil, err
 	}
 
@@ -64,8 +63,8 @@ func (m msgServer) CreateTask(ctx sdk.Context, msg *types.MsgCreateTask) (*types
 
 // UpdateTask handles MsgUpdateTask
 func (m msgServer) UpdateTask(ctx sdk.Context, msg *types.MsgUpdateTask) (*types.MsgUpdateTaskResponse, error) {
-	task := m.K.legacyKeeper.GetTask(msg.TaskID)
-	if task == nil {
+	task, found := m.K.GetTask(ctx, msg.TaskID)
+	if !found {
 		return nil, types.ErrTaskNotFound
 	}
 
@@ -101,7 +100,7 @@ func (m msgServer) UpdateTask(ctx sdk.Context, msg *types.MsgUpdateTask) (*types
 		task.Milestones = msg.Milestones
 	}
 
-	if err := m.K.legacyKeeper.UpdateTask(task); err != nil {
+	if err := m.K.UpdateTask(ctx, task); err != nil {
 		return nil, err
 	}
 
@@ -110,8 +109,8 @@ func (m msgServer) UpdateTask(ctx sdk.Context, msg *types.MsgUpdateTask) (*types
 
 // PublishTask handles MsgPublishTask
 func (m msgServer) PublishTask(ctx sdk.Context, msg *types.MsgPublishTask) (*types.MsgPublishTaskResponse, error) {
-	task := m.K.legacyKeeper.GetTask(msg.TaskID)
-	if task == nil {
+	task, found := m.K.GetTask(ctx, msg.TaskID)
+	if !found {
 		return nil, types.ErrTaskNotFound
 	}
 
@@ -128,13 +127,13 @@ func (m msgServer) PublishTask(ctx sdk.Context, msg *types.MsgPublishTask) (*typ
 
 	// Create auction if auction type
 	if task.Type == types.TaskTypeAuction {
-		_, err := m.K.legacyKeeper.CreateAuction(task.ID, task.Budget, task.Budget/2, 7*24*60*60) // 7 days
+		_, err := m.K.CreateAuction(ctx, task.ID, task.Budget, task.Budget/2, 7*24*60*60) // 7 days
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if err := m.K.legacyKeeper.UpdateTask(task); err != nil {
+	if err := m.K.UpdateTask(ctx, task); err != nil {
 		return nil, err
 	}
 
@@ -150,8 +149,8 @@ func (m msgServer) PublishTask(ctx sdk.Context, msg *types.MsgPublishTask) (*typ
 
 // CancelTask handles MsgCancelTask
 func (m msgServer) CancelTask(ctx sdk.Context, msg *types.MsgCancelTask) (*types.MsgCancelTaskResponse, error) {
-	task := m.K.legacyKeeper.GetTask(msg.TaskID)
-	if task == nil {
+	task, found := m.K.GetTask(ctx, msg.TaskID)
+	if !found {
 		return nil, types.ErrTaskNotFound
 	}
 
@@ -166,7 +165,7 @@ func (m msgServer) CancelTask(ctx sdk.Context, msg *types.MsgCancelTask) (*types
 
 	task.Cancel()
 
-	if err := m.K.legacyKeeper.UpdateTask(task); err != nil {
+	if err := m.K.UpdateTask(ctx, task); err != nil {
 		return nil, err
 	}
 
@@ -189,7 +188,7 @@ func (m msgServer) SubmitApplication(ctx sdk.Context, msg *types.MsgSubmitApplic
 	app.PortfolioLinks = msg.PortfolioLinks
 	app.EstimatedDuration = msg.EstimatedDuration
 
-	if err := m.K.legacyKeeper.SubmitApplication(app); err != nil {
+	if err := m.K.SubmitApplication(ctx, *app); err != nil {
 		return nil, err
 	}
 
@@ -207,7 +206,7 @@ func (m msgServer) SubmitApplication(ctx sdk.Context, msg *types.MsgSubmitApplic
 
 // AcceptApplication handles MsgAcceptApplication
 func (m msgServer) AcceptApplication(ctx sdk.Context, msg *types.MsgAcceptApplication) (*types.MsgAcceptApplicationResponse, error) {
-	if err := m.K.legacyKeeper.AcceptApplication(msg.ApplicationID); err != nil {
+	if err := m.K.AcceptApplication(ctx, msg.ApplicationID); err != nil {
 		return nil, err
 	}
 
@@ -223,7 +222,7 @@ func (m msgServer) AcceptApplication(ctx sdk.Context, msg *types.MsgAcceptApplic
 
 // RejectApplication handles MsgRejectApplication
 func (m msgServer) RejectApplication(ctx sdk.Context, msg *types.MsgRejectApplication) (*types.MsgRejectApplicationResponse, error) {
-	if err := m.K.legacyKeeper.RejectApplication(msg.ApplicationID); err != nil {
+	if err := m.K.RejectApplication(ctx, msg.ApplicationID); err != nil {
 		return nil, err
 	}
 
@@ -244,7 +243,7 @@ func (m msgServer) SubmitBid(ctx sdk.Context, msg *types.MsgSubmitBid) (*types.M
 	bid.Message = msg.Message
 	bid.Portfolio = msg.Portfolio
 
-	if err := m.K.legacyKeeper.SubmitBid(bid); err != nil {
+	if err := m.K.SubmitBid(ctx, *bid); err != nil {
 		return nil, err
 	}
 
@@ -262,13 +261,13 @@ func (m msgServer) SubmitBid(ctx sdk.Context, msg *types.MsgSubmitBid) (*types.M
 
 // CloseAuction handles MsgCloseAuction
 func (m msgServer) CloseAuction(ctx sdk.Context, msg *types.MsgCloseAuction) (*types.MsgCloseAuctionResponse, error) {
-	if err := m.K.legacyKeeper.CloseAuction(msg.TaskID); err != nil {
+	if err := m.K.CloseAuction(ctx, msg.TaskID); err != nil {
 		return nil, err
 	}
 
-	auction := m.K.legacyKeeper.GetAuction(msg.TaskID)
+	auction, found := m.K.GetAuction(ctx, msg.TaskID)
 	var winnerID string
-	if auction != nil && auction.WinningBidID != "" {
+	if found && auction.WinningBidID != "" {
 		for _, bid := range auction.Bids {
 			if bid.ID == auction.WinningBidID {
 				winnerID = bid.WorkerID
@@ -290,7 +289,7 @@ func (m msgServer) CloseAuction(ctx sdk.Context, msg *types.MsgCloseAuction) (*t
 
 // StartTask handles MsgStartTask
 func (m msgServer) StartTask(ctx sdk.Context, msg *types.MsgStartTask) (*types.MsgStartTaskResponse, error) {
-	if err := m.K.legacyKeeper.StartTask(msg.TaskID); err != nil {
+	if err := m.K.StartTask(ctx, msg.TaskID); err != nil {
 		return nil, err
 	}
 
@@ -299,7 +298,7 @@ func (m msgServer) StartTask(ctx sdk.Context, msg *types.MsgStartTask) (*types.M
 
 // SubmitMilestone handles MsgSubmitMilestone
 func (m msgServer) SubmitMilestone(ctx sdk.Context, msg *types.MsgSubmitMilestone) (*types.MsgSubmitMilestoneResponse, error) {
-	if err := m.K.legacyKeeper.SubmitMilestone(msg.TaskID, msg.MilestoneID, msg.Deliverables); err != nil {
+	if err := m.K.SubmitMilestone(ctx, msg.TaskID, msg.MilestoneID, msg.Deliverables); err != nil {
 		return nil, err
 	}
 
@@ -308,7 +307,7 @@ func (m msgServer) SubmitMilestone(ctx sdk.Context, msg *types.MsgSubmitMileston
 
 // ApproveMilestone handles MsgApproveMilestone
 func (m msgServer) ApproveMilestone(ctx sdk.Context, msg *types.MsgApproveMilestone) (*types.MsgApproveMilestoneResponse, error) {
-	if err := m.K.legacyKeeper.ApproveMilestone(msg.TaskID, msg.MilestoneID); err != nil {
+	if err := m.K.ApproveMilestone(ctx, msg.TaskID, msg.MilestoneID); err != nil {
 		return nil, err
 	}
 
@@ -317,7 +316,7 @@ func (m msgServer) ApproveMilestone(ctx sdk.Context, msg *types.MsgApproveMilest
 
 // RejectMilestone handles MsgRejectMilestone
 func (m msgServer) RejectMilestone(ctx sdk.Context, msg *types.MsgRejectMilestone) (*types.MsgRejectMilestoneResponse, error) {
-	if err := m.K.legacyKeeper.RejectMilestone(msg.TaskID, msg.MilestoneID, msg.Reason); err != nil {
+	if err := m.K.RejectMilestone(ctx, msg.TaskID, msg.MilestoneID, msg.Reason); err != nil {
 		return nil, err
 	}
 
@@ -343,7 +342,7 @@ func (m msgServer) SubmitRating(ctx sdk.Context, msg *types.MsgSubmitRating) (*t
 	}
 	rating.Comment = msg.Comment
 
-	if err := m.K.legacyKeeper.SubmitRating(rating); err != nil {
+	if err := m.K.SubmitRating(ctx, *rating); err != nil {
 		return nil, err
 	}
 
