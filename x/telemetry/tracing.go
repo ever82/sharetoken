@@ -7,6 +7,8 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
@@ -112,10 +114,31 @@ func InitTracer(cfg TracerConfig) error {
 
 // createExporter creates a trace exporter based on configuration
 func createExporter(cfg TracerConfig) (sdktrace.SpanExporter, error) {
-	// For now, use a simple stdout exporter that works with existing dependencies
-	// In production, you would import the appropriate exporter package
-	// e.g., go.opentelemetry.io/otel/exporters/jaeger
-	return nil, nil
+	switch cfg.ExporterType {
+	case "jaeger":
+		// Use OTLP HTTP exporter for Jaeger (Jaeger supports OTLP natively)
+		opts := []otlptracehttp.Option{
+			otlptracehttp.WithEndpoint(cfg.JaegerEndpoint),
+		}
+		// If endpoint contains http:// or https://, use WithEndpoint
+		// otherwise use the default
+		return otlptracehttp.New(context.Background(), opts...)
+
+	case "zipkin":
+		// For Zipkin, we would need the zipkin exporter package
+		// For now, return nil as a placeholder
+		// To enable: import "go.opentelemetry.io/otel/exporters/zipkin"
+		return nil, fmt.Errorf("Zipkin exporter requires additional dependency: go.opentelemetry.io/otel/exporters/zipkin")
+
+	case "stdout":
+		return stdouttrace.New(stdouttrace.WithPrettyPrint())
+
+	case "none", "":
+		return nil, nil
+
+	default:
+		return nil, fmt.Errorf("unsupported exporter type: %s", cfg.ExporterType)
+	}
 }
 
 // ShutdownTracer gracefully shuts down the tracer
