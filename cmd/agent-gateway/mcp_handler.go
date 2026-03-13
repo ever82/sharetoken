@@ -61,6 +61,15 @@ func NewMCPServer(keeper *keeper.Keeper) *MCPServer {
 
 // registerTools 注册所有工具
 func (s *MCPServer) registerTools() {
+	s.registerQueryTools()
+	s.registerServiceTools()
+	s.registerTaskTools()
+	s.registerEscrowTools()
+	s.registerCodeAnalysisTools()
+}
+
+// registerQueryTools 注册查询类工具
+func (s *MCPServer) registerQueryTools() {
 	// query_balance 工具
 	s.tools["query_balance"] = func(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 		address, ok := args["address"].(string)
@@ -79,7 +88,10 @@ func (s *MCPServer) registerTools() {
 			"denom":   "stt",
 		}, nil
 	}
+}
 
+// registerServiceTools 注册服务类工具
+func (s *MCPServer) registerServiceTools() {
 	// chat_with_genie 工具
 	s.tools["chat_with_genie"] = func(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 		message, ok := args["message"].(string)
@@ -102,7 +114,10 @@ func (s *MCPServer) registerTools() {
 			"cost":    resp.Cost,
 		}, nil
 	}
+}
 
+// registerTaskTools 注册任务类工具
+func (s *MCPServer) registerTaskTools() {
 	// create_task 工具
 	s.tools["create_task"] = func(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 		description, ok := args["description"].(string)
@@ -128,7 +143,10 @@ func (s *MCPServer) registerTools() {
 			"status":      "created",
 		}, nil
 	}
+}
 
+// registerEscrowTools 注册托管类工具
+func (s *MCPServer) registerEscrowTools() {
 	// create_escrow 工具
 	s.tools["create_escrow"] = func(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 		provider, ok := args["provider"].(string)
@@ -154,7 +172,10 @@ func (s *MCPServer) registerTools() {
 			"status":    "locked",
 		}, nil
 	}
+}
 
+// registerCodeAnalysisTools 注册代码分析类工具
+func (s *MCPServer) registerCodeAnalysisTools() {
 	// extract_functions 工具 - 从代码中提取函数名
 	s.tools["extract_functions"] = func(ctx context.Context, args map[string]interface{}) (interface{}, error) {
 		code, ok := args["code"].(string)
