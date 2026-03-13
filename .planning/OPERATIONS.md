@@ -522,7 +522,70 @@ sharetokensd tx gov vote <proposal-id> yes \
 sharetokensd query gov proposal <proposal-id>
 ```
 
-### 4.3 Upgrade Process with Cosmovisor
+### 4.3 Cosmovisor Setup (Recommended)
+
+Cosmovisor is a process manager for Cosmos SDK applications that automates chain upgrades.
+
+#### Installation
+
+```bash
+# Install Cosmovisor
+go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@latest
+
+# Setup directories
+mkdir -p ~/.sharetokens/cosmovisor/genesis/bin
+mkdir -p ~/.sharetokens/cosmovisor/upgrades
+
+# Copy current binary to genesis
+cp $(which sharetokensd) ~/.sharetokens/cosmovisor/genesis/bin/
+
+# Set environment variables
+echo 'export DAEMON_NAME=sharetokensd' >> ~/.profile
+echo 'export DAEMON_HOME=$HOME/.sharetokens' >> ~/.profile
+echo 'export DAEMON_ALLOW_DOWNLOAD_BINARIES=false' >> ~/.profile
+echo 'export DAEMON_LOG_BUFFER_SIZE=512' >> ~/.profile
+echo 'export DAEMON_RESTART_AFTER_UPGRADE=true' >> ~/.profile
+source ~/.profile
+
+# Verify installation
+cosmovisor version
+```
+
+#### Systemd Service Configuration
+
+```bash
+# Create systemd service for Cosmovisor
+sudo tee /etc/systemd/system/cosmovisor.service << EOF
+[Unit]
+Description=Cosmovisor (ShareTokens)
+After=network.target
+
+[Service]
+Type=simple
+User=<your-user>
+ExecStart=/home/<your-user>/go/bin/cosmovisor run start
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65535
+Environment="DAEMON_NAME=sharetokensd"
+Environment="DAEMON_HOME=/home/<your-user>/.sharetokens"
+Environment="DAEMON_ALLOW_DOWNLOAD_BINARIES=false"
+Environment="DAEMON_RESTART_AFTER_UPGRADE=true"
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable cosmovisor
+sudo systemctl start cosmovisor
+
+# Check status
+sudo systemctl status cosmovisor
+journalctl -u cosmovisor -f
+```
+
+### 4.4 Upgrade Process with Cosmovisor
 
 #### Phase 1: Pre-Upgrade (Before Target Height)
 
@@ -577,7 +640,7 @@ curl -s http://localhost:26657/block | jq .result.block.header.height
 watch -n 2 'curl -s http://localhost:26657/block | jq .result.block.header.height'
 ```
 
-### 4.4 Manual Upgrade (Without Cosmovisor)
+### 4.5 Manual Upgrade (Without Cosmovisor)
 
 ```bash
 # Monitor for upgrade height
@@ -605,7 +668,7 @@ sudo systemctl start sharetokensd
 sharetokensd status
 ```
 
-### 4.5 Rollback Procedure
+### 4.6 Rollback Procedure
 
 If upgrade fails:
 
@@ -623,7 +686,7 @@ sudo cp /path/to/backup/sharetokensd /usr/local/bin/
 sudo systemctl start sharetokensd
 ```
 
-### 4.6 Emergency Upgrade Coordination
+### 4.7 Emergency Upgrade Coordination
 
 When emergency upgrade is required:
 
@@ -650,51 +713,6 @@ When emergency upgrade is required:
    - Validator Discord: #emergency
    - Telegram: @STT_Validators
    - Email: validators@sharetokens.io
-
----
-
-## 5. Monitoring & Alerting
-
-```bash
-# Install Cosmovisor
-go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@latest
-
-# Setup directories
-mkdir -p ~/.sharetokens/cosmovisor/genesis/bin
-mkdir -p ~/.sharetokens/cosmovisor/upgrades/v2.0.0/bin
-
-# Copy current binary
-cp $(which sharetokensd) ~/.sharetokens/cosmovisor/genesis/bin/
-
-# Set environment variables
-echo 'export DAEMON_NAME=sharetokensd' >> ~/.profile
-echo 'export DAEMON_HOME=~/.sharetokens' >> ~/.profile
-source ~/.profile
-
-# Create systemd service for Cosmovisor
-sudo tee /etc/systemd/system/cosmovisor.service << EOF
-[Unit]
-Description=Cosmovisor (ShareTokens)
-After=network.target
-
-[Service]
-Type=simple
-User=<your-user>
-ExecStart=/home/<your-user>/go/bin/cosmovisor run start
-Restart=on-failure
-RestartSec=5
-LimitNOFILE=65535
-Environment="DAEMON_NAME=sharetokensd"
-Environment="DAEMON_HOME=/home/<your-user>/.sharetokens"
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl daemon-reload
-sudo systemctl enable cosmovisor
-sudo systemctl start cosmovisor
-```
 
 ---
 
@@ -1098,59 +1116,6 @@ receivers:
 
 ---
 
-## 6. Backup & Recovery
-
-### 5.1 Backup Strategy
-
-| Type       | Frequency | Retention | Size (Est.) |
-| ---------- | --------- | --------- | ----------- |
-| Full       | Daily     | 30 days   | ~50GB       |
-| Incremental| Hourly    | 7 days    | ~1GB        |
-| State Snapshots | Every 1000 blocks | 14 days | ~5GB |
-| Key Backup | Once (secure storage) | Forever | <1MB |
-
-### 5.2 Recovery Procedures
-
-#### Scenario 1: Data Corruption
-
-```bash
-# Stop node
-sudo systemctl stop sharetokensd
-
-# Backup corrupted data
-mv ~/.sharetokens/data ~/.sharetokens/data-corrupted-$(date +%Y%m%d)
-
-# Reset node state
-sharetokensd unsafe-reset-all
-
-# Download recent snapshot
-wget https://snapshots.sharetokens.io/mainnet/latest.tar.gz -O snapshot.tar.gz
-
-# Extract snapshot
-tar -xzf snapshot.tar.gz -C ~/.sharetokens/data
-
-# Start node
-sudo systemctl start sharetokensd
-```
-
-#### Scenario 2: Complete Node Failure
-
-```bash
-# On new server, install prerequisites
-
-# Download and extract backup
-wget https://backups.sharetokens.io/sharetokens-full-latest.tar.gz
-tar -xzf sharetokens-full-latest.tar.gz -C ~/
-
-# Restore validator key
-sharetokensd keys import validator validator-key.backup --keyring-backend file
-
-# Start node
-sudo systemctl start sharetokensd
-```
-
----
-
 ## 6. Security Checklist
 
 ### Core Node Security
@@ -1178,7 +1143,7 @@ sudo ufw enable
 
 ---
 
-## 6. Backup & Recovery
+## 7. Backup & Recovery
 
 ### 6.1 Backup Strategy
 
@@ -1395,7 +1360,7 @@ watch -n 5 'sharetokensd status | jq .SyncInfo'
 
 ---
 
-## 7. Emergency Response
+## 8. Emergency Response
 
 ### 7.1 Incident Severity Levels
 
@@ -1643,11 +1608,11 @@ After every P0/P1 incident:
 
 ---
 
-## 7. User Plugin: GenieBot
+## 8. User Plugin: GenieBot
 
 GenieBot是服务市场的用户端插件，提供 AI 对话界面。
 
-### 7.1 Installation
+### 8.1 Installation
 
 ```bash
 # Using npm
@@ -1657,7 +1622,7 @@ npm install @sharetokens/plugin-geniebot
 docker pull sharetokens/geniebot:latest
 ```
 
-### 7.2 Configuration
+### 8.2 Configuration
 
 ```yaml
 # geniebot-config.yml
@@ -1681,7 +1646,7 @@ geniebot:
     keplr_chain_id: sharetokens-1
 ```
 
-### 7.3 Deployment
+### 8.3 Deployment
 
 #### Docker Compose
 
@@ -1723,7 +1688,7 @@ docker-compose logs -f geniebot
 curl http://localhost:3000/health
 ```
 
-### 7.4 Monitoring
+### 8.4 Monitoring
 
 ```yaml
 # Prometheus scrape config for Xiaodeng
@@ -1735,11 +1700,11 @@ scrape_configs:
 
 ---
 
-## 8. Provider Plugin: LLM API Key Hosting
+## 9. Provider Plugin: LLM API Key Hosting
 
 托管 API Key，提供 Level 1 LLM 服务。
 
-### 8.1 Installation
+### 9.1 Installation
 
 ```bash
 # Using npm
@@ -1749,7 +1714,7 @@ npm install @sharetokens/plugin-llm-provider
 docker pull sharetokens/llm-provider:latest
 ```
 
-### 8.2 Configuration
+### 9.2 Configuration
 
 ```yaml
 # llm-provider-config.yml
@@ -1782,7 +1747,7 @@ llm_provider:
     gemini-pro: 0.001
 ```
 
-### 8.3 API Key Management
+### 9.3 API Key Management
 
 ```bash
 # Register API key (encrypted)
@@ -1798,7 +1763,7 @@ llm-provider keys rotate openai --key <new-api-key>
 llm-provider keys revoke openai
 ```
 
-### 8.4 Deployment
+### 9.4 Deployment
 
 ```yaml
 # docker-compose.yml for LLM Provider
@@ -1822,7 +1787,7 @@ services:
       - sharetokens-net
 ```
 
-### 8.5 Security Considerations
+### 9.5 Security Considerations
 
 - API keys are encrypted at rest
 - Never log API keys
@@ -1832,11 +1797,11 @@ services:
 
 ---
 
-## 9. Provider Plugin: Agent Executor (OpenFang)
+## 10. Provider Plugin: Agent Executor (OpenFang)
 
 运行 AI Agent，提供 Level 2 Agent 服务。
 
-### 9.1 Prerequisites
+### 10.1 Prerequisites
 
 ```bash
 # Install Rust
@@ -1850,7 +1815,7 @@ cargo build --release
 cargo install --path .
 ```
 
-### 9.2 Configuration
+### 10.2 Configuration
 
 ```yaml
 # openfang-config.yml
@@ -1891,7 +1856,7 @@ openfang:
     writer: 15
 ```
 
-### 9.3 Deployment
+### 10.3 Deployment
 
 ```yaml
 # docker-compose.yml for Agent Provider
@@ -1916,7 +1881,7 @@ services:
       - sharetokens-net
 ```
 
-### 9.4 Monitoring
+### 10.4 Monitoring
 
 ```bash
 # Check agent status
@@ -1931,11 +1896,11 @@ openfang logs --agent coder --follow
 
 ---
 
-## 10. Provider Plugin: Workflow Executor
+## 11. Provider Plugin: Workflow Executor
 
 编排多 Agent 任务流程，提供 Level 3 Workflow 服务。
 
-### 10.1 Installation
+### 11.1 Installation
 
 ```bash
 # Using npm
@@ -1945,7 +1910,7 @@ npm install @sharetokens/plugin-workflow-provider
 docker pull sharetokens/workflow-provider:latest
 ```
 
-### 10.2 Configuration
+### 11.2 Configuration
 
 ```yaml
 # workflow-provider-config.yml
@@ -2013,7 +1978,7 @@ workflow_provider:
     content_creation: 100
 ```
 
-### 10.3 Deployment
+### 11.3 Deployment
 
 ```yaml
 # docker-compose.yml for Workflow Provider
@@ -2040,9 +2005,9 @@ services:
 
 ---
 
-## 11. Complete Plugin Stack Deployment
+## 12. Complete Plugin Stack Deployment
 
-### 11.1 Full Stack Docker Compose
+### 12.1 Full Stack Docker Compose
 
 ```yaml
 # docker-compose.yml - Full plugin stack
@@ -2115,7 +2080,7 @@ networks:
     external: true
 ```
 
-### 11.2 Role-Based Deployment
+### 12.2 Role-Based Deployment
 
 根据节点角色选择部署的插件：
 
@@ -2130,9 +2095,9 @@ networks:
 
 ---
 
-## 12. Troubleshooting
+## 13. Troubleshooting
 
-### 12.1 Core Node Issues
+### 13.1 Core Node Issues
 
 #### Node Not Syncing
 
@@ -2164,7 +2129,7 @@ sharetokensd tx slashing unjail \
   --keyring-backend file
 ```
 
-### 12.2 Plugin Issues
+### 13.2 Plugin Issues
 
 #### GenieBot Not Connecting
 
@@ -2207,7 +2172,7 @@ openfang resources
 
 ---
 
-## 13. Support & Resources
+## 14. Support & Resources
 
 ### Official Channels
 
@@ -2225,6 +2190,6 @@ openfang resources
 
 ---
 
-*Document Version: 2.1.0*
-*Last Updated: 2026-03-13*
+*Document Version: 2.2.0*
+*Last Updated: 2026-03-14*
 *Maintained by: ShareTokens Operations Team*
