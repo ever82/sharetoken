@@ -1,0 +1,151 @@
+syntax = "proto3";
+package sharetoken.node;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/node/types";
+
+// NodeRole represents the role of a ShareToken node
+enum NodeRole {
+  NODE_ROLE_UNSPECIFIED = 0;
+  NODE_ROLE_LIGHT = 1;
+  NODE_ROLE_FULL = 2;
+  NODE_ROLE_SERVICE = 3;
+  NODE_ROLE_ARCHIVE = 4;
+}
+
+// NodeCapabilities represents what a node can do
+message NodeCapabilities {
+  // can_validate can participate in consensus
+  bool can_validate = 1;
+
+  // can_query_state can query full state
+  bool can_query_state = 2;
+
+  // can_query_history can query historical data
+  bool can_query_history = 3;
+
+  // can_serve_light_clients can serve light client proofs
+  bool can_serve_light_clients = 4;
+
+  // can_run_plugins can run service plugins
+  bool can_run_plugins = 5;
+
+  // can_index_blocks can index blocks for explorer
+  bool can_index_blocks = 6;
+
+  // storage_requirement_gb estimated storage requirement in GB
+  int32 storage_requirement_gb = 7;
+
+  // memory_requirement_gb estimated memory requirement in GB
+  int32 memory_requirement_gb = 8;
+}
+
+// LightNodeConfig configuration for light nodes
+message LightNodeConfig {
+  // max_peers maximum number of P2P peers
+  int32 max_peers = 1;
+
+  // pruning_strategy for state storage
+  string pruning_strategy = 2;
+
+  // enable_genie_bot enable GenieBot plugin
+  bool enable_genie_bot = 3;
+
+  // trusted_full_nodes list of trusted full nodes for queries
+  repeated string trusted_full_nodes = 4;
+}
+
+// FullNodeConfig configuration for full nodes
+message FullNodeConfig {
+  // max_peers maximum number of P2P peers
+  int32 max_peers = 1;
+
+  // pruning_strategy for state storage
+  string pruning_strategy = 2;
+
+  // pruning_keep_recent number of recent blocks to keep
+  uint64 pruning_keep_recent = 3;
+
+  // pruning_keep_every interval to keep blocks
+  uint64 pruning_keep_every = 4;
+
+  // enable_indexer enable transaction indexer
+  bool enable_indexer = 5;
+}
+
+// ServiceNodeConfig configuration for service nodes
+message ServiceNodeConfig {
+  // max_peers maximum number of P2P peers
+  int32 max_peers = 1;
+
+  // enable_llm_plugin enable LLM API Key custody
+  bool enable_llm_plugin = 2;
+
+  // enable_agent_plugin enable Agent executor
+  bool enable_agent_plugin = 3;
+
+  // enable_workflow_plugin enable Workflow executor
+  bool enable_workflow_plugin = 4;
+
+  // wasm_max_memory maximum memory for WASM sandboxes (MB)
+  int32 wasm_max_memory = 5;
+
+  // wasm_max_cpu_time maximum CPU time for WASM execution (ms)
+  int32 wasm_max_cpu_time = 6;
+
+  // trusted_full_nodes list of trusted full nodes for state queries
+  repeated string trusted_full_nodes = 7;
+}
+
+// ArchiveNodeConfig configuration for archive nodes
+message ArchiveNodeConfig {
+  // max_peers maximum number of P2P peers
+  int32 max_peers = 1;
+
+  // enable_block_explorer enable block explorer API
+  bool enable_block_explorer = 2;
+
+  // block_explorer_port port for block explorer API
+  int32 block_explorer_port = 3;
+
+  // index_all_transactions index all transactions
+  bool index_all_transactions = 4;
+
+  // index_events index all events
+  bool index_events = 5;
+
+  // compression_enabled enable block compression
+  bool compression_enabled = 6;
+
+  // archive_retention_years years of data to retain (0 = forever)
+  int32 archive_retention_years = 7;
+}
+
+// RoleConfig contains configuration specific to a node role
+message RoleConfig {
+  // role is the node role
+  NodeRole role = 1;
+
+  // light_config is the light node specific config
+  LightNodeConfig light_config = 2 [(gogoproto.nullable) = true];
+
+  // full_config is the full node specific config
+  FullNodeConfig full_config = 3 [(gogoproto.nullable) = true];
+
+  // service_config is the service node specific config
+  ServiceNodeConfig service_config = 4 [(gogoproto.nullable) = true];
+
+  // archive_config is the archive node specific config
+  ArchiveNodeConfig archive_config = 5 [(gogoproto.nullable) = true];
+}
+
+// NodeConfigEntry represents a node configuration entry
+message NodeConfigEntry {
+  // address is the node address
+  string address = 1;
+
+  // config is the node role configuration
+  RoleConfig config = 2 [(gogoproto.nullable) = false];
+}

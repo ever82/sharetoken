@@ -1,0 +1,31 @@
+syntax = "proto3";
+package sharetoken.agentgateway;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/agentgateway/types";
+
+// Session represents an agent gateway session
+message Session {
+  // id is the unique session identifier
+  string id = 1;
+
+  // address is the user address
+  string address = 2;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 3;
+}
+
+// RateLimitEntry represents rate limit data for an address
+message RateLimitEntry {
+  // address is the user address
+  string address = 1;
+
+  // request_count is the number of requests in the current window
+  int64 request_count = 2;
+
+  // window_start is the Unix timestamp when the window started
+  int64 window_start = 3;
+}

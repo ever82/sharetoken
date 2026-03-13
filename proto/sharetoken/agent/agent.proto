@@ -1,0 +1,111 @@
+syntax = "proto3";
+package sharetoken.agent;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/agent/types";
+
+// AgentTemplate represents the type of agent template
+enum AgentTemplate {
+  AGENT_TEMPLATE_UNSPECIFIED = 0;
+  AGENT_TEMPLATE_CODER = 1;
+  AGENT_TEMPLATE_RESEARCHER = 2;
+  AGENT_TEMPLATE_WRITER = 3;
+  AGENT_TEMPLATE_ANALYST = 4;
+  AGENT_TEMPLATE_DESIGNER = 5;
+  AGENT_TEMPLATE_TESTER = 6;
+  AGENT_TEMPLATE_REVIEWER = 7;
+  AGENT_TEMPLATE_ARCHITECT = 8;
+}
+
+// TaskStatus represents the execution status of a task
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_PENDING = 1;
+  TASK_STATUS_RUNNING = 2;
+  TASK_STATUS_COMPLETED = 3;
+  TASK_STATUS_FAILED = 4;
+  TASK_STATUS_CANCELLED = 5;
+}
+
+// Agent represents an AI agent instance
+message Agent {
+  // id is the unique agent identifier
+  string id = 1;
+
+  // owner is the agent owner address
+  string owner = 2;
+
+  // template is the agent template type
+  AgentTemplate template = 3;
+
+  // runtime is the execution runtime (wasm, rust, python)
+  string runtime = 4;
+
+  // config is the agent configuration
+  AgentConfig config = 5 [(gogoproto.nullable) = false];
+
+  // active indicates if the agent is active
+  bool active = 6;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 7;
+}
+
+// AgentConfig represents agent configuration
+message AgentConfig {
+  // max_tokens is the maximum tokens limit
+  int64 max_tokens = 1;
+
+  // temperature is the sampling temperature
+  double temperature = 2;
+
+  // timeout is the execution timeout in seconds
+  int64 timeout = 3;
+
+  // max_memory_mb is the maximum memory in MB
+  int64 max_memory_mb = 4;
+
+  // allowed_tools is the list of allowed tools
+  repeated string allowed_tools = 5;
+
+  // restricted_dirs is the list of restricted directories
+  repeated string restricted_dirs = 6;
+}
+
+// Task represents an agent task
+message Task {
+  // id is the unique task identifier
+  string id = 1;
+
+  // agent_id is the ID of the agent executing the task
+  string agent_id = 2;
+
+  // service_id is the associated service ID
+  string service_id = 3;
+
+  // input is the task input
+  string input = 4;
+
+  // output is the task output
+  string output = 5;
+
+  // status is the task status
+  TaskStatus status = 6;
+
+  // error is the error message if failed
+  string error = 7;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 8;
+
+  // started_at is the Unix timestamp when task started
+  int64 started_at = 9;
+
+  // completed_at is the Unix timestamp when task completed
+  int64 completed_at = 10;
+
+  // gas_used is the gas consumed
+  uint64 gas_used = 11;
+}

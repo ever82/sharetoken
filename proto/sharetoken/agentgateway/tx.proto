@@ -1,0 +1,46 @@
+syntax = "proto3";
+package sharetoken.agentgateway;
+
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/agentgateway/agentgateway.proto";
+
+option go_package = "sharetoken/x/agentgateway/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // CreateSession creates a new session
+  rpc CreateSession(MsgCreateSession) returns (MsgCreateSessionResponse);
+
+  // CloseSession closes an existing session
+  rpc CloseSession(MsgCloseSession) returns (MsgCloseSessionResponse);
+}
+
+// MsgCreateSession is the Msg/CreateSession request type.
+message MsgCreateSession {
+  option (cosmos.msg.v1.signer) = "address";
+
+  // address is the user address
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// MsgCreateSessionResponse is the Msg/CreateSession response type.
+message MsgCreateSessionResponse {
+  // session_id is the ID of the created session
+  string session_id = 1;
+}
+
+// MsgCloseSession is the Msg/CloseSession request type.
+message MsgCloseSession {
+  option (cosmos.msg.v1.signer) = "address";
+
+  // address is the user address
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // session_id is the session ID
+  string session_id = 2;
+}
+
+// MsgCloseSessionResponse is the Msg/CloseSession response type.
+message MsgCloseSessionResponse {}

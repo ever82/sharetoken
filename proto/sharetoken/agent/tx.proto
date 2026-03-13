@@ -1,0 +1,121 @@
+syntax = "proto3";
+package sharetoken.agent;
+
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/agent/agent.proto";
+
+option go_package = "sharetoken/x/agent/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // CreateAgent creates a new agent
+  rpc CreateAgent(MsgCreateAgent) returns (MsgCreateAgentResponse);
+
+  // UpdateAgent updates an existing agent
+  rpc UpdateAgent(MsgUpdateAgent) returns (MsgUpdateAgentResponse);
+
+  // DeleteAgent deletes an agent
+  rpc DeleteAgent(MsgDeleteAgent) returns (MsgDeleteAgentResponse);
+
+  // ExecuteTask executes a task on an agent
+  rpc ExecuteTask(MsgExecuteTask) returns (MsgExecuteTaskResponse);
+
+  // CancelTask cancels a running task
+  rpc CancelTask(MsgCancelTask) returns (MsgCancelTaskResponse);
+}
+
+// MsgCreateAgent is the Msg/CreateAgent request type.
+message MsgCreateAgent {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the agent owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // template is the agent template type
+  AgentTemplate template = 2;
+
+  // runtime is the execution runtime
+  string runtime = 3;
+
+  // config is the agent configuration
+  AgentConfig config = 4 [(gogoproto.nullable) = false];
+}
+
+// MsgCreateAgentResponse is the Msg/CreateAgent response type.
+message MsgCreateAgentResponse {
+  // agent_id is the ID of the created agent
+  string agent_id = 1;
+}
+
+// MsgUpdateAgent is the Msg/UpdateAgent request type.
+message MsgUpdateAgent {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the agent owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // agent_id is the agent ID
+  string agent_id = 2;
+
+  // config is the updated agent configuration
+  AgentConfig config = 3 [(gogoproto.nullable) = false];
+
+  // active indicates if the agent should be active
+  bool active = 4;
+}
+
+// MsgUpdateAgentResponse is the Msg/UpdateAgent response type.
+message MsgUpdateAgentResponse {}
+
+// MsgDeleteAgent is the Msg/DeleteAgent request type.
+message MsgDeleteAgent {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the agent owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // agent_id is the agent ID
+  string agent_id = 2;
+}
+
+// MsgDeleteAgentResponse is the Msg/DeleteAgent response type.
+message MsgDeleteAgentResponse {}
+
+// MsgExecuteTask is the Msg/ExecuteTask request type.
+message MsgExecuteTask {
+  option (cosmos.msg.v1.signer) = "requester";
+
+  // requester is the task requester address
+  string requester = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // agent_id is the agent ID
+  string agent_id = 2;
+
+  // service_id is the associated service ID
+  string service_id = 3;
+
+  // input is the task input
+  string input = 4;
+}
+
+// MsgExecuteTaskResponse is the Msg/ExecuteTask response type.
+message MsgExecuteTaskResponse {
+  // task_id is the ID of the created task
+  string task_id = 1;
+}
+
+// MsgCancelTask is the Msg/CancelTask request type.
+message MsgCancelTask {
+  option (cosmos.msg.v1.signer) = "requester";
+
+  // requester is the task requester address
+  string requester = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+}
+
+// MsgCancelTaskResponse is the Msg/CancelTask response type.
+message MsgCancelTaskResponse {}

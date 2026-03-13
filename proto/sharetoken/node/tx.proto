@@ -1,0 +1,63 @@
+syntax = "proto3";
+package sharetoken.node;
+
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/node/node.proto";
+
+option go_package = "sharetoken/x/node/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // RegisterNode registers a new node
+  rpc RegisterNode(MsgRegisterNode) returns (MsgRegisterNodeResponse);
+
+  // UpdateNodeConfig updates a node configuration
+  rpc UpdateNodeConfig(MsgUpdateNodeConfig) returns (MsgUpdateNodeConfigResponse);
+
+  // UnregisterNode unregisters a node
+  rpc UnregisterNode(MsgUnregisterNode) returns (MsgUnregisterNodeResponse);
+}
+
+// MsgRegisterNode is the Msg/RegisterNode request type.
+message MsgRegisterNode {
+  option (cosmos.msg.v1.signer) = "address";
+
+  // address is the node address
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // role is the node role
+  NodeRole role = 2;
+
+  // config is the node configuration
+  RoleConfig config = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgRegisterNodeResponse is the Msg/RegisterNode response type.
+message MsgRegisterNodeResponse {}
+
+// MsgUpdateNodeConfig is the Msg/UpdateNodeConfig request type.
+message MsgUpdateNodeConfig {
+  option (cosmos.msg.v1.signer) = "address";
+
+  // address is the node address
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // config is the updated node configuration
+  RoleConfig config = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgUpdateNodeConfigResponse is the Msg/UpdateNodeConfig response type.
+message MsgUpdateNodeConfigResponse {}
+
+// MsgUnregisterNode is the Msg/UnregisterNode request type.
+message MsgUnregisterNode {
+  option (cosmos.msg.v1.signer) = "address";
+
+  // address is the node address
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// MsgUnregisterNodeResponse is the Msg/UnregisterNode response type.
+message MsgUnregisterNodeResponse {}

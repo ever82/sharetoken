@@ -1,0 +1,41 @@
+syntax = "proto3";
+package sharetoken.node;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/node/node.proto";
+
+option go_package = "sharetoken/x/node/types";
+
+// GenesisState defines the node module's genesis state.
+message GenesisState {
+  // node_configs stores node configurations
+  repeated NodeConfigEntry node_configs = 1 [(gogoproto.nullable) = false];
+}
+
+// Params defines the parameters for the node module.
+message Params {
+  option (amino.name) = "sharetoken/x/node/Params";
+  option (gogoproto.equal) = true;
+
+  // default_light_max_peers is the default maximum peers for light nodes
+  int32 default_light_max_peers = 1;
+
+  // default_full_max_peers is the default maximum peers for full nodes
+  int32 default_full_max_peers = 2;
+
+  // default_service_max_peers is the default maximum peers for service nodes
+  int32 default_service_max_peers = 3;
+
+  // default_archive_max_peers is the default maximum peers for archive nodes
+  int32 default_archive_max_peers = 4;
+
+  // default_wasm_max_memory is the default maximum memory for WASM sandboxes (MB)
+  int32 default_wasm_max_memory = 5;
+
+  // default_wasm_max_cpu_time is the default maximum CPU time for WASM execution (ms)
+  int32 default_wasm_max_cpu_time = 6;
+
+  // default_block_explorer_port is the default port for block explorer API
+  int32 default_block_explorer_port = 7;
+}

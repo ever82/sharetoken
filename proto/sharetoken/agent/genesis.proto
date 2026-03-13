@@ -1,0 +1,29 @@
+syntax = "proto3";
+package sharetoken.agent;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/agent/agent.proto";
+
+option go_package = "sharetoken/x/agent/types";
+
+// GenesisState defines the agent module's genesis state.
+message GenesisState {
+  // agents is the list of agents
+  repeated Agent agents = 1 [(gogoproto.nullable) = false];
+
+  // tasks is the list of tasks
+  repeated Task tasks = 2 [(gogoproto.nullable) = false];
+}
+
+// Params defines the parameters for the agent module.
+message Params {
+  option (amino.name) = "sharetoken/x/agent/Params";
+  option (gogoproto.equal) = true;
+
+  // max_agents_per_user is the maximum agents per user
+  int64 max_agents_per_user = 1;
+
+  // min_gas_per_task is the minimum gas required per task
+  uint64 min_gas_per_task = 2;
+}

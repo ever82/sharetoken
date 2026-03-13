@@ -1,0 +1,142 @@
+syntax = "proto3";
+package sharetoken.agent;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/agent/agent.proto";
+
+option go_package = "sharetoken/x/agent/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Agents queries all agents
+  rpc Agents(QueryAgentsRequest) returns (QueryAgentsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/agent/agents";
+  }
+
+  // Agent queries an agent by ID
+  rpc Agent(QueryAgentRequest) returns (QueryAgentResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/agent/agents/{agent_id}";
+  }
+
+  // AgentsByOwner queries agents by owner
+  rpc AgentsByOwner(QueryAgentsByOwnerRequest) returns (QueryAgentsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/agent/owner/{owner}";
+  }
+
+  // Tasks queries all tasks
+  rpc Tasks(QueryTasksRequest) returns (QueryTasksResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/agent/tasks";
+  }
+
+  // Task queries a task by ID
+  rpc Task(QueryTaskRequest) returns (QueryTaskResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/agent/tasks/{task_id}";
+  }
+
+  // TasksByAgent queries tasks by agent ID
+  rpc TasksByAgent(QueryTasksByAgentRequest) returns (QueryTasksResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/agent/agent/{agent_id}/tasks";
+  }
+
+  // Params queries the module parameters
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/agent/params";
+  }
+}
+
+// QueryAgentsRequest is the request type for the Query/Agents RPC method.
+message QueryAgentsRequest {
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryAgentsResponse is the response type for the Query/Agents RPC method.
+message QueryAgentsResponse {
+  // agents is the list of agents
+  repeated Agent agents = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryAgentRequest is the request type for the Query/Agent RPC method.
+message QueryAgentRequest {
+  // agent_id is the agent ID
+  string agent_id = 1;
+}
+
+// QueryAgentResponse is the response type for the Query/Agent RPC method.
+message QueryAgentResponse {
+  // agent is the agent
+  Agent agent = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryAgentsByOwnerRequest is the request type for the Query/AgentsByOwner RPC method.
+message QueryAgentsByOwnerRequest {
+  // owner is the owner address
+  string owner = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryTasksRequest is the request type for the Query/Tasks RPC method.
+message QueryTasksRequest {
+  // status filters by task status
+  TaskStatus status = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryTasksResponse is the response type for the Query/Tasks RPC method.
+message QueryTasksResponse {
+  // tasks is the list of tasks
+  repeated Task tasks = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryTaskRequest is the request type for the Query/Task RPC method.
+message QueryTaskRequest {
+  // task_id is the task ID
+  string task_id = 1;
+}
+
+// QueryTaskResponse is the response type for the Query/Task RPC method.
+message QueryTaskResponse {
+  // task is the task
+  Task task = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryTasksByAgentRequest is the request type for the Query/TasksByAgent RPC method.
+message QueryTasksByAgentRequest {
+  // agent_id is the agent ID
+  string agent_id = 1;
+
+  // status filters by task status
+  TaskStatus status = 2;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params is the module parameters
+  Params params = 1 [(gogoproto.nullable) = false];
+}

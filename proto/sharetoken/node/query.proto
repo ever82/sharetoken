@@ -1,0 +1,82 @@
+syntax = "proto3";
+package sharetoken.node;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/node/node.proto";
+
+option go_package = "sharetoken/x/node/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // NodeConfigs queries all node configurations
+  rpc NodeConfigs(QueryNodeConfigsRequest) returns (QueryNodeConfigsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/node/configs";
+  }
+
+  // NodeConfig queries a node config by address
+  rpc NodeConfig(QueryNodeConfigRequest) returns (QueryNodeConfigResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/node/config/{address}";
+  }
+
+  // NodeConfigsByRole queries node configs by role
+  rpc NodeConfigsByRole(QueryNodeConfigsByRoleRequest) returns (QueryNodeConfigsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/node/role/{role}";
+  }
+
+  // Params queries the module parameters
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/node/params";
+  }
+}
+
+// QueryNodeConfigsRequest is the request type for the Query/NodeConfigs RPC method.
+message QueryNodeConfigsRequest {
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryNodeConfigsResponse is the response type for the Query/NodeConfigs RPC method.
+message QueryNodeConfigsResponse {
+  // node_configs is the list of node configurations
+  repeated NodeConfigEntry node_configs = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryNodeConfigRequest is the request type for the Query/NodeConfig RPC method.
+message QueryNodeConfigRequest {
+  // address is the node address
+  string address = 1;
+}
+
+// QueryNodeConfigResponse is the response type for the Query/NodeConfig RPC method.
+message QueryNodeConfigResponse {
+  // config is the node configuration
+  NodeConfigEntry config = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryNodeConfigsByRoleRequest is the request type for the Query/NodeConfigsByRole RPC method.
+message QueryNodeConfigsByRoleRequest {
+  // role is the node role
+  NodeRole role = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params is the module parameters
+  Params params = 1 [(gogoproto.nullable) = false];
+}

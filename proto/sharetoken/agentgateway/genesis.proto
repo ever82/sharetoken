@@ -1,0 +1,26 @@
+syntax = "proto3";
+package sharetoken.agentgateway;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/agentgateway/agentgateway.proto";
+
+option go_package = "sharetoken/x/agentgateway/types";
+
+// GenesisState defines the agentgateway module's genesis state.
+message GenesisState {
+  // sessions is the list of active sessions
+  repeated Session sessions = 1 [(gogoproto.nullable) = false];
+}
+
+// Params defines the parameters for the agentgateway module.
+message Params {
+  option (amino.name) = "sharetoken/x/agentgateway/Params";
+  option (gogoproto.equal) = true;
+
+  // rate_limit_per_minute is the maximum requests per minute per address
+  int64 rate_limit_per_minute = 1;
+
+  // session_timeout is the session timeout in seconds
+  int64 session_timeout = 2;
+}

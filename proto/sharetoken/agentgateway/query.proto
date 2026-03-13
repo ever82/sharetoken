@@ -1,0 +1,82 @@
+syntax = "proto3";
+package sharetoken.agentgateway;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/agentgateway/agentgateway.proto";
+
+option go_package = "sharetoken/x/agentgateway/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Sessions queries all sessions
+  rpc Sessions(QuerySessionsRequest) returns (QuerySessionsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/agentgateway/sessions";
+  }
+
+  // Session queries a session by ID
+  rpc Session(QuerySessionRequest) returns (QuerySessionResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/agentgateway/sessions/{session_id}";
+  }
+
+  // SessionsByAddress queries sessions by address
+  rpc SessionsByAddress(QuerySessionsByAddressRequest) returns (QuerySessionsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/agentgateway/address/{address}/sessions";
+  }
+
+  // Params queries the module parameters
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/agentgateway/params";
+  }
+}
+
+// QuerySessionsRequest is the request type for the Query/Sessions RPC method.
+message QuerySessionsRequest {
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QuerySessionsResponse is the response type for the Query/Sessions RPC method.
+message QuerySessionsResponse {
+  // sessions is the list of sessions
+  repeated Session sessions = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QuerySessionRequest is the request type for the Query/Session RPC method.
+message QuerySessionRequest {
+  // session_id is the session ID
+  string session_id = 1;
+}
+
+// QuerySessionResponse is the response type for the Query/Session RPC method.
+message QuerySessionResponse {
+  // session is the session
+  Session session = 1 [(gogoproto.nullable) = false];
+}
+
+// QuerySessionsByAddressRequest is the request type for the Query/SessionsByAddress RPC method.
+message QuerySessionsByAddressRequest {
+  // address is the user address
+  string address = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  // params is the module parameters
+  Params params = 1 [(gogoproto.nullable) = false];
+}
