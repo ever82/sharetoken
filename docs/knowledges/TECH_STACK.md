@@ -11,7 +11,7 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
 | 层级 | 技术 | 主要用途 |
 |------|------|----------|
 | 区块链核心 | Go + Cosmos SDK | 共识、状态机、IBC |
-| 前端应用 | Vue.js 3 + TypeScript | 用户界面、钱包交互 |
+| 前端应用 | Vue.js 3 + TypeScript + Pinia | 用户界面、钱包交互 |
 | 智能合约 | CosmWasm (可选) | 复杂业务逻辑 |
 
 ---
@@ -22,9 +22,9 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
 
 | 组件 | 版本 | 说明 |
 |------|------|------|
-| Go | 1.19+ | 开发语言 |
-| Cosmos SDK | v0.47.3 | 区块链应用框架 |
-| CometBFT | v0.37.1 | 共识引擎 (原 Tendermint) |
+| Go | 1.21+ | 开发语言 |
+| Cosmos SDK | v0.47.15 | 区块链应用框架 |
+| CometBFT | v0.37.10 | 共识引擎 (原 Tendermint) |
 | IBC-Go | v7.1.0 | 跨链通信协议 |
 
 ### 2.2 Cosmos SDK 生态组件
@@ -32,14 +32,14 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
 | 组件 | 版本 | 说明 |
 |------|------|------|
 | cosmossdk.io/api | v0.3.1 | Cosmos SDK API 定义 |
-| cosmossdk.io/errors | v1.0.0-beta.7 | 错误处理库 |
+| cosmossdk.io/errors | v1.0.1 | 错误处理库 |
 | cosmossdk.io/core | v0.5.1 | 核心接口定义 |
-| cosmossdk.io/depinject | v1.0.0-alpha.3 | 依赖注入框架 |
-| cosmossdk.io/log | v1.1.0 | 日志库 |
-| cosmossdk.io/math | v1.0.1 | 精确实算库 |
+| cosmossdk.io/depinject | v1.0.0-alpha.4 | 依赖注入框架 |
+| cosmossdk.io/log | v1.4.1 | 日志库 |
+| cosmossdk.io/math | v1.4.0 | 精确实算库 |
 | cosmossdk.io/tools/rosetta | v0.2.1 | Rosetta API 支持 |
-| cosmos/gogoproto | v1.4.10 | Protobuf 生成工具 |
-| cosmos/iavl | v0.20.0 | 默克尔树存储 |
+| cosmos/gogoproto | v1.7.0 | Protobuf 生成工具 |
+| cosmos/iavl | v0.20.1 | 默克尔树存储 |
 | cosmos/ics23/go | v0.10.0 | ICS23 证明格式 |
 
 ### 2.3 存储技术
@@ -51,16 +51,16 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
 | go.etcd.io/bbolt | v1.3.7 | BoltDB 嵌入式数据库 |
 | dgraph-io/badger/v2 | v2.2007.4 | Badger 键值存储 |
 | dgraph-io/ristretto | v0.1.1 | 内存缓存 |
-| syndtr/goleveldb | v1.0.1-0.20210819022825-2ae1ddf74ef7 | LevelDB (替换版本) |
+| syndtr/goleveldb | v1.0.1-0.20220721030215-126854af5e6d | LevelDB (替换版本) |
 
 ### 2.4 通信与 API
 
 | 组件 | 版本 | 说明 |
 |------|------|------|
-| google.golang.org/grpc | v1.55.0 | gRPC 通信框架 |
-| google.golang.org/protobuf | v1.30.0 | Protobuf Go 运行时 |
-| github.com/golang/protobuf | v1.5.3 | Protobuf Go 生成器 |
-| google.golang.org/genproto | v0.0.0-20230306155012-7f2fa6fef1f4 | 生成代码 |
+| google.golang.org/grpc | v1.62.1 | gRPC 通信框架 |
+| google.golang.org/protobuf | v1.33.0 | Protobuf Go 运行时 |
+| github.com/golang/protobuf | v1.5.4 | Protobuf Go 生成器 |
+| google.golang.org/genproto | v0.0.0-20240123012728-ef4313101c80 | 生成代码 |
 | grpc-gateway | v1.16.0 / v2.15.2 | RESTful API 网关 |
 | gorilla/mux | v1.8.0 | HTTP 路由器 |
 | gorilla/websocket | v1.5.0 | WebSocket 支持 |
@@ -70,7 +70,7 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
 
 | 组件 | 版本 | 说明 |
 |------|------|------|
-| golang.org/x/crypto | v0.8.0 | Go 加密库 |
+| golang.org/x/crypto | v0.27.0 | Go 加密库 |
 | filippo.io/edwards25519 | v1.0.0 | Ed25519 曲线实现 |
 | decred/dcrd/dcrec/secp256k1/v4 | v4.1.0 | Secp256k1 曲线 |
 | btcsuite/btcd/btcec/v2 | v2.3.2 | 比特币 ECDSA |
@@ -79,10 +79,10 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
 
 | 组件 | 版本 | 说明 |
 |------|------|------|
-| spf13/cobra | v1.6.1 | CLI 框架 |
+| spf13/cobra | v1.8.0 | CLI 框架 |
 | spf13/pflag | v1.0.5 | POSIX 风格命令行标志 |
-| spf13/viper | v1.15.0 | 配置管理 |
-| rs/zerolog | v1.29.1 | 结构化日志 |
+| spf13/viper | v1.18.2 | 配置管理 |
+| rs/zerolog | v1.33.0 | 结构化日志 |
 
 ---
 
@@ -95,8 +95,8 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
 | Vue.js | ^3.3.4 | 前端框架 |
 | TypeScript | ^5.x | 类型安全的 JavaScript |
 | Vue Router | ^4.2.4 | 路由管理 |
-| Vuex | ^4.1.0 | 状态管理 |
-| Core-js | ^3.32.0 | JavaScript  polyfill |
+| Pinia | ^2.1.x | 状态管理 (推荐替代 Vuex) |
+| Core-js | ^3.32.0 | JavaScript polyfill |
 
 ### 3.2 Cosmos 生态 JavaScript 库
 
@@ -154,12 +154,12 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
 ┌─────────────────────────────────────────────────────────────────┐
 │                        ShareToken Application                    │
 ├─────────────────────────────────────────────────────────────────┤
-│  Cosmos SDK v0.47.3                                             │
+│  Cosmos SDK v0.47.15                                            │
 │  ├── Core (auth, bank, staking, distribution, gov, mint...)    │
 │  ├── IBC-Go v7.1.0 (transfer, interchain-accounts)              │
 │  └── Custom Modules (trust, service, etc.)                      │
 ├─────────────────────────────────────────────────────────────────┤
-│  CometBFT v0.37.1 (Consensus + Networking)                      │
+│  CometBFT v0.37.10 (Consensus + Networking)                      │
 │  └── cometbft-db v0.7.0                                         │
 ├─────────────────────────────────────────────────────────────────┤
 │  Storage Layer                                                  │
@@ -175,7 +175,7 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Frontend Application                        │
-│  ├── Vue.js 3 + TypeScript                                      │
+│  ├── Vue.js 3 + TypeScript + Pinia                               │
 │  ├── @cosmjs/* v0.31.0 (Cosmos client libraries)               │
 │  ├── Keplr Wallet Integration                                   │
 │  └── WalletConnect Integration                                  │
@@ -190,15 +190,15 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
 
 | Go 版本 | 支持状态 | 说明 |
 |---------|----------|------|
-| 1.19.x | 推荐 | 当前 go.mod 指定版本 |
-| 1.20.x | 支持 | 测试通过 |
-| 1.21.x | 支持 | 开发环境版本 |
+| 1.21.x | 推荐 | 当前 go.mod 指定版本 |
+| 1.22.x | 支持 | 测试通过 |
+| 1.23.x | 支持 | 向前兼容 |
 
 ### 6.2 Cosmos SDK 兼容性
 
 | Cosmos SDK | CometBFT | IBC-Go | 状态 |
 |------------|----------|--------|------|
-| v0.47.x | v0.37.x | v7.x | 当前使用 |
+| v0.47.x | v0.37.x | v7.x | 当前使用 (v0.47.15 + v0.37.10) |
 | v0.46.x | v0.34.x | v6.x | 不兼容 |
 | v0.45.x | v0.34.x | v3.x | 不兼容 |
 
@@ -217,8 +217,8 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
 
 1. **CometBFT 替换**: 从 Tendermint v0.34 迁移到 CometBFT v0.37
 2. **IAVL 升级**: iavl v0.20 引入新的存储格式
-3. **GRPC 升级**: grpc v1.55 可能需要证书更新
-4. **Protobuf 更新**: gogoproto v1.4.10 生成代码格式变化
+3. **GRPC 升级**: grpc v1.62 可能需要证书更新
+4. **Protobuf 更新**: gogoproto v1.7.0 生成代码格式变化
 
 ### 7.2 数据库兼容性
 
@@ -251,8 +251,9 @@ ShareToken 是基于 Cosmos SDK 构建的区块链应用，采用分层架构设
 
 | 日期 | 版本 | 变更 |
 |------|------|------|
+| 2026-03-14 | v0.1.1 | 更新版本信息，同步 go.mod 中的实际版本 (Cosmos SDK v0.47.15, CometBFT v0.37.10, Go 1.21+) |
 | 2024-XX | v0.1.0 | 初始版本，基于 Cosmos SDK v0.47.3 |
 
 ---
 
-*最后更新: 2026-03-13*
+*最后更新: 2026-03-14*
