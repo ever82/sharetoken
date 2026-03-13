@@ -107,12 +107,6 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "sharetoken",
-      "repo": "sharetoken",
-      "releaseType": "release"
     }
   },
   "keywords": [
