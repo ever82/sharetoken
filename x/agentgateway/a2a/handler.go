@@ -123,9 +123,9 @@ func (h *Handler) createTask(w http.ResponseWriter, r *http.Request) {
 // handleStatus 处理状态查询
 func (h *Handler) handleStatus(w http.ResponseWriter, r *http.Request) {
 	status := map[string]interface{}{
-		"status":    "online",
-		"version":   "1.0.0",
-		"uptime":    "99.9%",
+		"status":  "online",
+		"version": "1.0.0",
+		"uptime":  "99.9%",
 		"capabilities": []string{
 			"task_execution",
 			"escrow_management",
@@ -156,11 +156,11 @@ func (h *Handler) handleNegotiate(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: 实现真实协商逻辑
 	response := map[string]interface{}{
-		"task_id":   req.TaskID,
-		"provider":  req.Provider,
-		"bid":       req.Bid,
-		"status":    "accepted",
-		"message":   "Bid accepted",
+		"task_id":  req.TaskID,
+		"provider": req.Provider,
+		"bid":      req.Bid,
+		"status":   "accepted",
+		"message":  "Bid accepted",
 	}
 
 	_ = json.NewEncoder(w).Encode(response)

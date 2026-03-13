@@ -49,8 +49,8 @@ func (s *ServiceDiscoveryTest) TestSearchByKeyword() {
 
 	// 测试搜索
 	searchCases := []struct {
-		keyword      string
-		expectedMin  int
+		keyword     string
+		expectedMin int
 	}{
 		{"translation", 1},
 		{"GPT", 2},

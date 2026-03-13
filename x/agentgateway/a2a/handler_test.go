@@ -156,9 +156,9 @@ func (s *A2AHandlerTestSuite) TestStatus() {
 // TestNegotiate 测试协商端点
 func (s *A2AHandlerTestSuite) TestNegotiate() {
 	payload := map[string]string{
-		"task_id":   "task-123",
-		"provider":  "cosmos1provider",
-		"bid":       "450stt",
+		"task_id":  "task-123",
+		"provider": "cosmos1provider",
+		"bid":      "450stt",
 	}
 	body, _ := json.Marshal(payload)
 
@@ -281,9 +281,9 @@ func (s *A2AHandlerTestSuite) TestCreateTaskEmptyDescription() {
 // TestNegotiateEmptyFields 测试协商空字段
 func (s *A2AHandlerTestSuite) TestNegotiateEmptyFields() {
 	payload := map[string]string{
-		"task_id":   "",
-		"provider":  "",
-		"bid":       "",
+		"task_id":  "",
+		"provider": "",
+		"bid":      "",
 	}
 	body, _ := json.Marshal(payload)
 

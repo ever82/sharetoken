@@ -20,7 +20,7 @@ type Keeper struct {
 	externalAgent *ExternalAgentConfig
 
 	// 会话管理
-	sessions map[string]*Session
+	sessions  map[string]*Session
 	sessionMu sync.RWMutex
 
 	// 速率限制
