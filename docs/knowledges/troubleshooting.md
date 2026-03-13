@@ -371,12 +371,14 @@ ERROR: signing failed: unable to sign
 - 密钥被锁定
 
 **解决方案**:
+
+> **安全警告**：`test` backend 仅用于自动化测试，密钥以明文存储在内存中。日常使用请使用 `file` 或 `os` backend。
+
 ```bash
 # 1. 确认密钥存在
-./bin/sharetokend keys list --keyring-backend test
+./bin/sharetokend keys list --keyring-backend file
 
 # 2. 使用正确的 keyring-backend
-./bin/sharetokend tx bank send ... --keyring-backend test
 ./bin/sharetokend tx bank send ... --keyring-backend file
 ./bin/sharetokend tx bank send ... --keyring-backend os
 
@@ -430,12 +432,12 @@ ERROR: checksum error
 # 1. 确认助记词格式（BIP39）
 # 应为 12 或 24 个英文单词
 
-# 2. 重新恢复密钥
-./bin/sharetokend keys add <name> --recover --keyring-backend test
+# 2. 重新恢复密钥（使用安全的 file backend）
+./bin/sharetokend keys add <name> --recover --keyring-backend file
 # 然后输入正确的助记词
 
 # 3. 检查恢复的地址是否正确
-./bin/sharetokend keys show <name> --keyring-backend test
+./bin/sharetokend keys show <name> --keyring-backend file
 ```
 
 ---
@@ -472,8 +474,9 @@ chmod 700 ~/.sharetoken/keyring-file/
 # 1. 添加创世账户
 ./bin/sharetokend add-genesis-account <address> 1000000000stake
 
-# 2. 创建创世交易
-gentx <name> 100000000stake --keyring-backend test
+# 2. 创建创世交易（仅用于开发测试环境）
+# 注意：生产环境请使用 file 或 os backend
+gentx <name> 100000000stake --keyring-backend file
 
 # 3. 收集创世交易
 collect-gentxs

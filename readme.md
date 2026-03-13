@@ -299,13 +299,16 @@ pagination:
 
 ### 教程 1：完整转账流程
 
+> **安全警告**：`--keyring-backend test` 仅用于开发测试，密钥以明文存储在内存中，极不安全！
+> 生产环境请使用 `--keyring-backend file` 或 `--keyring-backend os`。
+
 ```bash
-# 步骤 1：创建两个测试钱包
-./bin/sharetokend keys add alice --keyring-backend test
-./bin/sharetokend keys add bob --keyring-backend test
+# 步骤 1：创建两个测试钱包（开发测试环境使用 file backend）
+./bin/sharetokend keys add alice --keyring-backend file
+./bin/sharetokend keys add bob --keyring-backend file
 
 # 步骤 2：查看钱包地址
-./bin/sharetokend keys list --keyring-backend test
+./bin/sharetokend keys list --keyring-backend file
 # 输出示例：
 # - name: alice
 #   address: sharetoken1abc...
@@ -315,7 +318,7 @@ pagination:
 # 步骤 3：从创世账户给 alice 充值
 ./bin/sharetokend tx bank send validator0 sharetoken1abc... 1000000stake \
     --chain-id sharetoken-devnet \
-    --keyring-backend test \
+    --keyring-backend file \
     --keyring-dir ./.devnet/node0 \
     --fees 1000stake \
     --yes
@@ -327,7 +330,7 @@ pagination:
 # 步骤 5：alice 转账给 bob
 ./bin/sharetokend tx bank send alice sharetoken1xyz... 50000stake \
     --chain-id sharetoken-devnet \
-    --keyring-backend test \
+    --keyring-backend file \
     --fees 1000stake \
     --yes
 

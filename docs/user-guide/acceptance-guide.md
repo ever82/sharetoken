@@ -72,9 +72,12 @@ make build
 
 #### 步骤 1：创建钱包（计时测试）
 
+> **安全警告**：`--keyring-backend test` 仅用于自动化测试，密钥以明文存储在内存中。
+> 日常使用和测试请使用 `--keyring-backend file` 或 `--keyring-backend os`。
+
 ```bash
 # 开始计时，执行以下命令
-./bin/sharetokend keys add testuser --keyring-backend test
+./bin/sharetokend keys add testuser --keyring-backend file
 ```
 
 **预期结果：**
@@ -100,7 +103,7 @@ make build
 # 从创世账户转账
 ./bin/sharetokend tx bank send validator0 <您的地址> 1000000stake \
     --chain-id sharetoken-devnet \
-    --keyring-backend test \
+    --keyring-backend file \
     --keyring-dir ./.devnet/node0 \
     --fees 1000stake \
     --yes
@@ -118,15 +121,15 @@ make build
 
 ```bash
 # 创建第二个钱包
-./bin/sharetokend keys add testuser2 --keyring-backend test
+./bin/sharetokend keys add testuser2 --keyring-backend file
 
 # 查看地址
-./bin/sharetokend keys list --keyring-backend test
+./bin/sharetokend keys list --keyring-backend file
 
 # 从第一个钱包转账到第二个
 ./bin/sharetokend tx bank send testuser <testuser2地址> 100000stake \
     --chain-id sharetoken-devnet \
-    --keyring-backend test \
+    --keyring-backend file \
     --fees 1000stake \
     --yes
 
@@ -143,7 +146,7 @@ make build
 
 ```bash
 # 导出私钥
-./bin/sharetokend keys export testuser --keyring-backend test
+./bin/sharetokend keys export testuser --keyring-backend file
 
 # 输入密码后，将显示私钥
 ```
