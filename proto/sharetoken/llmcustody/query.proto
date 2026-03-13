@@ -1,0 +1,200 @@
+syntax = "proto3";
+package sharetoken.llmcustody;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/llmcustody/apikey.proto";
+
+option go_package = "sharetoken/x/llmcustody/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // APIKey queries an API key by ID
+  rpc APIKey(QueryAPIKeyRequest) returns (QueryAPIKeyResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/llmcustody/apikey/{id}";
+  }
+
+  // APIKeysByOwner queries all API keys owned by an address
+  rpc APIKeysByOwner(QueryAPIKeysByOwnerRequest) returns (QueryAPIKeysByOwnerResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/llmcustody/owner/{owner}";
+  }
+
+  // AllAPIKeys queries all registered API keys
+  rpc AllAPIKeys(QueryAllAPIKeysRequest) returns (QueryAllAPIKeysResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/llmcustody/apikeys";
+  }
+
+  // UsageStats queries usage statistics for an API key
+  rpc UsageStats(QueryUsageStatsRequest) returns (QueryUsageStatsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/llmcustody/usage/{api_key_id}";
+  }
+
+  // DailyUsage queries daily usage statistics
+  rpc DailyUsage(QueryDailyUsageRequest) returns (QueryDailyUsageResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/llmcustody/daily/{api_key_id}";
+  }
+
+  // ServiceUsage queries service usage statistics
+  rpc ServiceUsage(QueryServiceUsageRequest) returns (QueryServiceUsageResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/llmcustody/service/{service_id}";
+  }
+}
+
+// QueryAPIKeyRequest is the request type for the Query/APIKey RPC method.
+message QueryAPIKeyRequest {
+  // id is the API key ID
+  string id = 1;
+}
+
+// QueryAPIKeyResponse is the response type for the Query/APIKey RPC method.
+message QueryAPIKeyResponse {
+  // api_key is the API key
+  APIKey api_key = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryAPIKeysByOwnerRequest is the request type for the Query/APIKeysByOwner RPC method.
+message QueryAPIKeysByOwnerRequest {
+  // owner is the owner address
+  string owner = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryAPIKeysByOwnerResponse is the response type for the Query/APIKeysByOwner RPC method.
+message QueryAPIKeysByOwnerResponse {
+  // api_keys is the list of API keys
+  repeated APIKey api_keys = 1 [(gogoproto.nullable) = false];
+
+  // total is the total count of API keys
+  uint64 total = 2;
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 3;
+}
+
+// QueryAllAPIKeysRequest is the request type for the Query/AllAPIKeys RPC method.
+message QueryAllAPIKeysRequest {
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryAllAPIKeysResponse is the response type for the Query/AllAPIKeys RPC method.
+message QueryAllAPIKeysResponse {
+  // api_keys is the list of API keys
+  repeated APIKey api_keys = 1 [(gogoproto.nullable) = false];
+
+  // total is the total count of API keys
+  uint64 total = 2;
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 3;
+}
+
+// APIKeyUsageStats represents aggregated usage statistics for an API key
+message APIKeyUsageStats {
+  // api_key_id is the API key ID
+  string api_key_id = 1;
+  // total_requests is the total number of requests
+  int64 total_requests = 2;
+  // total_input_tokens is the total number of input tokens
+  int64 total_input_tokens = 3;
+  // total_output_tokens is the total number of output tokens
+  int64 total_output_tokens = 4;
+  // total_tokens is the total number of tokens
+  int64 total_tokens = 5;
+  // total_cost is the total cost in ustt
+  int64 total_cost = 6;
+  // first_used_at is the Unix timestamp of first use
+  int64 first_used_at = 7;
+  // last_used_at is the Unix timestamp of last use
+  int64 last_used_at = 8;
+}
+
+// QueryUsageStatsRequest is the request type for the Query/UsageStats RPC method.
+message QueryUsageStatsRequest {
+  // api_key_id is the API key ID
+  string api_key_id = 1;
+}
+
+// QueryUsageStatsResponse is the response type for the Query/UsageStats RPC method.
+message QueryUsageStatsResponse {
+  // stats is the usage statistics
+  APIKeyUsageStats stats = 1 [(gogoproto.nullable) = false];
+}
+
+// DailyUsageStats represents daily aggregated usage statistics
+message DailyUsageStats {
+  // date is the date in YYYY-MM-DD format
+  string date = 1;
+  // api_key_id is the API key ID
+  string api_key_id = 2;
+  // total_requests is the total number of requests
+  int64 total_requests = 3;
+  // total_input_tokens is the total number of input tokens
+  int64 total_input_tokens = 4;
+  // total_output_tokens is the total number of output tokens
+  int64 total_output_tokens = 5;
+  // total_tokens is the total number of tokens
+  int64 total_tokens = 6;
+  // total_cost is the total cost in ustt
+  int64 total_cost = 7;
+}
+
+// QueryDailyUsageRequest is the request type for the Query/DailyUsage RPC method.
+message QueryDailyUsageRequest {
+  // api_key_id is the API key ID
+  string api_key_id = 1;
+  // date is the date in YYYY-MM-DD format
+  string date = 2;
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryDailyUsageResponse is the response type for the Query/DailyUsage RPC method.
+message QueryDailyUsageResponse {
+  // daily_stats is the list of daily usage statistics
+  repeated DailyUsageStats daily_stats = 1 [(gogoproto.nullable) = false];
+  // total is the total count
+  uint64 total = 2;
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 3;
+}
+
+// ServiceUsageStats represents usage statistics for a specific service
+message ServiceUsageStats {
+  // service_id is the service ID
+  string service_id = 1;
+  // total_requests is the total number of requests
+  int64 total_requests = 2;
+  // total_input_tokens is the total number of input tokens
+  int64 total_input_tokens = 3;
+  // total_output_tokens is the total number of output tokens
+  int64 total_output_tokens = 4;
+  // total_tokens is the total number of tokens
+  int64 total_tokens = 5;
+  // total_cost is the total cost in ustt
+  int64 total_cost = 6;
+}
+
+// QueryServiceUsageRequest is the request type for the Query/ServiceUsage RPC method.
+message QueryServiceUsageRequest {
+  // service_id is the service ID
+  string service_id = 1;
+  // api_key_id is the optional API key ID filter
+  string api_key_id = 2;
+}
+
+// QueryServiceUsageResponse is the response type for the Query/ServiceUsage RPC method.
+message QueryServiceUsageResponse {
+  // stats is the service usage statistics
+  ServiceUsageStats stats = 1 [(gogoproto.nullable) = false];
+}

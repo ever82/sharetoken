@@ -1,0 +1,33 @@
+syntax = "proto3";
+package sharetoken.llmcustody;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/llmcustody/apikey.proto";
+
+option go_package = "sharetoken/x/llmcustody/types";
+
+// GenesisState defines the llmcustody module's genesis state.
+message GenesisState {
+  // api_keys is the list of API keys
+  repeated APIKey api_keys = 1 [(gogoproto.nullable) = false];
+
+  // encryption_key is the key encryption key (KEK) used to encrypt API keys
+  // In production, this should be managed by a secure key management service
+  bytes encryption_key = 2;
+}
+
+// Params defines the parameters for the llmcustody module.
+message Params {
+  option (amino.name) = "sharetoken/x/llmcustody/Params";
+  option (gogoproto.equal) = true;
+
+  // max_keys_per_user is the maximum number of API keys per user
+  uint32 max_keys_per_user = 1;
+
+  // default_rate_limit is the default rate limit per minute
+  int64 default_rate_limit = 2;
+
+  // key_rotation_period is the recommended key rotation period in days
+  uint32 key_rotation_period = 3;
+}

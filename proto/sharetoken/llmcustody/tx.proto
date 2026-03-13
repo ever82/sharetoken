@@ -1,0 +1,128 @@
+syntax = "proto3";
+package sharetoken.llmcustody;
+
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/llmcustody/apikey.proto";
+
+option go_package = "sharetoken/x/llmcustody/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // RegisterAPIKey registers a new API key
+  rpc RegisterAPIKey(MsgRegisterAPIKey) returns (MsgRegisterAPIKeyResponse);
+
+  // UpdateAPIKey updates an existing API key
+  rpc UpdateAPIKey(MsgUpdateAPIKey) returns (MsgUpdateAPIKeyResponse);
+
+  // RevokeAPIKey revokes an API key
+  rpc RevokeAPIKey(MsgRevokeAPIKey) returns (MsgRevokeAPIKeyResponse);
+
+  // RecordUsage records API usage
+  rpc RecordUsage(MsgRecordUsage) returns (MsgRecordUsageResponse);
+
+  // RotateAPIKey rotates an API key
+  rpc RotateAPIKey(MsgRotateAPIKey) returns (MsgRotateAPIKeyResponse);
+}
+
+// MsgRegisterAPIKey is the Msg/RegisterAPIKey request type.
+message MsgRegisterAPIKey {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the API key owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // provider is the LLM provider (openai, anthropic)
+  string provider = 2;
+
+  // encrypted_key is the AES-256-GCM encrypted API key
+  bytes encrypted_key = 3;
+
+  // access_rules defines access control rules
+  repeated AccessRule access_rules = 4 [(gogoproto.nullable) = false];
+}
+
+// MsgRegisterAPIKeyResponse is the Msg/RegisterAPIKey response type.
+message MsgRegisterAPIKeyResponse {
+  // api_key_id is the ID of the registered API key
+  string api_key_id = 1;
+}
+
+// MsgUpdateAPIKey is the Msg/UpdateAPIKey request type.
+message MsgUpdateAPIKey {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the API key owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // api_key_id is the API key ID to update
+  string api_key_id = 2;
+
+  // access_rules defines new access control rules
+  repeated AccessRule access_rules = 3 [(gogoproto.nullable) = false];
+
+  // active indicates if the key should be active
+  bool active = 4;
+}
+
+// MsgUpdateAPIKeyResponse is the Msg/UpdateAPIKey response type.
+message MsgUpdateAPIKeyResponse {}
+
+// MsgRevokeAPIKey is the Msg/RevokeAPIKey request type.
+message MsgRevokeAPIKey {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the API key owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // api_key_id is the API key ID to revoke
+  string api_key_id = 2;
+}
+
+// MsgRevokeAPIKeyResponse is the Msg/RevokeAPIKey response type.
+message MsgRevokeAPIKeyResponse {}
+
+// MsgRecordUsage is the Msg/RecordUsage request type.
+message MsgRecordUsage {
+  // api_key_id is the API key ID
+  string api_key_id = 1;
+
+  // service_id is the service ID
+  string service_id = 2;
+
+  // request_count is the number of requests
+  int64 request_count = 3;
+
+  // token_count is the number of tokens used
+  int64 token_count = 4;
+
+  // cost is the total cost in ustt
+  int64 cost = 5;
+}
+
+// MsgRecordUsageResponse is the Msg/RecordUsage response type.
+message MsgRecordUsageResponse {}
+
+// MsgRotateAPIKey is the Msg/RotateAPIKey request type.
+message MsgRotateAPIKey {
+  option (cosmos.msg.v1.signer) = "owner";
+
+  // owner is the API key owner address
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // api_key_id is the API key ID to rotate
+  string api_key_id = 2;
+
+  // new_encrypted_key is the new encrypted API key
+  bytes new_encrypted_key = 3;
+
+  // reason is the rotation reason
+  string reason = 4;
+}
+
+// MsgRotateAPIKeyResponse is the Msg/RotateAPIKey response type.
+message MsgRotateAPIKeyResponse {
+  // new_api_key_id is the ID of the new API key
+  string new_api_key_id = 1;
+}

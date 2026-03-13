@@ -4,7 +4,7 @@ package sharetoken.trust;
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
-import "sharetoken/trust/genesis.proto";
+import "sharetoken/trust/mq.proto";
 
 option go_package = "sharetoken/x/trust/types";
 

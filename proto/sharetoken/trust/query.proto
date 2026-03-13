@@ -5,7 +5,7 @@ import "cosmos/base/query/v1beta1/pagination.proto";
 import "cosmos/query/v1/query.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "sharetoken/trust/genesis.proto";
+import "sharetoken/trust/mq.proto";
 
 option go_package = "sharetoken/x/trust/types";
 
