@@ -187,6 +187,16 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		// Escrow module - holds funds in escrow
+		"escrow": nil,
+		// Dispute module - holds funds during disputes
+		"dispute": nil,
+		// Crowdfunding module - holds campaign funds
+		"crowdfunding": nil,
+		// Marketplace module - handles service payments
+		"marketplace": nil,
+		// Taskmarket module - holds task payments
+		"taskmarket": nil,
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
