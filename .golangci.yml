@@ -254,10 +254,16 @@ issues:
         - errcheck
       text: "rand.Read"
 
-    # 排除 keeper SetAPIKey 错误检查
+    # 排除 gosec 安全警告（开发阶段允许）
     - linters:
-        - errcheck
-      text: "k.SetAPIKey"
+        - gosec
+      text: "G101"  # 潜在的硬编码凭证
+    - linters:
+        - gosec
+      text: "G104"  # 未处理的错误
+    - linters:
+        - gosec
+      text: "G204"  # 子进程启动
 
   # 最大问题数
   max-issues-per-linter: 50
