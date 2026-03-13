@@ -47,7 +47,7 @@ func (s *TaskTrackingTestSuite) TestTaskSorting() {
 	require.Greater(s.T(), len(tasks), 0)
 
 	// 按优先级排序
-	tasks, err = s.chain.QueryUserTasksSorted(user.Address, "priority", "desc")
+	_, err = s.chain.QueryUserTasksSorted(user.Address, "priority", "desc")
 	require.NoError(s.T(), err)
 
 	s.T().Log("任务排序测试通过")

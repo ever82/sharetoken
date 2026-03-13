@@ -274,7 +274,10 @@ issues:
         - ineffassign
       text: "ineffectual assignment"
 
-    # 排除 gosec 安全警告（开发阶段允许）
+    # 排除 gosec G114 警告（开发服务器无超时设置）
+    - linters:
+        - gosec
+      text: "G114"
     - linters:
         - gosec
       text: "G101"  # 潜在的硬编码凭证

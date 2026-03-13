@@ -38,8 +38,8 @@ func (s *MarketplacePricingTestSuite) TestPricingModelDisplay() {
 		level    int
 		expected string
 	}{
-		{1, "per_token"},    // Level 1: 按token计费
-		{2, "per_skill"},    // Level 2: 按skill计费
+		{1, "per_token"},     // Level 1: 按token计费
+		{2, "per_skill"},     // Level 2: 按skill计费
 		{3, "fixed_package"}, // Level 3: 打包计费
 	}
 
