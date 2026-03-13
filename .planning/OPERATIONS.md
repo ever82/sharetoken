@@ -145,7 +145,125 @@ dispute:
   voting_period: 72h
 ```
 
-### 1.4 Testnet Deployment
+### 1.4 Mainnet Deployment
+
+#### Pre-Deployment Checklist
+
+- [ ] Hardware meets recommended requirements
+- [ ] Validator key generated and backed up securely
+- [ ] Genesis file downloaded from official source
+- [ ] Network configuration verified
+- [ ] Monitoring stack ready
+- [ ] Backup strategy in place
+
+#### Step 1: Initialize Node
+
+```bash
+# Clone repository
+git clone https://github.com/sharetokens/sharetokens-chain.git
+cd sharetokens-chain
+
+# Checkout mainnet release tag
+git checkout v2.0.0
+
+# Build binary
+make build
+
+# Initialize chain for mainnet
+sharetokensd init <moniker> --chain-id sharetokens-1
+```
+
+#### Step 2: Download Mainnet Genesis
+
+```bash
+# Download official genesis
+curl -L https://raw.githubusercontent.com/sharetokens/mainnet/main/genesis.json \
+  -o ~/.sharetokens/config/genesis.json
+
+# Verify genesis hash
+sha256sum ~/.sharetokens/config/genesis.json
+# Expected: <official-genesis-hash>
+
+# Download mainnet config
+curl -L https://raw.githubusercontent.com/sharetokens/mainnet/main/config.toml \
+  -o ~/.sharetokens/config/config.toml
+
+curl -L https://raw.githubusercontent.com/sharetokens/mainnet/main/app.toml \
+  -o ~/.sharetokens/config/app.toml
+```
+
+#### Step 3: Configure Node for Mainnet
+
+```bash
+# Set persistent peers from mainnet seed list
+SEEDS="seed1@seed1.sharetokens.io:26656,seed2@seed2.sharetokens.io:26656"
+sed -i "s/^seeds = .*/seeds = \"$SEEDS\"/" ~/.sharetokens/config/config.toml
+
+# Configure minimum gas prices
+sed -i 's/^minimum-gas-prices = .*/minimum-gas-prices = "0.025stt"/' ~/.sharetokens/config/app.toml
+
+# Enable Prometheus metrics
+sed -i 's/^prometheus = .*/prometheus = true/' ~/.sharetokens/config/config.toml
+
+# Configure pruning for mainnet (aggressive)
+sed -i 's/^pruning = .*/pruning = "everything"/' ~/.sharetokens/config/app.toml
+```
+
+#### Step 4: Start Syncing
+
+```bash
+# Option A: Start from genesis (slow, historical data)
+sharetokensd start
+
+# Option B: Start from snapshot (fast, recommended)
+# Download snapshot
+wget https://snapshots.sharetokens.io/mainnet/latest.tar.lz4
+
+# Stop node if running
+sudo systemctl stop sharetokensd
+
+# Reset and restore from snapshot
+sharetokensd unsafe-reset-all
+lz4 -d latest.tar.lz4 | tar -x -C ~/.sharetokens/
+
+# Start node
+sudo systemctl start sharetokensd
+```
+
+#### Step 5: Create Validator (Optional)
+
+```bash
+# Create validator key
+sharetokensd keys add validator --keyring-backend file
+
+# Fund validator address (from exchange or faucet)
+# Wait for funds to arrive
+
+# Create validator
+current_height=$(sharetokensd status | jq -r '.SyncInfo.latest_block_height')
+pubkey=$(sharetokensd tendermint show-validator)
+
+sharetokensd tx staking create-validator \
+  --amount=1000000stt \
+  --pubkey="$pubkey" \
+  --moniker="<your-validator-name>" \
+  --website="https://your-website.com" \
+  --details="Your validator description" \
+  --commission-rate=0.10 \
+  --commission-max-rate=0.20 \
+  --commission-max-change-rate=0.01 \
+  --min-self-delegation=1 \
+  --from=validator \
+  --chain-id=sharetokens-1 \
+  --gas=auto \
+  --gas-adjustment=1.2 \
+  --gas-prices=0.025stt \
+  --keyring-backend=file
+```
+
+---
+
+### 1.5 Testnet Deployment
 
 #### Step 1: Initialize Node
 
@@ -245,9 +363,11 @@ sudo systemctl enable sharetokensd
 sudo systemctl start sharetokensd
 ```
 
-### 1.5 Mainnet Genesis
+---
 
-#### Initial Token Distribution
+## 2. Mainnet Genesis
+
+### Initial Token Distribution
 
 | Allocation          | Percentage | Amount (STT)    | Vesting Period |
 | ------------------- | ---------- | --------------- | -------------- |
@@ -258,7 +378,7 @@ sudo systemctl start sharetokensd
 | Airdrop             | 10%        | 100,000,000     | Unlocked       |
 | Liquidity Mining    | 20%        | 200,000,000     | 4 years        |
 
-#### Governance Parameters
+### Governance Parameters
 
 ```yaml
 governance:
@@ -283,7 +403,7 @@ slashing:
 
 ---
 
-## 2. Core Module Operations
+## 3. Core Module Operations
 
 ### 2.1 Service Marketplace Operations
 
@@ -362,9 +482,22 @@ sharetokensd tx dispute vote <dispute-id> \
 
 ---
 
-## 3. Upgrade Mechanism
+## 4. Upgrade Mechanism
 
-### 3.1 Software Upgrade (Governance Proposal)
+### 4.1 Chain Upgrade Types
+
+#### Planned Upgrades (via Governance)
+- Feature additions
+- Parameter changes
+- Consensus updates
+- Security patches
+
+#### Emergency Upgrades
+- Critical security fixes
+- Consensus bugs
+- Requires coordination via validators channel
+
+### 4.2 Software Upgrade (Governance Proposal)
 
 ```bash
 # Submit software upgrade proposal
@@ -378,9 +511,149 @@ sharetokensd tx gov submit-proposal software-upgrade v2.0.0 \
   --chain-id sharetokens-1 \
   --keyring-backend file \
   --fees 5000stt
+
+# Vote on proposal
+sharetokensd tx gov vote <proposal-id> yes \
+  --from validator \
+  --chain-id sharetokens-1 \
+  --keyring-backend file
+
+# Monitor voting progress
+sharetokensd query gov proposal <proposal-id>
 ```
 
-### 3.2 Auto-Upgrade with Cosmovisor
+### 4.3 Upgrade Process with Cosmovisor
+
+#### Phase 1: Pre-Upgrade (Before Target Height)
+
+```bash
+# Download new binary
+wget https://github.com/sharetokens/sharetokens-chain/releases/download/v2.0.0/sharetokensd-v2.0.0-linux-amd64.tar.gz
+tar -xzf sharetokensd-v2.0.0-linux-amd64.tar.gz
+
+# Verify checksum
+sha256sum sharetokensd
+cat checksum.txt | grep sharetokensd
+
+# Create upgrade directory
+mkdir -p ~/.sharetokens/cosmovisor/upgrades/v2.0.0/bin
+
+# Copy new binary
+cp sharetokensd ~/.sharetokens/cosmovisor/upgrades/v2.0.0/bin/
+
+# Verify binary version
+~/.sharetokens/cosmovisor/upgrades/v2.0.0/bin/sharetokensd version
+
+# Set upgrade info (optional - for automated downloads)
+echo '{"binaries":{"linux/amd64":"https://github.com/sharetokens/sharetokens-chain/releases/download/v2.0.0/sharetokensd-v2.0.0-linux-amd64.tar.gz"}}' > ~/.sharetokens/cosmovisor/upgrades/v2.0.0/upgrade-info.json
+```
+
+#### Phase 2: Monitor Upgrade Height
+
+```bash
+# Check current height
+watch -n 5 'sharetokensd status | jq .SyncInfo.latest_block_height'
+
+# Check upgrade plan
+sharetokensd query upgrade plan
+
+# Monitor logs
+journalctl -u cosmovisor -f
+```
+
+#### Phase 3: Post-Upgrade Verification
+
+```bash
+# Check new version
+sharetokensd version
+
+# Check node is syncing
+sharetokensd status | jq .SyncInfo
+
+# Check validator is signing (if validator)
+curl -s http://localhost:26657/block | jq .result.block.header.height
+
+# Verify chain continues
+watch -n 2 'curl -s http://localhost:26657/block | jq .result.block.header.height'
+```
+
+### 4.4 Manual Upgrade (Without Cosmovisor)
+
+```bash
+# Monitor for upgrade height
+# When halt-height reached:
+
+# Stop node
+sudo systemctl stop sharetokensd
+
+# Backup (just in case)
+cp -r ~/.sharetokens/data ~/.sharetokens/data-backup-$(date +%Y%m%d)
+
+# Download and install new binary
+wget <new-binary-url>
+tar -xzf <new-binary.tar.gz>
+sudo cp sharetokensd /usr/local/bin/
+sudo chmod +x /usr/local/bin/sharetokensd
+
+# Verify
+sharetokensd version
+
+# Start node
+sudo systemctl start sharetokensd
+
+# Check status
+sharetokensd status
+```
+
+### 4.5 Rollback Procedure
+
+If upgrade fails:
+
+```bash
+# Stop node
+sudo systemctl stop sharetokensd
+
+# Restore from backup (if using manual upgrade)
+cp -r ~/.sharetokens/data-backup-<date> ~/.sharetokens/data
+
+# Restore old binary
+sudo cp /path/to/backup/sharetokensd /usr/local/bin/
+
+# Start with old version
+sudo systemctl start sharetokensd
+```
+
+### 4.6 Emergency Upgrade Coordination
+
+When emergency upgrade is required:
+
+1. **Immediate Actions:**
+   - Stop node if instructed
+   - Join emergency validator call
+   - Monitor official channels
+
+2. **Download Patch:**
+   ```bash
+   # Download emergency patch
+   wget <emergency-binary-url>
+
+   # Verify signature
+   gpg --verify <binary>.sig <binary>
+
+   # Install
+   sudo systemctl stop sharetokensd
+   sudo cp <new-binary> /usr/local/bin/sharetokensd
+   sudo systemctl start sharetokensd
+   ```
+
+3. **Communication Channels:**
+   - Validator Discord: #emergency
+   - Telegram: @STT_Validators
+   - Email: validators@sharetokens.io
+
+---
+
+## 5. Monitoring & Alerting
 
 ```bash
 # Install Cosmovisor
@@ -425,43 +698,74 @@ sudo systemctl start cosmovisor
 
 ---
 
-## 4. Monitoring & Alerting
+## 5. Monitoring & Alerting
 
-### 4.1 Key Metrics
+### 5.1 Key Metrics
 
 #### Core Node Metrics
 
-| Metric                  | Target   | Alert Threshold |
-| ----------------------- | -------- | --------------- |
-| Block Production Delay  | < 10s    | > 15s           |
-| Transaction Confirmation| < 30s    | > 60s           |
-| Peer Count              | > 25     | < 10            |
-| CPU Usage               | < 70%    | > 90%           |
-| Memory Usage            | < 80%    | > 95%           |
-| Disk Usage              | < 80%    | > 90%           |
+| Metric                  | Target   | Alert Threshold | Severity |
+| ----------------------- | -------- | --------------- | -------- |
+| Block Production Delay  | < 10s    | > 15s           | Critical |
+| Transaction Confirmation| < 30s    | > 60s           | Warning  |
+| Peer Count              | > 25     | < 10            | Warning  |
+| CPU Usage               | < 70%    | > 90%           | Warning  |
+| Memory Usage            | < 80%    | > 95%           | Critical |
+| Disk Usage              | < 80%    | > 90%           | Critical |
+| Block Height Lag        | < 5      | > 100           | Warning  |
+| Missed Blocks (24h)     | < 50     | > 200           | Critical |
 
 #### Service Marketplace Metrics
 
-| Metric                  | Target   | Alert Threshold |
-| ----------------------- | -------- | --------------- |
-| Service Registration    | Working  | Failed          |
-| Request Routing         | < 5s     | > 30s           |
-| Escrow Operations       | Working  | Failed          |
-| MQ Updates              | Working  | Stale > 1h      |
+| Metric                  | Target   | Alert Threshold | Severity |
+| ----------------------- | -------- | --------------- | -------- |
+| Service Registration    | Working  | Failed          | Warning  |
+| Request Routing         | < 5s     | > 30s           | Warning  |
+| Escrow Operations       | Working  | Failed          | Critical |
+| MQ Updates              | Working  | Stale > 1h      | Warning  |
 
-### 4.2 Prometheus Configuration
+### 5.2 Prometheus Setup
+
+#### Installation
+
+```bash
+# Download Prometheus
+cd /tmp
+wget https://github.com/prometheus/prometheus/releases/download/v2.47.0/prometheus-2.47.0.linux-amd64.tar.gz
+tar -xzf prometheus-2.47.0.linux-amd64.tar.gz
+cd prometheus-2.47.0.linux-amd64
+
+# Move binaries
+sudo mv prometheus /usr/local/bin/
+sudo mv promtool /usr/local/bin/
+
+# Create directories
+sudo mkdir -p /etc/prometheus
+sudo mkdir -p /var/lib/prometheus
+
+# Copy config files
+sudo cp -r consoles /etc/prometheus/
+sudo cp -r console_libraries /etc/prometheus/
+```
+
+#### Configuration
 
 ```yaml
 # /etc/prometheus/prometheus.yml
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
+  external_labels:
+    monitor: 'sharetokens-monitor'
+    chain: 'sharetokens-1'
 
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
           - localhost:9093
+      timeout: 10s
+      api_version: v2
 
 rule_files:
   - /etc/prometheus/rules/*.yml
@@ -471,19 +775,194 @@ scrape_configs:
   - job_name: 'sharetokens-core'
     static_configs:
       - targets: ['localhost:26660']
+    metrics_path: /metrics
+    scrape_interval: 5s
 
   # Node Exporter (System Metrics)
   - job_name: 'node'
     static_configs:
       - targets: ['localhost:9100']
+    scrape_interval: 15s
 
   # Prometheus self-monitoring
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
+
+  # Validator metrics (if applicable)
+  - job_name: 'validator-metrics'
+    static_configs:
+      - targets: ['localhost:26661']
+    scrape_interval: 5s
 ```
 
-### 4.3 Alert Rules
+### 5.3 Grafana Setup
+
+#### Installation
+
+```bash
+# Add Grafana repository
+sudo apt-get install -y software-properties-common
+wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+echo "deb https://packages.grafana.com/oss/deb stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+
+# Install Grafana
+sudo apt-get update
+sudo apt-get install -y grafana
+
+# Start Grafana
+sudo systemctl daemon-reload
+sudo systemctl enable grafana-server
+sudo systemctl start grafana-server
+
+# Default credentials: admin/admin
+# Access: http://<server-ip>:3000
+```
+
+#### Dashboard Configuration
+
+```json
+{
+  "dashboard": {
+    "title": "ShareTokens Node Monitor",
+    "tags": ["sharetokens", "blockchain"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Block Height",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "tendermint_block_height",
+            "legendFormat": "Current Height"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"value": null, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Block Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(tendermint_block_height[1m])",
+            "legendFormat": "Blocks/sec"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Peer Count",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "tendermint_p2p_peers",
+            "legendFormat": "Peers"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"value": null, "color": "red"},
+                {"value": 5, "color": "yellow"},
+                {"value": 25, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU %"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100",
+            "legendFormat": "Memory %"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Disk Usage",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "(node_filesystem_size_bytes{mountpoint=\"/\"} - node_filesystem_avail_bytes{mountpoint=\"/\"}) / node_filesystem_size_bytes{mountpoint=\"/\"} * 100",
+            "legendFormat": "Disk Usage %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 80, "color": "yellow"},
+                {"value": 90, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Transaction Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(tendermint_consensus_total_txs[5m])",
+            "legendFormat": "TX/s"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Validator Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "tendermint_consensus_validator_power",
+            "legendFormat": "Voting Power"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### Dashboard Import
+
+1. Access Grafana at `http://<server-ip>:3000`
+2. Login with default credentials (admin/admin)
+3. Change default password
+4. Navigate to Dashboards → Import
+5. Upload JSON or paste JSON content
+6. Select Prometheus data source
+7. Click Import
+
+### 5.4 Alert Rules
 
 ```yaml
 # /etc/prometheus/rules/sharetokens-alerts.yml
@@ -499,7 +978,7 @@ groups:
           severity: critical
         annotations:
           summary: "Block production halted"
-          description: "No new blocks produced for > 60 seconds"
+          description: "No new blocks produced for > 60 seconds on {{ $labels.instance }}"
 
       # Node offline
       - alert: NodeOffline
@@ -509,7 +988,7 @@ groups:
           severity: critical
         annotations:
           summary: "Node offline"
-          description: "ShareTokens core node is not responding"
+          description: "ShareTokens core node {{ $labels.instance }} is not responding"
 
       # Low peer count
       - alert: LowPeerCount
@@ -519,7 +998,7 @@ groups:
           severity: warning
         annotations:
           summary: "Low peer count"
-          description: "Connected peers < 10"
+          description: "Connected peers < 10 on {{ $labels.instance }}"
 
       # Disk space low
       - alert: DiskSpaceLow
@@ -529,12 +1008,97 @@ groups:
           severity: critical
         annotations:
           summary: "Disk space critically low"
-          description: "Available disk space < 10%"
+          description: "Available disk space < 10% on {{ $labels.instance }}"
+
+      # Memory usage high
+      - alert: MemoryUsageHigh
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.95
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Memory usage critically high"
+          description: "Memory usage > 95% on {{ $labels.instance }}"
+
+      # CPU usage high
+      - alert: CPUUsageHigh
+        expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU usage high"
+          description: "CPU usage > 90% for > 10 minutes on {{ $labels.instance }}"
+
+      # Validator missed blocks
+      - alert: ValidatorMissedBlocks
+        expr: increase(tendermint_consensus_validator_missed_blocks[1h]) > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Validator missing blocks"
+          description: "Validator missed > 50 blocks in last hour"
+
+      # Block sync lagging
+      - alert: BlockSyncLag
+        expr: tendermint_consensus_latest_block_height - tendermint_consensus_caught_up_height > 100
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Block sync lagging"
+          description: "Node is > 100 blocks behind"
+```
+
+### 5.5 Alertmanager Configuration
+
+```yaml
+# /etc/prometheus/alertmanager.yml
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@sharetokens.io'
+  smtp_auth_username: 'alerts@sharetokens.io'
+  smtp_auth_password: '<app-password>'
+
+route:
+  group_by: ['alertname', 'severity']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default'
+  routes:
+    - match:
+        severity: critical
+      receiver: 'pagerduty'
+    - match:
+        severity: warning
+      receiver: 'default'
+
+receivers:
+  - name: 'default'
+    email_configs:
+      - to: 'ops@sharetokens.io'
+        subject: '[STT Alert] {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Instance: {{ .Labels.instance }}
+          Severity: {{ .Labels.severity }}
+          Time: {{ .StartsAt }}
+          {{ end }}
+
+  - name: 'pagerduty'
+    pagerduty_configs:
+      - service_key: '<pagerduty-key>'
+        severity: '{{ .GroupLabels.severity }}'
+        description: '{{ .GroupLabels.alertname }}'
 ```
 
 ---
 
-## 5. Backup & Recovery
+## 6. Backup & Recovery
 
 ### 5.1 Backup Strategy
 
@@ -611,6 +1175,465 @@ sudo ufw allow 26657/tcp  # RPC (restrict to localhost if possible)
 sudo ufw allow 26660/tcp  # Prometheus metrics
 sudo ufw enable
 ```
+
+---
+
+## 6. Backup & Recovery
+
+### 6.1 Backup Strategy
+
+#### Backup Types
+
+| Type       | Frequency | Retention | Size (Est.) | Priority |
+| ---------- | --------- | --------- | ----------- | -------- |
+| Full       | Daily     | 30 days   | ~50GB       | High     |
+| Incremental| Hourly    | 7 days    | ~1GB        | Medium   |
+| State Snapshots | Every 1000 blocks | 14 days | ~5GB | High |
+| Key Backup | Once (secure storage) | Forever | <1MB | Critical |
+| Config Backup | On change | 90 days | ~1MB | Medium |
+
+#### Automated Backup Script
+
+```bash
+#!/bin/bash
+# /usr/local/bin/sharetokens-backup.sh
+
+set -e
+
+# Configuration
+BACKUP_DIR="/backups/sharetokens"
+DATA_DIR="$HOME/.sharetokens/data"
+CONFIG_DIR="$HOME/.sharetokens/config"
+RETENTION_DAYS=30
+DATE=$(date +%Y%m%d_%H%M%S)
+LOG_FILE="$BACKUP_DIR/backup_$DATE.log"
+
+# Ensure backup directory exists
+mkdir -p "$BACKUP_DIR"
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+# Stop node temporarily (optional - can backup live with --snapshot)
+log "Stopping node for backup..."
+sudo systemctl stop sharetokensd || true
+
+# Create backup
+log "Creating backup..."
+tar -czf "$BACKUP_DIR/sharetokens-data-$DATE.tar.gz" -C "$DATA_DIR" . 2>&1 | tee -a "$LOG_FILE"
+tar -czf "$BACKUP_DIR/sharetokens-config-$DATE.tar.gz" -C "$CONFIG_DIR" . 2>&1 | tee -a "$LOG_FILE"
+
+# Restart node
+log "Restarting node..."
+sudo systemctl start sharetokensd
+
+# Upload to cloud storage (S3 example)
+log "Uploading to S3..."
+aws s3 cp "$BACKUP_DIR/sharetokens-data-$DATE.tar.gz" s3://sharetokens-backups/mainnet/ --storage-class STANDARD_IA
+aws s3 cp "$BACKUP_DIR/sharetokens-config-$DATE.tar.gz" s3://sharetokens-backups/mainnet/ --storage-class STANDARD_IA
+
+# Clean up old backups locally
+log "Cleaning up old backups..."
+find "$BACKUP_DIR" -name "sharetokens-*.tar.gz" -mtime +$RETENTION_DAYS -delete
+find "$BACKUP_DIR" -name "backup_*.log" -mtime +$RETENTION_DAYS -delete
+
+log "Backup completed successfully"
+```
+
+#### Cron Configuration
+
+```bash
+# /etc/cron.d/sharetokens-backup
+# Daily full backup at 2 AM
+0 2 * * * root /usr/local/bin/sharetokens-backup.sh
+
+# Hourly incremental backup (state only)
+0 * * * * root /usr/local/bin/sharetokens-backup-incremental.sh
+```
+
+### 6.2 State Snapshots
+
+```bash
+# Create state snapshot
+sharetokensd snapshots create --home ~/.sharetokens
+
+# List snapshots
+sharetokensd snapshots list --home ~/.sharetokens
+
+# Restore from snapshot
+sharetokensd snapshots restore <snapshot-height> --home ~/.sharetokens
+
+# Prune old snapshots
+sharetokensd snapshots delete-older-than 1000 --home ~/.sharetokens
+```
+
+### 6.3 Validator Key Backup
+
+```bash
+# Export validator key
+sharetokensd keys export validator --keyring-backend file > validator-key.backup
+
+# Encrypt backup
+gpg --symmetric --cipher-algo AES256 validator-key.backup
+
+# Store securely (multiple locations)
+# 1. Hardware wallet
+# 2. Offline USB (encrypted)
+# 3. Password manager
+# 4. Paper backup (mnemonic)
+
+# Test restoration
+gpg --decrypt validator-key.backup.gpg > validator-key.restore
+cp validator-key.restore /tmp/validator-key.backup
+sharetokensd keys import validator-test /tmp/validator-key.backup --keyring-backend file
+sharetokensd keys show validator-test --keyring-backend file
+rm /tmp/validator-key.backup
+```
+
+### 6.4 Recovery Procedures
+
+#### Scenario 1: Data Corruption
+
+```bash
+# Stop node
+sudo systemctl stop sharetokensd
+
+# Backup corrupted data (for forensic analysis)
+mv ~/.sharetokens/data ~/.sharetokens/data-corrupted-$(date +%Y%m%d)
+
+# Reset node state
+sharetokensd unsafe-reset-all
+
+# Download recent snapshot from official source
+wget https://snapshots.sharetokens.io/mainnet/latest.tar.lz4
+
+# Extract snapshot
+lz4 -d latest.tar.lz4 | tar -x -C ~/.sharetokens/data
+
+# Or restore from local backup
+tar -xzf /backups/sharetokens/sharetokens-data-<date>.tar.gz -C ~/.sharetokens/data
+
+# Start node
+sudo systemctl start sharetokensd
+
+# Verify sync
+sharetokensd status
+```
+
+#### Scenario 2: Complete Node Failure
+
+```bash
+# On new server:
+
+# 1. Install prerequisites (see Section 1.2)
+
+# 2. Download and restore backup
+mkdir -p ~/.sharetokens
+tar -xzf sharetokens-config-<date>.tar.gz -C ~/.sharetokens/config
+tar -xzf sharetokens-data-<date>.tar.gz -C ~/.sharetokens/data
+
+# 3. Restore validator key (if validator)
+sharetokensd keys import validator validator-key.backup --keyring-backend file
+
+# 4. Verify configuration
+cat ~/.sharetokens/config/config.toml | grep moniker
+cat ~/.sharetokens/config/config.toml | grep seeds
+
+# 5. Start node
+sudo systemctl start sharetokensd
+
+# 6. Verify
+sharetokensd status
+sharetokensd query staking validator <validator-address>
+```
+
+#### Scenario 3: Chain Rollback (Consensus Issue)
+
+```bash
+# Stop node
+sudo systemctl stop sharetokensd
+
+# Backup current state
+cp -r ~/.sharetokens/data ~/.sharetokens/data-pre-rollback-$(date +%Y%m%d)
+
+# Rollback to specific height
+sharetokensd rollback --height <target-height>
+
+# Or manually reset and sync from snapshot
+sharetokensd unsafe-reset-all
+# Restore from snapshot (see Scenario 1)
+
+# Start node
+sudo systemctl start sharetokensd
+
+# Monitor for consensus
+watch -n 5 'sharetokensd status | jq .SyncInfo'
+```
+
+### 6.5 Disaster Recovery Plan
+
+#### RTO/RPO Targets
+
+| Component | RTO | RPO |
+|-----------|-----|-----|
+| Validator Node | 1 hour | 24 hours |
+| Full Node | 4 hours | 24 hours |
+| Sentry Node | 2 hours | 24 hours |
+
+#### Recovery Checklist
+
+- [ ] Identify failure type (hardware/software/network)
+- [ ] Notify team via emergency channels
+- [ ] Assess backup availability
+- [ ] Provision new server (if hardware failure)
+- [ ] Restore from backup or snapshot
+- [ ] Verify node syncs to network
+- [ ] Verify validator is signing (if applicable)
+- [ ] Update monitoring
+- [ ] Post-incident report
+
+---
+
+## 7. Emergency Response
+
+### 7.1 Incident Severity Levels
+
+| Level | Description | Response Time | Example |
+|-------|-------------|---------------|---------|
+| P0 (Critical) | Chain halt, security breach | 15 minutes | Consensus failure, double-sign detected |
+| P1 (High) | Validator jailed, sync issues | 1 hour | Validator downtime, sync lag |
+| P2 (Medium) | Performance degradation | 4 hours | High latency, peer count low |
+| P3 (Low) | Non-critical issues | 24 hours | Minor config issues |
+
+### 7.2 Emergency Contacts & Communication
+
+#### Primary Channels
+
+| Channel | Purpose | Access |
+|---------|---------|--------|
+| Validator Discord | Real-time coordination | #validators-emergency |
+| Telegram | Quick alerts | @STT_Validators |
+| Email | Formal communications | validators@sharetokens.io |
+| GitHub | Security advisories | github.com/sharetokens/security |
+
+#### Emergency Response Team
+
+| Role | Contact | Responsibility |
+|------|---------|----------------|
+| On-call Engineer | oncall@sharetokens.io | Initial response |
+| Security Lead | security@sharetokens.io | Security incidents |
+| DevOps Lead | devops@sharetokens.io | Infrastructure issues |
+| Community Lead | community@sharetokens.io | Public communications |
+
+### 7.3 Critical Incident Response
+
+#### P0: Chain Halt Response
+
+```bash
+# 1. IMMEDIATE (0-15 min)
+# Check node status
+sharetokensd status 2>&1 | jq .
+
+# Check logs for errors
+journalctl -u sharetokensd -n 1000 --no-pager | grep -i error
+
+# Check if halt is network-wide
+# - Check official Discord/Telegram
+# - Check block explorers
+# - Query other validators
+
+# 2. ASSESS (15-30 min)
+# Determine if local or network issue
+# If local: attempt restart with backup
+# If network: await official guidance
+
+# 3. RECOVERY
+# Stop node
+sudo systemctl stop sharetokensd
+
+# Restore from last known good state
+tar -xzf /backups/sharetokens/sharetokens-data-<last-known-good>.tar.gz -C ~/.sharetokens/data
+
+# Or reset and sync from snapshot
+sharetokensd unsafe-reset-all
+# Download and restore snapshot
+
+# Restart
+sudo systemctl start sharetokensd
+
+# Monitor
+watch -n 5 'sharetokensd status | jq .SyncInfo.catching_up'
+```
+
+#### P0: Double-Sign Detected
+
+```bash
+# If validator accidentally double-signed:
+
+# 1. IMMEDIATELY stop validator
+sudo systemctl stop sharetokensd
+
+# 2. Check validator status
+sharetokensd query staking validator <validator-address>
+
+# 3. Validator will be tombstoned (cannot unjail)
+# Contact team immediately
+# Rotate to backup validator if available
+
+# 4. Post-incident
+# Review signing process
+# Implement multi-sig or HSM
+# Document lessons learned
+```
+
+#### P1: Validator Jailed
+
+```bash
+# Check jail status
+sharetokensd query staking validator <validator-address>
+
+# Check missed blocks
+sharetokensd query slashing signing-info <validator-pubkey>
+
+# Unjail (if not tombstoned)
+sharetokensd tx slashing unjail \
+  --from validator \
+  --chain-id sharetokens-1 \
+  --keyring-backend file \
+  --fees 5000stt
+
+# Monitor for recovery
+watch -n 30 'sharetokensd query staking validator <validator-address>'
+```
+
+### 7.4 Security Incident Response
+
+#### Suspicious Activity Detection
+
+```bash
+# Check for unusual transactions
+sharetokensd query tx --events message.sender=<suspicious-address>
+
+# Check validator power changes
+sharetokensd query staking validators --limit 1000 | jq '.validators[] | select(.tokens != <expected>)'
+
+# Check for unauthorized access attempts
+sudo grep "Failed password" /var/log/auth.log
+sudo grep "Invalid user" /var/log/auth.log
+
+# Check firewall logs
+sudo ufw status verbose
+sudo tail -f /var/log/ufw.log
+```
+
+#### Security Incident Response Steps
+
+1. **Contain**
+   - Isolate affected systems
+   - Revoke compromised credentials
+   - Block suspicious IPs
+
+2. **Investigate**
+   - Preserve logs
+   - Identify attack vector
+   - Assess impact scope
+
+3. **Recover**
+   - Restore from clean backup
+   - Apply security patches
+   - Update credentials
+
+4. **Report**
+   - Document incident
+   - Notify affected parties
+   - Publish post-mortem
+
+### 7.5 Emergency Runbooks
+
+#### Runbook: Node Won't Start
+
+```bash
+# Check 1: Logs
+journalctl -u sharetokensd -n 500 --no-pager
+
+# Check 2: Disk space
+df -h
+
+# Check 3: Configuration
+sharetokensd validate-genesis
+
+# Check 4: Data integrity
+# If corrupted:
+sudo systemctl stop sharetokensd
+sharetokensd unsafe-reset-all
+# Restore from backup/snapshot
+
+# Check 5: Binary version
+sharetokensd version
+# Ensure correct version for network
+```
+
+#### Runbook: Sync Stuck
+
+```bash
+# Check peer count
+sharetokensd query consensus peers
+
+# Check for errors
+journalctl -u sharetokensd -f
+
+# Restart with peer refresh
+sudo systemctl restart sharetokensd
+
+# If still stuck:
+# 1. Update persistent_peers in config.toml
+# 2. Reset and restore from snapshot
+```
+
+#### Runbook: High Resource Usage
+
+```bash
+# CPU high
+htop
+# Check for:
+# - Too many connections
+# - Compaction running
+# - Query overload
+
+# Memory high
+free -h
+# Check for:
+# - Memory leak
+# - Cache not clearing
+
+# Disk high
+du -sh ~/.sharetokens/data/*
+# Solutions:
+# - Enable pruning
+# - Compact database
+# - Archive old data
+```
+
+### 7.6 Post-Incident Review
+
+After every P0/P1 incident:
+
+1. **Timeline Documentation**
+   - Detection time
+   - Response start
+   - Resolution time
+   - Root cause identified
+
+2. **Lessons Learned**
+   - What went well
+   - What could improve
+   - Action items
+
+3. **Process Updates**
+   - Update runbooks
+   - Improve monitoring
+   - Revise playbooks
 
 ---
 
@@ -1202,6 +2225,6 @@ openfang resources
 
 ---
 
-*Document Version: 2.0.0*
-*Last Updated: 2026-03-02*
+*Document Version: 2.1.0*
+*Last Updated: 2026-03-13*
 *Maintained by: ShareTokens Operations Team*
