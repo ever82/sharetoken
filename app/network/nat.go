@@ -53,6 +53,8 @@ type NATManager struct {
 	ctx        context.Context
 	upnpClient UPnPClient
 	upnpMu     sync.RWMutex
+	started    bool
+	stopMu     sync.Mutex
 }
 
 // UPnPClient interface for UPnP operations
@@ -91,6 +93,14 @@ func NewNATManager(config *NATConfig) *NATManager {
 
 // Start initializes NAT traversal (UPnP, etc.)
 func (nm *NATManager) Start() error {
+	nm.stopMu.Lock()
+	defer nm.stopMu.Unlock()
+
+	if nm.started {
+		nm.logger.Debug("NAT manager already started")
+		return nil
+	}
+
 	nm.logger.Info("Starting NAT manager", "upnp_enabled", nm.config.EnableUPnP)
 
 	if nm.config.EnableUPnP {
@@ -105,11 +115,20 @@ func (nm *NATManager) Start() error {
 		}
 	}
 
+	nm.started = true
 	return nil
 }
 
 // Stop cleans up NAT mappings
 func (nm *NATManager) Stop() error {
+	nm.stopMu.Lock()
+	defer nm.stopMu.Unlock()
+
+	if !nm.started {
+		nm.logger.Debug("NAT manager not started")
+		return nil
+	}
+
 	nm.logger.Info("Stopping NAT manager")
 	nm.cancel()
 
@@ -118,6 +137,7 @@ func (nm *NATManager) Stop() error {
 		nm.cleanupUPnP()
 	}
 
+	nm.started = false
 	return nil
 }
 

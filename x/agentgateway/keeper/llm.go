@@ -105,7 +105,10 @@ func (k *Keeper) createLLMRequest(messages []Message, apiKey string) (*http.Requ
 		},
 	}
 
-	jsonBody, _ := json.Marshal(reqBody)
+	jsonBody, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequest("POST", "https://api.anthropic.com/v1/messages", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, err

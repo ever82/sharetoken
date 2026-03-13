@@ -107,7 +107,11 @@ func (k Keeper) GetEscrowsByRequester(ctx sdk.Context, requester string) []types
 	store := ctx.KVStore(k.storeKey)
 	prefix := append(types.EscrowByRequesterKey, []byte(requester)...)
 	iterator := sdk.KVStorePrefixIterator(store, prefix)
-	defer iterator.Close() //nolint:errcheck
+	defer func() {
+		if err := iterator.Close(); err != nil {
+			ctx.Logger().Error("failed to close iterator", "error", err)
+		}
+	}()
 
 	var escrows []types.Escrow
 	for ; iterator.Valid(); iterator.Next() {
@@ -128,7 +132,11 @@ func (k Keeper) GetEscrowsByProvider(ctx sdk.Context, provider string) []types.E
 	store := ctx.KVStore(k.storeKey)
 	prefix := append(types.EscrowByProviderKey, []byte(provider)...)
 	iterator := sdk.KVStorePrefixIterator(store, prefix)
-	defer iterator.Close() //nolint:errcheck
+	defer func() {
+		if err := iterator.Close(); err != nil {
+			ctx.Logger().Error("failed to close iterator", "error", err)
+		}
+	}()
 
 	var escrows []types.Escrow
 	for ; iterator.Valid(); iterator.Next() {
@@ -148,7 +156,11 @@ func (k Keeper) GetEscrowsByProvider(ctx sdk.Context, provider string) []types.E
 func (k Keeper) GetAllEscrows(ctx sdk.Context) []types.Escrow {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, types.EscrowKey)
-	defer iterator.Close() //nolint:errcheck
+	defer func() {
+		if err := iterator.Close(); err != nil {
+			ctx.Logger().Error("failed to close iterator", "error", err)
+		}
+	}()
 
 	var escrows []types.Escrow
 	for ; iterator.Valid(); iterator.Next() {

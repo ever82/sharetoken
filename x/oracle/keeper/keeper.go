@@ -63,7 +63,11 @@ func (k Keeper) GetPrice(ctx sdk.Context, symbol string) (types.Price, bool) {
 func (k Keeper) GetAllPrices(ctx sdk.Context) []types.Price {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, types.PriceKey)
-	defer iterator.Close() //nolint:errcheck
+	defer func() {
+		if err := iterator.Close(); err != nil {
+			ctx.Logger().Error("failed to close iterator", "error", err)
+		}
+	}()
 
 	var prices []types.Price
 	for ; iterator.Valid(); iterator.Next() {

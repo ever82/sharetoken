@@ -81,7 +81,11 @@ func (k *CRUDKeeper[T]) Delete(ctx sdk.Context, id string) {
 func (k *CRUDKeeper[T]) GetAll(ctx sdk.Context) []T {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, k.prefix)
-	defer iterator.Close() //nolint:errcheck
+	defer func() {
+		if err := iterator.Close(); err != nil {
+			ctx.Logger().Error("failed to close iterator", "error", err)
+		}
+	}()
 
 	var items []T
 	for ; iterator.Valid(); iterator.Next() {
