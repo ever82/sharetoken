@@ -7,6 +7,9 @@ const (
 	// StoreKey is the string store key for the escrow module
 	StoreKey = ModuleName
 
+	// MemStoreKey is the in-memory store key for the escrow module
+	MemStoreKey = "mem_escrow"
+
 	// RouterKey is the message route for the escrow module
 	RouterKey = ModuleName
 

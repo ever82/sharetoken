@@ -11,6 +11,9 @@ const (
 	// StoreKey is the string store key for the identity module
 	StoreKey = ModuleName
 
+	// MemStoreKey is the in-memory store key for the identity module
+	MemStoreKey = "mem_identity"
+
 	// RouterKey is the message route for the identity module
 	RouterKey = ModuleName
 

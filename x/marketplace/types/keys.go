@@ -1,5 +1,13 @@
 package types
 
+const (
+	// RouterKey is the message route for the marketplace module
+	RouterKey = ModuleName
+
+	// QuerierRoute is the querier route for the marketplace module
+	QuerierRoute = ModuleName
+)
+
 var (
 	ServiceKey = []byte{0x01}
 )
