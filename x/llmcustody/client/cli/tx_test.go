@@ -33,7 +33,7 @@ func TestGetQueryCmdLlmcustodyTx(t *testing.T) {
 func TestCmdRegisterAPIKey(t *testing.T) {
 	cmd := CmdRegisterAPIKey()
 	require.NotNil(t, cmd)
-	require.Equal(t, "register-api-key [provider] [encrypted-key]", cmd.Use)
+	require.Equal(t, "register-api-key [provider] [encrypted-key-file]", cmd.Use)
 	require.NotEmpty(t, cmd.Short)
 }
 

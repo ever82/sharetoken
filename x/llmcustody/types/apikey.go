@@ -61,6 +61,7 @@ type APIKey struct {
 	LastUsedAt   int64        `json:"last_used_at"`
 	UsageCount   int64        `json:"usage_count"`
 	Active       bool         `json:"active"`
+	Version      int          `json:"version"` // For key rotation tracking
 }
 
 // Reset implements proto.Message
@@ -162,6 +163,7 @@ func (m *APIKey) fromProto(pm *APIKeyProto) {
 	m.LastUsedAt = pm.LastUsedAt
 	m.UsageCount = pm.UsageCount
 	m.Active = pm.Active
+	m.Version = 1
 }
 
 // NewAPIKey creates a new API key record
@@ -177,6 +179,7 @@ func NewAPIKey(id string, provider Provider, encryptedKey []byte, owner string) 
 		Owner:        owner,
 		AccessRules:  []AccessRule{},
 		Active:       true,
+		Version:      1,
 	}
 }
 
@@ -236,4 +239,19 @@ func (k *APIKey) SecureWipe() {
 		k.EncryptedKey[i] = 0
 	}
 	k.EncryptedKey = nil
+}
+
+// SetActive sets the active status of the API key
+func (k *APIKey) SetActive(active bool) {
+	k.Active = active
+}
+
+// GetVersion returns the version of the API key
+func (k APIKey) GetVersion() int {
+	return k.Version
+}
+
+// IncrementVersion increments the version of the API key
+func (k *APIKey) IncrementVersion() {
+	k.Version++
 }

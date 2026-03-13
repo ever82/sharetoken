@@ -16,6 +16,7 @@ const (
 	TypeMsgUpdateAPIKey   = "update_api_key"
 	TypeMsgRevokeAPIKey   = "revoke_api_key"
 	TypeMsgRecordUsage    = "record_usage"
+	TypeMsgRotateAPIKey   = "rotate_api_key"
 )
 
 // MsgServer is the message server interface
@@ -24,6 +25,7 @@ type MsgServer interface {
 	UpdateAPIKey(ctx context.Context, msg *MsgUpdateAPIKey) (*MsgUpdateAPIKeyResponse, error)
 	RevokeAPIKey(ctx context.Context, msg *MsgRevokeAPIKey) (*MsgRevokeAPIKeyResponse, error)
 	RecordUsage(ctx context.Context, msg *MsgRecordUsage) (*MsgRecordUsageResponse, error)
+	RotateAPIKey(ctx context.Context, msg *MsgRotateAPIKey) (*MsgRotateAPIKeyResponse, error)
 }
 
 // Response types
@@ -260,4 +262,66 @@ func (msg MsgRecordUsage) ValidateBasic() error {
 		return fmt.Errorf("token count cannot be negative")
 	}
 	return nil
+}
+
+// -----------------------------------------------------------------------------
+// MsgRotateAPIKey
+// -----------------------------------------------------------------------------
+
+// MsgRotateAPIKey is the message for rotating an API key
+type MsgRotateAPIKey struct {
+	Owner        string `json:"owner"`
+	APIKeyID     string `json:"api_key_id"`
+	NewEncryptedKey []byte `json:"new_encrypted_key"`
+	Reason       string `json:"reason"`
+}
+
+// NewMsgRotateAPIKey creates a new MsgRotateAPIKey
+func NewMsgRotateAPIKey(owner, apiKeyID string, newEncryptedKey []byte, reason string) *MsgRotateAPIKey {
+	return &MsgRotateAPIKey{
+		Owner:           owner,
+		APIKeyID:        apiKeyID,
+		NewEncryptedKey: newEncryptedKey,
+		Reason:          reason,
+	}
+}
+
+// Route returns the module route
+func (msg MsgRotateAPIKey) Route() string { return RouterKey }
+
+// Type returns the message type
+func (msg MsgRotateAPIKey) Type() string { return TypeMsgRotateAPIKey }
+
+// GetSigners returns the signers
+func (msg MsgRotateAPIKey) GetSigners() []sdk.AccAddress {
+	addr, err := sdk.AccAddressFromBech32(msg.Owner)
+	if err != nil {
+		return nil
+	}
+	return []sdk.AccAddress{addr}
+}
+
+// GetSignBytes returns the bytes to sign
+func (msg MsgRotateAPIKey) GetSignBytes() []byte {
+	b, _ := json.Marshal(&msg)
+	return sdk.MustSortJSON(b)
+}
+
+// ValidateBasic performs basic validation
+func (msg MsgRotateAPIKey) ValidateBasic() error {
+	if msg.Owner == "" {
+		return fmt.Errorf("owner cannot be empty")
+	}
+	if msg.APIKeyID == "" {
+		return fmt.Errorf("API key ID cannot be empty")
+	}
+	if len(msg.NewEncryptedKey) == 0 {
+		return fmt.Errorf("new encrypted key cannot be empty")
+	}
+	return nil
+}
+
+// Response types
+type MsgRotateAPIKeyResponse struct {
+	NewAPIKeyID string `json:"new_api_key_id"`
 }

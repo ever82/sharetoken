@@ -105,7 +105,23 @@ func (k msgServer) RecordUsage(ctx context.Context, msg *types.MsgRecordUsage) (
 
 	// Record usage
 	apiKey.RecordUsage()
+	apiKey.LastUsedAt = sdkCtx.BlockTime().Unix()
 	k.SetAPIKey(sdkCtx, apiKey)
 
 	return &types.MsgRecordUsageResponse{}, nil
+}
+
+// RotateAPIKey implements the RotateAPIKey gRPC method
+func (k msgServer) RotateAPIKey(ctx context.Context, msg *types.MsgRotateAPIKey) (*types.MsgRotateAPIKeyResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	// Rotate the API key
+	newAPIKeyID, err := k.Keeper.RotateAPIKey(sdkCtx, msg.Owner, msg.APIKeyID, msg.NewEncryptedKey, msg.Reason)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.MsgRotateAPIKeyResponse{
+		NewAPIKeyID: newAPIKeyID,
+	}, nil
 }
