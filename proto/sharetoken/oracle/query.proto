@@ -1,0 +1,55 @@
+syntax = "proto3";
+package sharetoken.oracle;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/oracle/price.proto";
+
+option go_package = "sharetoken/x/oracle/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Price queries a price by symbol
+  rpc Price(QueryPriceRequest) returns (QueryPriceResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/oracle/price/{symbol}";
+  }
+
+  // Prices queries all prices
+  rpc Prices(QueryPricesRequest) returns (QueryPricesResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/oracle/prices";
+  }
+}
+
+// QueryPriceRequest is the request type for the Query/Price RPC method.
+message QueryPriceRequest {
+  // symbol is the price symbol (e.g., "STT/USD")
+  string symbol = 1;
+}
+
+// QueryPriceResponse is the response type for the Query/Price RPC method.
+message QueryPriceResponse {
+  // price is the price data
+  Price price = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryPricesRequest is the request type for the Query/Prices RPC method.
+message QueryPricesRequest {
+  // source filters by price source
+  PriceSource source = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryPricesResponse is the response type for the Query/Prices RPC method.
+message QueryPricesResponse {
+  // prices is the list of prices
+  repeated Price prices = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}

@@ -1,0 +1,131 @@
+syntax = "proto3";
+package sharetoken.escrow;
+
+import "cosmos/msg/v1/msg.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/escrow/escrow.proto";
+
+option go_package = "sharetoken/x/escrow/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // CreateEscrow creates a new escrow
+  rpc CreateEscrow(MsgCreateEscrow) returns (MsgCreateEscrowResponse);
+
+  // Release releases funds from escrow to provider
+  rpc Release(MsgRelease) returns (MsgReleaseResponse);
+
+  // Refund refunds escrow to requester
+  rpc Refund(MsgRefund) returns (MsgRefundResponse);
+
+  // Dispute disputes an escrow
+  rpc Dispute(MsgDispute) returns (MsgDisputeResponse);
+
+  // Resolve resolves a disputed escrow
+  rpc Resolve(MsgResolve) returns (MsgResolveResponse);
+}
+
+// MsgCreateEscrow is the Msg/CreateEscrow request type.
+message MsgCreateEscrow {
+  option (cosmos.msg.v1.signer) = "requester";
+
+  // requester is the requester address
+  string requester = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // provider is the provider address
+  string provider = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // amount is the escrow amount
+  repeated cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+
+  // duration is the escrow duration in seconds
+  int64 duration = 4;
+}
+
+// MsgCreateEscrowResponse is the Msg/CreateEscrow response type.
+message MsgCreateEscrowResponse {
+  // escrow_id is the ID of the created escrow
+  string escrow_id = 1;
+}
+
+// MsgRelease is the Msg/Release request type.
+message MsgRelease {
+  option (cosmos.msg.v1.signer) = "requester";
+
+  // requester is the requester address
+  string requester = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // escrow_id is the escrow ID
+  string escrow_id = 2;
+
+  // completion_proof is the proof of completion (optional)
+  string completion_proof = 3;
+}
+
+// MsgReleaseResponse is the Msg/Release response type.
+message MsgReleaseResponse {
+  // amount is the amount released
+  repeated cosmos.base.v1beta1.Coin amount = 1 [(gogoproto.nullable) = false];
+}
+
+// MsgRefund is the Msg/Refund request type.
+message MsgRefund {
+  option (cosmos.msg.v1.signer) = "requester";
+
+  // requester is the requester address
+  string requester = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // escrow_id is the escrow ID
+  string escrow_id = 2;
+}
+
+// MsgRefundResponse is the Msg/Refund response type.
+message MsgRefundResponse {
+  // amount is the amount refunded
+  repeated cosmos.base.v1beta1.Coin amount = 1 [(gogoproto.nullable) = false];
+}
+
+// MsgDispute is the Msg/Dispute request type.
+message MsgDispute {
+  option (cosmos.msg.v1.signer) = "initiator";
+
+  // initiator is the dispute initiator address
+  string initiator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // escrow_id is the escrow ID
+  string escrow_id = 2;
+
+  // reason is the dispute reason
+  string reason = 3;
+}
+
+// MsgDisputeResponse is the Msg/Dispute response type.
+message MsgDisputeResponse {
+  // dispute_id is the ID of the created dispute
+  string dispute_id = 1;
+}
+
+// MsgResolve is the Msg/Resolve request type.
+message MsgResolve {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address that controls the escrow module
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // escrow_id is the escrow ID
+  string escrow_id = 2;
+
+  // allocation is the fund allocation
+  FundAllocation allocation = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgResolveResponse is the Msg/Resolve response type.
+message MsgResolveResponse {
+  // requester_amount is the amount returned to requester
+  repeated cosmos.base.v1beta1.Coin requester_amount = 1 [(gogoproto.nullable) = false];
+
+  // provider_amount is the amount paid to provider
+  repeated cosmos.base.v1beta1.Coin provider_amount = 2 [(gogoproto.nullable) = false];
+}

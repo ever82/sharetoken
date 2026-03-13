@@ -1,0 +1,48 @@
+syntax = "proto3";
+package sharetoken.crowdfunding;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/crowdfunding/idea.proto";
+import "sharetoken/crowdfunding/campaign.proto";
+
+option go_package = "sharetoken/x/crowdfunding/types";
+
+// GenesisState defines the crowdfunding module's genesis state.
+message GenesisState {
+  // ideas is the list of ideas
+  repeated Idea ideas = 1 [(gogoproto.nullable) = false];
+
+  // campaigns is the list of campaigns
+  repeated Campaign campaigns = 2 [(gogoproto.nullable) = false];
+
+  // backers is the list of backers
+  repeated Backer backers = 3 [(gogoproto.nullable) = false];
+
+  // contributions is the list of contributions
+  repeated Contribution contributions = 4 [(gogoproto.nullable) = false];
+
+  // updates is the list of campaign updates
+  repeated CampaignUpdate updates = 5 [(gogoproto.nullable) = false];
+}
+
+// Params defines the parameters for the crowdfunding module.
+message Params {
+  option (amino.name) = "sharetoken/x/crowdfunding/Params";
+  option (gogoproto.equal) = true;
+
+  // min_campaign_duration is the minimum campaign duration in seconds
+  int64 min_campaign_duration = 1;
+
+  // max_campaign_duration is the maximum campaign duration in seconds
+  int64 max_campaign_duration = 2;
+
+  // min_goal_amount is the minimum goal amount
+  uint64 min_goal_amount = 3;
+
+  // max_goal_amount is the maximum goal amount
+  uint64 max_goal_amount = 4;
+
+  // platform_fee_rate is the platform fee rate (basis points)
+  uint32 platform_fee_rate = 5;
+}

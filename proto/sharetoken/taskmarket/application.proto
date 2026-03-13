@@ -1,0 +1,120 @@
+syntax = "proto3";
+package sharetoken.taskmarket;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/taskmarket/types";
+
+// ApplicationStatus represents application status
+type ApplicationStatus int32;
+
+// ApplicationStatus values
+const (
+  ApplicationStatusPending   ApplicationStatus = 0;
+  ApplicationStatusAccepted  ApplicationStatus = 1;
+  ApplicationStatusRejected  ApplicationStatus = 2;
+  ApplicationStatusWithdrawn ApplicationStatus = 3;
+);
+
+// Application represents a worker's application for an open task
+message Application {
+  // id is the unique application identifier
+  string id = 1;
+
+  // task_id is the task ID
+  string task_id = 2;
+
+  // worker_id is the worker address
+  string worker_id = 3;
+
+  // status is the application status
+  ApplicationStatus status = 4;
+
+  // proposed_price is the proposed price
+  uint64 proposed_price = 5;
+
+  // cover_letter is the application cover letter
+  string cover_letter = 6;
+
+  // relevant_experience is the worker's relevant experience
+  repeated string relevant_experience = 7;
+
+  // portfolio_links are links to portfolio
+  repeated string portfolio_links = 8;
+
+  // estimated_duration is the estimated duration in days
+  int64 estimated_duration = 9;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 10;
+
+  // updated_at is the Unix timestamp of last update
+  int64 updated_at = 11;
+}
+
+// BidStatus represents bid status
+type BidStatus int32;
+
+// BidStatus values
+const (
+  BidStatusPending   BidStatus = 0;
+  BidStatusAccepted  BidStatus = 1;
+  BidStatusRejected  BidStatus = 2;
+  BidStatusWithdrawn BidStatus = 3;
+  BidStatusOutbid    BidStatus = 4;
+);
+
+// Bid represents a bid for an auction task
+message Bid {
+  // id is the unique bid identifier
+  string id = 1;
+
+  // task_id is the task ID
+  string task_id = 2;
+
+  // worker_id is the worker address
+  string worker_id = 3;
+
+  // amount is the bid amount (lower is better)
+  uint64 amount = 4;
+
+  // status is the bid status
+  BidStatus status = 5;
+
+  // message is the bid message
+  string message = 6;
+
+  // portfolio is the worker's portfolio
+  string portfolio = 7;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 8;
+
+  // updated_at is the Unix timestamp of last update
+  int64 updated_at = 9;
+}
+
+// Auction represents an auction with bids
+message Auction {
+  // task_id is the task ID
+  string task_id = 1;
+
+  // starting_price is the starting price
+  uint64 starting_price = 2;
+
+  // reserve_price is the minimum acceptable price
+  uint64 reserve_price = 3;
+
+  // end_time is the auction end time (Unix timestamp)
+  int64 end_time = 4;
+
+  // bids are the auction bids
+  repeated Bid bids = 5 [(gogoproto.nullable) = false];
+
+  // winning_bid_id is the ID of the winning bid
+  string winning_bid_id = 6;
+
+  // is_active indicates if the auction is active
+  bool is_active = 7;
+}

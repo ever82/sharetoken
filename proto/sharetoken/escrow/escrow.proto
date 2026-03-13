@@ -1,0 +1,64 @@
+syntax = "proto3";
+package sharetoken.escrow;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/escrow/types";
+
+// EscrowStatus represents the status of an escrow
+type EscrowStatus int32;
+
+// EscrowStatus values
+const (
+  EscrowStatusPending   EscrowStatus = 0; // Active and waiting for completion
+  EscrowStatusCompleted EscrowStatus = 1; // Completed and funds released
+  EscrowStatusDisputed  EscrowStatus = 2; // Under dispute
+  EscrowStatusRefunded  EscrowStatus = 3; // Refunded to requester
+);
+
+// Escrow represents an escrow agreement
+message Escrow {
+  // id is the unique escrow identifier
+  string id = 1;
+
+  // requester is the requester address
+  string requester = 2;
+
+  // provider is the provider address
+  string provider = 3;
+
+  // amount is the escrow amount
+  repeated cosmos.base.v1beta1.Coin amount = 4 [(gogoproto.nullable) = false];
+
+  // status is the escrow status
+  EscrowStatus status = 5;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 6;
+
+  // expires_at is the Unix timestamp of expiration
+  int64 expires_at = 7;
+
+  // completed_at is the Unix timestamp of completion
+  int64 completed_at = 8;
+
+  // completion_proof is the proof of completion
+  string completion_proof = 9;
+
+  // dispute_id is the associated dispute ID
+  string dispute_id = 10;
+
+  // refund_address is the address for refunds
+  string refund_address = 11;
+}
+
+// FundAllocation represents how funds should be allocated after a dispute
+message FundAllocation {
+  // requester_amount is the amount to return to requester
+  repeated cosmos.base.v1beta1.Coin requester_amount = 1 [(gogoproto.nullable) = false];
+
+  // provider_amount is the amount to pay to provider
+  repeated cosmos.base.v1beta1.Coin provider_amount = 2 [(gogoproto.nullable) = false];
+}

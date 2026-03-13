@@ -1,0 +1,106 @@
+syntax = "proto3";
+package sharetoken.dispute;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/dispute/dispute.proto";
+
+option go_package = "sharetoken/x/dispute/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Disputes queries all disputes
+  rpc Disputes(QueryDisputesRequest) returns (QueryDisputesResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/dispute/disputes";
+  }
+
+  // Dispute queries a single dispute by ID
+  rpc Dispute(QueryDisputeRequest) returns (QueryDisputeResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/dispute/disputes/{dispute_id}";
+  }
+
+  // DisputesByEscrow queries disputes by escrow ID
+  rpc DisputesByEscrow(QueryDisputesByEscrowRequest) returns (QueryDisputesResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/dispute/escrow/{escrow_id}";
+  }
+
+  // DisputesByParty queries disputes by party address
+  rpc DisputesByParty(QueryDisputesByPartyRequest) returns (QueryDisputesResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/dispute/party/{party}";
+  }
+
+  // JurorPool queries the juror pool
+  rpc JurorPool(QueryJurorPoolRequest) returns (QueryJurorPoolResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/dispute/juror-pool";
+  }
+}
+
+// QueryDisputesRequest is the request type for the Query/Disputes RPC method.
+message QueryDisputesRequest {
+  // status filters by dispute status
+  DisputeStatus status = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryDisputesResponse is the response type for the Query/Disputes RPC method.
+message QueryDisputesResponse {
+  // disputes is the list of disputes
+  repeated Dispute disputes = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryDisputeRequest is the request type for the Query/Dispute RPC method.
+message QueryDisputeRequest {
+  // dispute_id is the dispute ID
+  string dispute_id = 1;
+}
+
+// QueryDisputeResponse is the response type for the Query/Dispute RPC method.
+message QueryDisputeResponse {
+  // dispute is the dispute
+  Dispute dispute = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryDisputesByEscrowRequest is the request type for the Query/DisputesByEscrow RPC method.
+message QueryDisputesByEscrowRequest {
+  // escrow_id is the escrow ID
+  string escrow_id = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryDisputesByPartyRequest is the request type for the Query/DisputesByParty RPC method.
+message QueryDisputesByPartyRequest {
+  // party is the party address
+  string party = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryJurorPoolRequest is the request type for the Query/JurorPool RPC method.
+message QueryJurorPoolRequest {
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryJurorPoolResponse is the response type for the Query/JurorPool RPC method.
+message QueryJurorPoolResponse {
+  // jurors is the list of juror addresses
+  repeated string jurors = 1;
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}

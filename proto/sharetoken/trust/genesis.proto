@@ -1,0 +1,43 @@
+syntax = "proto3";
+package sharetoken.trust;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/trust/types";
+
+// MQScore represents a user's Moral Quotient score
+message MQScore {
+  // address is the user address
+  string address = 1;
+
+  // score is the current MQ score (0-100)
+  int32 score = 2;
+
+  // disputes is the number of disputes participated
+  uint64 disputes = 3;
+
+  // consensus is the number of times voted with consensus
+  uint64 consensus = 4;
+
+  // updated_at is the Unix timestamp of last update
+  int64 updated_at = 5;
+}
+
+// GenesisState defines the trust module's genesis state.
+message GenesisState {
+  // mq_scores is the list of MQ scores
+  repeated MQScore mq_scores = 1 [(gogoproto.nullable) = false];
+}
+
+// Params defines the parameters for the trust module.
+message Params {
+  option (amino.name) = "sharetoken/x/trust/Params";
+  option (gogoproto.equal) = true;
+
+  // initial_mq is the starting MQ score for new users
+  int32 initial_mq = 1;
+
+  // max_mq_loss_percent is the maximum percentage of MQ that can be lost in a single dispute
+  int32 max_mq_loss_percent = 2;
+}

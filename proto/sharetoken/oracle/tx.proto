@@ -1,0 +1,53 @@
+syntax = "proto3";
+package sharetoken.oracle;
+
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/oracle/price.proto";
+import "sharetoken/oracle/params.proto";
+
+option go_package = "sharetoken/x/oracle/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // UpdatePrice updates a price
+  rpc UpdatePrice(MsgUpdatePrice) returns (MsgUpdatePriceResponse);
+
+  // UpdateParams updates the module parameters (governance only)
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+}
+
+// MsgUpdatePrice is the Msg/UpdatePrice request type.
+message MsgUpdatePrice {
+  option (cosmos.msg.v1.signer) = "oracle";
+
+  // oracle is the oracle address
+  string oracle = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // symbol is the price symbol
+  string symbol = 2;
+
+  // price is the price value
+  string price = 3;
+
+  // confidence is the confidence level
+  int32 confidence = 4;
+}
+
+// MsgUpdatePriceResponse is the Msg/UpdatePrice response type.
+message MsgUpdatePriceResponse {}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address that controls the module (defaults to x/gov)
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the new parameters to set
+  Params params = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgUpdateParamsResponse is the Msg/UpdateParams response type.
+message MsgUpdateParamsResponse {}

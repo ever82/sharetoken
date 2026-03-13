@@ -1,0 +1,176 @@
+syntax = "proto3";
+package sharetoken.crowdfunding;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/crowdfunding/idea.proto";
+import "sharetoken/crowdfunding/campaign.proto";
+
+option go_package = "sharetoken/x/crowdfunding/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Ideas queries all ideas
+  rpc Ideas(QueryIdeasRequest) returns (QueryIdeasResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/crowdfunding/ideas";
+  }
+
+  // Idea queries a single idea by ID
+  rpc Idea(QueryIdeaRequest) returns (QueryIdeaResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/crowdfunding/ideas/{idea_id}";
+  }
+
+  // Campaigns queries all campaigns
+  rpc Campaigns(QueryCampaignsRequest) returns (QueryCampaignsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/crowdfunding/campaigns";
+  }
+
+  // Campaign queries a single campaign by ID
+  rpc Campaign(QueryCampaignRequest) returns (QueryCampaignResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/crowdfunding/campaigns/{campaign_id}";
+  }
+
+  // CampaignsByIdea queries campaigns by idea ID
+  rpc CampaignsByIdea(QueryCampaignsByIdeaRequest) returns (QueryCampaignsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/crowdfunding/idea/{idea_id}/campaigns";
+  }
+
+  // Contributions queries contributions
+  rpc Contributions(QueryContributionsRequest) returns (QueryContributionsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/crowdfunding/contributions";
+  }
+
+  // Backers queries backers for a campaign
+  rpc Backers(QueryBackersRequest) returns (QueryBackersResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/crowdfunding/campaigns/{campaign_id}/backers";
+  }
+}
+
+// QueryIdeasRequest is the request type for the Query/Ideas RPC method.
+message QueryIdeasRequest {
+  // status filters by status
+  IdeaStatus status = 1;
+
+  // creator_id filters by creator
+  string creator_id = 2;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryIdeasResponse is the response type for the Query/Ideas RPC method.
+message QueryIdeasResponse {
+  // ideas is the list of ideas
+  repeated Idea ideas = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryIdeaRequest is the request type for the Query/Idea RPC method.
+message QueryIdeaRequest {
+  // idea_id is the idea ID
+  string idea_id = 1;
+}
+
+// QueryIdeaResponse is the response type for the Query/Idea RPC method.
+message QueryIdeaResponse {
+  // idea is the idea
+  Idea idea = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryCampaignsRequest is the request type for the Query/Campaigns RPC method.
+message QueryCampaignsRequest {
+  // status filters by status
+  CampaignStatus status = 1;
+
+  // campaign_type filters by type
+  CampaignType campaign_type = 2;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryCampaignsResponse is the response type for the Query/Campaigns RPC method.
+message QueryCampaignsResponse {
+  // campaigns is the list of campaigns
+  repeated Campaign campaigns = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryCampaignRequest is the request type for the Query/Campaign RPC method.
+message QueryCampaignRequest {
+  // campaign_id is the campaign ID
+  string campaign_id = 1;
+}
+
+// QueryCampaignResponse is the response type for the Query/Campaign RPC method.
+message QueryCampaignResponse {
+  // campaign is the campaign
+  Campaign campaign = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryCampaignsByIdeaRequest is the request type for the Query/CampaignsByIdea RPC method.
+message QueryCampaignsByIdeaRequest {
+  // idea_id is the idea ID
+  string idea_id = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryContributionsRequest is the request type for the Query/Contributions RPC method.
+message QueryContributionsRequest {
+  // idea_id filters by idea ID
+  string idea_id = 1;
+
+  // contributor_id filters by contributor
+  string contributor_id = 2;
+
+  // status filters by status
+  ContributionStatus status = 3;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 4;
+}
+
+// QueryContributionsResponse is the response type for the Query/Contributions RPC method.
+message QueryContributionsResponse {
+  // contributions is the list of contributions
+  repeated Contribution contributions = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryBackersRequest is the request type for the Query/Backers RPC method.
+message QueryBackersRequest {
+  // campaign_id is the campaign ID
+  string campaign_id = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryBackersResponse is the response type for the Query/Backers RPC method.
+message QueryBackersResponse {
+  // backers is the list of backers
+  repeated Backer backers = 1 [(gogoproto.nullable) = false];
+
+  // total_backed is the total backed amount
+  uint64 total_backed = 2;
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 3;
+}

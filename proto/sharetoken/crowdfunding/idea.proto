@@ -1,0 +1,157 @@
+syntax = "proto3";
+package sharetoken.crowdfunding;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/crowdfunding/types";
+
+// IdeaStatus represents the status of an idea
+type IdeaStatus int32;
+
+// IdeaStatus values
+const (
+  IdeaStatusDraft      IdeaStatus = 0;
+  IdeaStatusActive     IdeaStatus = 1;
+  IdeaStatusFunding    IdeaStatus = 2;
+  IdeaStatusDeveloping IdeaStatus = 3;
+  IdeaStatusCompleted  IdeaStatus = 4;
+  IdeaStatusArchived   IdeaStatus = 5;
+);
+
+// Idea represents a creative idea/project
+message Idea {
+  // id is the unique idea identifier
+  string id = 1;
+
+  // title is the idea title
+  string title = 2;
+
+  // description is the idea description
+  string description = 3;
+
+  // creator_id is the creator address
+  string creator_id = 4;
+
+  // status is the idea status
+  IdeaStatus status = 5;
+
+  // current_version is the current version number
+  int32 current_version = 6;
+
+  // tags are the idea tags
+  repeated string tags = 7;
+
+  // categories are the idea categories
+  repeated string categories = 8;
+
+  // view_count is the number of views
+  int32 view_count = 9;
+
+  // contribution_count is the number of contributions
+  int32 contribution_count = 10;
+
+  // total_weight is the total contribution weight
+  double total_weight = 11;
+
+  // campaign_id is the associated campaign ID
+  string campaign_id = 12;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 13;
+
+  // updated_at is the Unix timestamp of last update
+  int64 updated_at = 14;
+
+  // published_at is the Unix timestamp of publication
+  int64 published_at = 15;
+}
+
+// IdeaVersion represents a version of an idea
+message IdeaVersion {
+  // id is the unique version identifier
+  string id = 1;
+
+  // idea_id is the parent idea ID
+  string idea_id = 2;
+
+  // version is the version number
+  int32 version = 3;
+
+  // title is the title
+  string title = 4;
+
+  // description is the description
+  string description = 5;
+
+  // changes describes what changed
+  string changes = 6;
+
+  // created_by is the creator address
+  string created_by = 7;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 8;
+}
+
+// ContributionCategory represents types of contributions
+type ContributionCategory int32;
+
+// ContributionCategory values
+const (
+  ContributionCategoryCode      ContributionCategory = 0;
+  ContributionCategoryDesign    ContributionCategory = 1;
+  ContributionCategoryDocs      ContributionCategory = 2;
+  ContributionCategoryResearch  ContributionCategory = 3;
+  ContributionCategoryMarketing ContributionCategory = 4;
+  ContributionCategoryTesting   ContributionCategory = 5;
+);
+
+// ContributionStatus represents contribution status
+type ContributionStatus int32;
+
+// ContributionStatus values
+const (
+  ContributionStatusPending  ContributionStatus = 0;
+  ContributionStatusApproved ContributionStatus = 1;
+  ContributionStatusRejected ContributionStatus = 2;
+);
+
+// Contribution represents a contribution to an idea
+message Contribution {
+  // id is the unique contribution identifier
+  string id = 1;
+
+  // idea_id is the idea ID
+  string idea_id = 2;
+
+  // contributor_id is the contributor address
+  string contributor_id = 3;
+
+  // category is the contribution category
+  ContributionCategory category = 4;
+
+  // description is the contribution description
+  string description = 5;
+
+  // weight is the calculated weight
+  double weight = 6;
+
+  // raw_score is the base contribution score
+  double raw_score = 7;
+
+  // evidence is the link to work/evidence
+  string evidence = 8;
+
+  // status is the contribution status
+  ContributionStatus status = 9;
+
+  // reviewed_by is the reviewer address
+  string reviewed_by = 10;
+
+  // reviewed_at is the Unix timestamp of review
+  int64 reviewed_at = 11;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 12;
+}

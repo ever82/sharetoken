@@ -1,0 +1,104 @@
+syntax = "proto3";
+package sharetoken.dispute;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/dispute/types";
+
+// DisputeStatus represents the status of a dispute
+type DisputeStatus int32;
+
+// DisputeStatus values
+const (
+  DisputeStatusOpen      DisputeStatus = 0;
+  DisputeStatusMediating DisputeStatus = 1;
+  DisputeStatusVoting    DisputeStatus = 2;
+  DisputeStatusResolved  DisputeStatus = 3;
+  DisputeStatusCancelled DisputeStatus = 4;
+);
+
+// Evidence represents evidence submitted in a dispute
+message Evidence {
+  // submitted_by is the address that submitted the evidence
+  string submitted_by = 1;
+
+  // type is the evidence type
+  string evidence_type = 2;
+
+  // content is the evidence content
+  string content = 3;
+
+  // timestamp is the Unix timestamp of submission
+  int64 timestamp = 4;
+}
+
+// Vote represents a vote in a dispute
+message Vote {
+  // voter is the voter address
+  string voter = 1;
+
+  // weight is the voting weight
+  string weight = 2;
+
+  // decision is the vote decision ("requester", "provider", or "split")
+  string decision = 3;
+
+  // timestamp is the Unix timestamp of voting
+  int64 timestamp = 4;
+}
+
+// VoteResult represents the result of voting
+message VoteResult {
+  // decision is the final decision
+  string decision = 1;
+
+  // requester_votes is the total weight for requester
+  string requester_votes = 2;
+
+  // provider_votes is the total weight for provider
+  string provider_votes = 3;
+
+  // split_votes is the total weight for split
+  string split_votes = 4;
+
+  // total_weight is the total voting weight
+  string total_weight = 5;
+}
+
+// Dispute represents a dispute between parties
+message Dispute {
+  // id is the unique dispute identifier
+  string id = 1;
+
+  // escrow_id is the associated escrow ID
+  string escrow_id = 2;
+
+  // requester is the requester address
+  string requester = 3;
+
+  // provider is the provider address
+  string provider = 4;
+
+  // status is the dispute status
+  DisputeStatus status = 5;
+
+  // reason is the dispute reason
+  string reason = 6;
+
+  // evidence is the list of submitted evidence
+  repeated Evidence evidence = 7 [(gogoproto.nullable) = false];
+
+  // votes is the list of votes
+  repeated Vote votes = 8 [(gogoproto.nullable) = false];
+
+  // result is the voting result
+  VoteResult result = 9 [(gogoproto.nullable) = false];
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 10;
+
+  // completed_at is the Unix timestamp of completion
+  int64 completed_at = 11;
+}

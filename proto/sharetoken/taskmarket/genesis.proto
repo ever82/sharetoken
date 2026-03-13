@@ -1,0 +1,52 @@
+syntax = "proto3";
+package sharetoken.taskmarket;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/taskmarket/task.proto";
+import "sharetoken/taskmarket/application.proto";
+import "sharetoken/taskmarket/rating.proto";
+
+option go_package = "sharetoken/x/taskmarket/types";
+
+// GenesisState defines the taskmarket module's genesis state.
+message GenesisState {
+  // tasks is the list of tasks
+  repeated Task tasks = 1 [(gogoproto.nullable) = false];
+
+  // applications is the list of applications
+  repeated Application applications = 2 [(gogoproto.nullable) = false];
+
+  // auctions is the list of auctions
+  repeated Auction auctions = 3 [(gogoproto.nullable) = false];
+
+  // bids is the list of bids
+  repeated Bid bids = 4 [(gogoproto.nullable) = false];
+
+  // ratings is the list of ratings
+  repeated Rating ratings = 5 [(gogoproto.nullable) = false];
+
+  // reputations is the list of reputations
+  repeated Reputation reputations = 6 [(gogoproto.nullable) = false];
+}
+
+// Params defines the parameters for the taskmarket module.
+message Params {
+  option (amino.name) = "sharetoken/x/taskmarket/Params";
+  option (gogoproto.equal) = true;
+
+  // min_task_budget is the minimum task budget
+  uint64 min_task_budget = 1;
+
+  // max_task_budget is the maximum task budget
+  uint64 max_task_budget = 2;
+
+  // platform_fee_rate is the platform fee rate (basis points, 10000 = 100%)
+  uint32 platform_fee_rate = 3;
+
+  // min_auction_duration is the minimum auction duration in seconds
+  int64 min_auction_duration = 4;
+
+  // max_auction_duration is the maximum auction duration in seconds
+  int64 max_auction_duration = 5;
+}

@@ -1,0 +1,29 @@
+syntax = "proto3";
+package sharetoken.escrow;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/escrow/escrow.proto";
+
+option go_package = "sharetoken/x/escrow/types";
+
+// GenesisState defines the escrow module's genesis state.
+message GenesisState {
+  // escrows is the list of escrows
+  repeated Escrow escrows = 1 [(gogoproto.nullable) = false];
+}
+
+// Params defines the parameters for the escrow module.
+message Params {
+  option (amino.name) = "sharetoken/x/escrow/Params";
+  option (gogoproto.equal) = true;
+
+  // max_escrow_duration is the maximum escrow duration in seconds
+  int64 max_escrow_duration = 1;
+
+  // min_escrow_amount is the minimum escrow amount
+  uint64 min_escrow_amount = 2;
+
+  // platform_fee_rate is the platform fee rate (basis points)
+  uint32 platform_fee_rate = 3;
+}

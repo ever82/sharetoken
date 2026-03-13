@@ -1,0 +1,91 @@
+syntax = "proto3";
+package sharetoken.escrow;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/escrow/escrow.proto";
+
+option go_package = "sharetoken/x/escrow/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Escrows queries all escrows
+  rpc Escrows(QueryEscrowsRequest) returns (QueryEscrowsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/escrow/escrows";
+  }
+
+  // Escrow queries an escrow by ID
+  rpc Escrow(QueryEscrowRequest) returns (QueryEscrowResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/escrow/escrows/{escrow_id}";
+  }
+
+  // EscrowsByRequester queries escrows by requester
+  rpc EscrowsByRequester(QueryEscrowsByRequesterRequest) returns (QueryEscrowsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/escrow/requester/{requester}";
+  }
+
+  // EscrowsByProvider queries escrows by provider
+  rpc EscrowsByProvider(QueryEscrowsByProviderRequest) returns (QueryEscrowsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/escrow/provider/{provider}";
+  }
+}
+
+// QueryEscrowsRequest is the request type for the Query/Escrows RPC method.
+message QueryEscrowsRequest {
+  // status filters by escrow status
+  EscrowStatus status = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryEscrowsResponse is the response type for the Query/Escrows RPC method.
+message QueryEscrowsResponse {
+  // escrows is the list of escrows
+  repeated Escrow escrows = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryEscrowRequest is the request type for the Query/Escrow RPC method.
+message QueryEscrowRequest {
+  // escrow_id is the escrow ID
+  string escrow_id = 1;
+}
+
+// QueryEscrowResponse is the response type for the Query/Escrow RPC method.
+message QueryEscrowResponse {
+  // escrow is the escrow
+  Escrow escrow = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryEscrowsByRequesterRequest is the request type for the Query/EscrowsByRequester RPC method.
+message QueryEscrowsByRequesterRequest {
+  // requester is the requester address
+  string requester = 1;
+
+  // status filters by escrow status
+  EscrowStatus status = 2;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryEscrowsByProviderRequest is the request type for the Query/EscrowsByProvider RPC method.
+message QueryEscrowsByProviderRequest {
+  // provider is the provider address
+  string provider = 1;
+
+  // status filters by escrow status
+  EscrowStatus status = 2;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}

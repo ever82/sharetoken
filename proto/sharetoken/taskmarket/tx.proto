@@ -1,0 +1,365 @@
+syntax = "proto3";
+package sharetoken.taskmarket;
+
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/taskmarket/task.proto";
+import "sharetoken/taskmarket/application.proto";
+
+option go_package = "sharetoken/x/taskmarket/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // CreateTask creates a new task
+  rpc CreateTask(MsgCreateTask) returns (MsgCreateTaskResponse);
+
+  // UpdateTask updates an existing task
+  rpc UpdateTask(MsgUpdateTask) returns (MsgUpdateTaskResponse);
+
+  // PublishTask publishes a task
+  rpc PublishTask(MsgPublishTask) returns (MsgPublishTaskResponse);
+
+  // CancelTask cancels a task
+  rpc CancelTask(MsgCancelTask) returns (MsgCancelTaskResponse);
+
+  // SubmitApplication submits an application for a task
+  rpc SubmitApplication(MsgSubmitApplication) returns (MsgSubmitApplicationResponse);
+
+  // AcceptApplication accepts an application
+  rpc AcceptApplication(MsgAcceptApplication) returns (MsgAcceptApplicationResponse);
+
+  // RejectApplication rejects an application
+  rpc RejectApplication(MsgRejectApplication) returns (MsgRejectApplicationResponse);
+
+  // SubmitBid submits a bid for an auction task
+  rpc SubmitBid(MsgSubmitBid) returns (MsgSubmitBidResponse);
+
+  // CloseAuction closes an auction
+  rpc CloseAuction(MsgCloseAuction) returns (MsgCloseAuctionResponse);
+
+  // StartTask marks a task as in progress
+  rpc StartTask(MsgStartTask) returns (MsgStartTaskResponse);
+
+  // SubmitMilestone submits a milestone
+  rpc SubmitMilestone(MsgSubmitMilestone) returns (MsgSubmitMilestoneResponse);
+
+  // ApproveMilestone approves a milestone
+  rpc ApproveMilestone(MsgApproveMilestone) returns (MsgApproveMilestoneResponse);
+
+  // RejectMilestone rejects a milestone
+  rpc RejectMilestone(MsgRejectMilestone) returns (MsgRejectMilestoneResponse);
+
+  // SubmitRating submits a rating
+  rpc SubmitRating(MsgSubmitRating) returns (MsgSubmitRatingResponse);
+}
+
+// MsgCreateTask is the Msg/CreateTask request type.
+message MsgCreateTask {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  // creator is the task creator address
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // title is the task title
+  string title = 2;
+
+  // description is the task description
+  string description = 3;
+
+  // task_type is the task type
+  TaskType task_type = 4;
+
+  // category is the task category
+  TaskCategory category = 5;
+
+  // budget is the task budget
+  uint64 budget = 6;
+
+  // currency is the currency symbol
+  string currency = 7;
+
+  // deadline is the deadline (Unix timestamp)
+  int64 deadline = 8;
+
+  // skills are the required skills
+  repeated string skills = 9;
+
+  // subtasks are the subtasks
+  repeated Subtask subtasks = 10 [(gogoproto.nullable) = false];
+
+  // milestones are the milestones
+  repeated Milestone milestones = 11 [(gogoproto.nullable) = false];
+}
+
+// MsgCreateTaskResponse is the Msg/CreateTask response type.
+message MsgCreateTaskResponse {
+  // task_id is the ID of the created task
+  string task_id = 1;
+}
+
+// MsgUpdateTask is the Msg/UpdateTask request type.
+message MsgUpdateTask {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  // creator is the task creator address
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+
+  // title is the new title (optional)
+  string title = 3;
+
+  // description is the new description (optional)
+  string description = 4;
+
+  // budget is the new budget (optional)
+  uint64 budget = 5;
+
+  // deadline is the new deadline (optional)
+  int64 deadline = 6;
+
+  // skills are the new skills (optional)
+  repeated string skills = 7;
+
+  // subtasks are the new subtasks (optional)
+  repeated Subtask subtasks = 8 [(gogoproto.nullable) = false];
+
+  // milestones are the new milestones (optional)
+  repeated Milestone milestones = 9 [(gogoproto.nullable) = false];
+}
+
+// MsgUpdateTaskResponse is the Msg/UpdateTask response type.
+message MsgUpdateTaskResponse {}
+
+// MsgPublishTask is the Msg/PublishTask request type.
+message MsgPublishTask {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  // creator is the task creator address
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+}
+
+// MsgPublishTaskResponse is the Msg/PublishTask response type.
+message MsgPublishTaskResponse {}
+
+// MsgCancelTask is the Msg/CancelTask request type.
+message MsgCancelTask {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  // creator is the task creator address
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+}
+
+// MsgCancelTaskResponse is the Msg/CancelTask response type.
+message MsgCancelTaskResponse {}
+
+// MsgSubmitApplication is the Msg/SubmitApplication request type.
+message MsgSubmitApplication {
+  option (cosmos.msg.v1.signer) = "worker_id";
+
+  // worker_id is the worker address
+  string worker_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+
+  // proposed_price is the proposed price
+  uint64 proposed_price = 3;
+
+  // cover_letter is the application cover letter
+  string cover_letter = 4;
+
+  // relevant_experience is the relevant experience
+  repeated string relevant_experience = 5;
+
+  // portfolio_links are portfolio links
+  repeated string portfolio_links = 6;
+
+  // estimated_duration is the estimated duration in days
+  int64 estimated_duration = 7;
+}
+
+// MsgSubmitApplicationResponse is the Msg/SubmitApplication response type.
+message MsgSubmitApplicationResponse {
+  // application_id is the ID of the created application
+  string application_id = 1;
+}
+
+// MsgAcceptApplication is the Msg/AcceptApplication request type.
+message MsgAcceptApplication {
+  option (cosmos.msg.v1.signer) = "requester_id";
+
+  // requester_id is the requester address
+  string requester_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // application_id is the application ID
+  string application_id = 2;
+}
+
+// MsgAcceptApplicationResponse is the Msg/AcceptApplication response type.
+message MsgAcceptApplicationResponse {}
+
+// MsgRejectApplication is the Msg/RejectApplication request type.
+message MsgRejectApplication {
+  option (cosmos.msg.v1.signer) = "requester_id";
+
+  // requester_id is the requester address
+  string requester_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // application_id is the application ID
+  string application_id = 2;
+
+  // reason is the rejection reason
+  string reason = 3;
+}
+
+// MsgRejectApplicationResponse is the Msg/RejectApplication response type.
+message MsgRejectApplicationResponse {}
+
+// MsgSubmitBid is the Msg/SubmitBid request type.
+message MsgSubmitBid {
+  option (cosmos.msg.v1.signer) = "worker_id";
+
+  // worker_id is the worker address
+  string worker_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+
+  // amount is the bid amount
+  uint64 amount = 3;
+
+  // message is the bid message
+  string message = 4;
+
+  // portfolio is the portfolio
+  string portfolio = 5;
+}
+
+// MsgSubmitBidResponse is the Msg/SubmitBid response type.
+message MsgSubmitBidResponse {
+  // bid_id is the ID of the created bid
+  string bid_id = 1;
+}
+
+// MsgCloseAuction is the Msg/CloseAuction request type.
+message MsgCloseAuction {
+  option (cosmos.msg.v1.signer) = "requester_id";
+
+  // requester_id is the requester address
+  string requester_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+}
+
+// MsgCloseAuctionResponse is the Msg/CloseAuction response type.
+message MsgCloseAuctionResponse {
+  // winner_id is the address of the winning worker
+  string winner_id = 1;
+}
+
+// MsgStartTask is the Msg/StartTask request type.
+message MsgStartTask {
+  option (cosmos.msg.v1.signer) = "worker_id";
+
+  // worker_id is the worker address
+  string worker_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+}
+
+// MsgStartTaskResponse is the Msg/StartTask response type.
+message MsgStartTaskResponse {}
+
+// MsgSubmitMilestone is the Msg/SubmitMilestone request type.
+message MsgSubmitMilestone {
+  option (cosmos.msg.v1.signer) = "worker_id";
+
+  // worker_id is the worker address
+  string worker_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+
+  // milestone_id is the milestone ID
+  string milestone_id = 3;
+
+  // deliverables is the submitted deliverables
+  string deliverables = 4;
+}
+
+// MsgSubmitMilestoneResponse is the Msg/SubmitMilestone response type.
+message MsgSubmitMilestoneResponse {}
+
+// MsgApproveMilestone is the Msg/ApproveMilestone request type.
+message MsgApproveMilestone {
+  option (cosmos.msg.v1.signer) = "requester_id";
+
+  // requester_id is the requester address
+  string requester_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+
+  // milestone_id is the milestone ID
+  string milestone_id = 3;
+}
+
+// MsgApproveMilestoneResponse is the Msg/ApproveMilestone response type.
+message MsgApproveMilestoneResponse {}
+
+// MsgRejectMilestone is the Msg/RejectMilestone request type.
+message MsgRejectMilestone {
+  option (cosmos.msg.v1.signer) = "requester_id";
+
+  // requester_id is the requester address
+  string requester_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+
+  // milestone_id is the milestone ID
+  string milestone_id = 3;
+
+  // reason is the rejection reason
+  string reason = 4;
+}
+
+// MsgRejectMilestoneResponse is the Msg/RejectMilestone response type.
+message MsgRejectMilestoneResponse {}
+
+// MsgSubmitRating is the Msg/SubmitRating request type.
+message MsgSubmitRating {
+  option (cosmos.msg.v1.signer) = "rater_id";
+
+  // rater_id is the rater address
+  string rater_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // task_id is the task ID
+  string task_id = 2;
+
+  // rated_id is the address being rated
+  string rated_id = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // ratings is the dimension -> score map (1-5)
+  map<string, int32> ratings = 4;
+
+  // comment is the rating comment
+  string comment = 5;
+}
+
+// MsgSubmitRatingResponse is the Msg/SubmitRating response type.
+message MsgSubmitRatingResponse {
+  // rating_id is the ID of the created rating
+  string rating_id = 1;
+}

@@ -1,0 +1,58 @@
+syntax = "proto3";
+package sharetoken.trust;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/trust/genesis.proto";
+
+option go_package = "sharetoken/x/trust/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // MQScore queries a user's MQ score
+  rpc MQScore(QueryMQScoreRequest) returns (QueryMQScoreResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/trust/mq/{address}";
+  }
+
+  // MQScores queries all MQ scores
+  rpc MQScores(QueryMQScoresRequest) returns (QueryMQScoresResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/trust/mq";
+  }
+}
+
+// QueryMQScoreRequest is the request type for the Query/MQScore RPC method.
+message QueryMQScoreRequest {
+  // address is the user address
+  string address = 1;
+}
+
+// QueryMQScoreResponse is the response type for the Query/MQScore RPC method.
+message QueryMQScoreResponse {
+  // mq_score is the user's MQ score
+  MQScore mq_score = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryMQScoresRequest is the request type for the Query/MQScores RPC method.
+message QueryMQScoresRequest {
+  // min_score filters by minimum score
+  int32 min_score = 1;
+
+  // max_score filters by maximum score
+  int32 max_score = 2;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryMQScoresResponse is the response type for the Query/MQScores RPC method.
+message QueryMQScoresResponse {
+  // mq_scores is the list of MQ scores
+  repeated MQScore mq_scores = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}

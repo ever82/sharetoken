@@ -1,0 +1,205 @@
+syntax = "proto3";
+package sharetoken.crowdfunding;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/crowdfunding/types";
+
+// CampaignType represents the type of crowdfunding campaign
+type CampaignType int32;
+
+// CampaignType values
+const (
+  CampaignTypeInvestment CampaignType = 0;
+  CampaignTypeLending    CampaignType = 1;
+  CampaignTypeDonation   CampaignType = 2;
+);
+
+// CampaignStatus represents the status of a campaign
+type CampaignStatus int32;
+
+// CampaignStatus values
+const (
+  CampaignStatusDraft     CampaignStatus = 0;
+  CampaignStatusActive    CampaignStatus = 1;
+  CampaignStatusFunded    CampaignStatus = 2;
+  CampaignStatusExpired   CampaignStatus = 3;
+  CampaignStatusCancelled CampaignStatus = 4;
+  CampaignStatusClosed    CampaignStatus = 5;
+);
+
+// Campaign represents a crowdfunding campaign
+message Campaign {
+  // id is the unique campaign identifier
+  string id = 1;
+
+  // idea_id is the associated idea ID
+  string idea_id = 2;
+
+  // creator_id is the creator address
+  string creator_id = 3;
+
+  // title is the campaign title
+  string title = 4;
+
+  // description is the campaign description
+  string description = 5;
+
+  // type is the campaign type
+  CampaignType campaign_type = 6;
+
+  // status is the campaign status
+  CampaignStatus status = 7;
+
+  // goal_amount is the target amount
+  uint64 goal_amount = 8;
+
+  // raised_amount is the currently raised amount
+  uint64 raised_amount = 9;
+
+  // currency is the currency symbol
+  string currency = 10;
+
+  // start_time is the Unix timestamp of start
+  int64 start_time = 11;
+
+  // end_time is the Unix timestamp of end
+  int64 end_time = 12;
+
+  // min_contribution is the minimum contribution
+  uint64 min_contribution = 13;
+
+  // max_contribution is the maximum contribution
+  uint64 max_contribution = 14;
+
+  // equity_offered is the equity percentage (0-100)
+  double equity_offered = 15;
+
+  // valuation is the company valuation
+  uint64 valuation = 16;
+
+  // interest_rate is the annual interest rate
+  double interest_rate = 17;
+
+  // loan_term is the term in days
+  int64 loan_term = 18;
+
+  // repayment_schedule is the repayment schedule ("monthly", "quarterly", "lump")
+  string repayment_schedule = 19;
+
+  // backer_count is the number of backers
+  int32 backer_count = 20;
+
+  // update_count is the number of updates
+  int32 update_count = 21;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 22;
+
+  // updated_at is the Unix timestamp of last update
+  int64 updated_at = 23;
+}
+
+// Backer represents a backer/contribution to a campaign
+message Backer {
+  // id is the unique backer identifier
+  string id = 1;
+
+  // campaign_id is the campaign ID
+  string campaign_id = 2;
+
+  // backer_id is the backer address
+  string backer_id = 3;
+
+  // amount is the contribution amount
+  uint64 amount = 4;
+
+  // currency is the currency symbol
+  string currency = 5;
+
+  // message is an optional message
+  string message = 6;
+
+  // refunded indicates if refunded
+  bool refunded = 7;
+
+  // refund_amount is the refund amount
+  uint64 refund_amount = 8;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 9;
+}
+
+// CampaignUpdate represents an update from the campaign creator
+message CampaignUpdate {
+  // id is the unique update identifier
+  string id = 1;
+
+  // campaign_id is the campaign ID
+  string campaign_id = 2;
+
+  // title is the update title
+  string title = 3;
+
+  // content is the update content
+  string content = 4;
+
+  // created_by is the creator address
+  string created_by = 5;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 6;
+}
+
+// DistributionStatus represents distribution status
+type DistributionStatus int32;
+
+// DistributionStatus values
+const (
+  DistributionStatusPending   DistributionStatus = 0;
+  DistributionStatusProcessed DistributionStatus = 1;
+  DistributionStatusFailed    DistributionStatus = 2;
+);
+
+// ContributorPayout represents a payout to a contributor
+message ContributorPayout {
+  // contributor_id is the contributor address
+  string contributor_id = 1;
+
+  // weight is the contributor weight
+  double weight = 2;
+
+  // share is the share percentage
+  double share = 3;
+
+  // amount is the payout amount
+  uint64 amount = 4;
+
+  // status is the payout status
+  string status = 5;
+}
+
+// RevenueDistribution represents revenue distribution to contributors
+message RevenueDistribution {
+  // id is the unique distribution identifier
+  string id = 1;
+
+  // idea_id is the idea ID
+  string idea_id = 2;
+
+  // campaign_id is the campaign ID
+  string campaign_id = 3;
+
+  // total_amount is the total amount to distribute
+  uint64 total_amount = 4;
+
+  // distributed_at is the Unix timestamp of distribution
+  int64 distributed_at = 5;
+
+  // distributions is the list of payouts
+  repeated ContributorPayout distributions = 6 [(gogoproto.nullable) = false];
+
+  // status is the distribution status
+  DistributionStatus status = 7;
+}

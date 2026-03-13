@@ -1,0 +1,128 @@
+syntax = "proto3";
+package sharetoken.marketplace;
+
+import "cosmos/msg/v1/msg.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/marketplace/service.proto";
+
+option go_package = "sharetoken/x/marketplace/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // RegisterService registers a new service
+  rpc RegisterService(MsgRegisterService) returns (MsgRegisterServiceResponse);
+
+  // UpdateService updates an existing service
+  rpc UpdateService(MsgUpdateService) returns (MsgUpdateServiceResponse);
+
+  // ActivateService activates a service
+  rpc ActivateService(MsgActivateService) returns (MsgActivateServiceResponse);
+
+  // DeactivateService deactivates a service
+  rpc DeactivateService(MsgDeactivateService) returns (MsgDeactivateServiceResponse);
+
+  // PurchaseService purchases a service
+  rpc PurchaseService(MsgPurchaseService) returns (MsgPurchaseServiceResponse);
+}
+
+// MsgRegisterService is the Msg/RegisterService request type.
+message MsgRegisterService {
+  option (cosmos.msg.v1.signer) = "provider";
+
+  // provider is the provider address
+  string provider = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // name is the service name
+  string name = 2;
+
+  // description is the service description
+  string description = 3;
+
+  // level is the service level
+  ServiceLevel level = 4;
+
+  // pricing_mode is the pricing mode
+  PricingMode pricing_mode = 5;
+
+  // price is the service price
+  repeated cosmos.base.v1beta1.Coin price = 6 [(gogoproto.nullable) = false];
+}
+
+// MsgRegisterServiceResponse is the Msg/RegisterService response type.
+message MsgRegisterServiceResponse {
+  // service_id is the ID of the registered service
+  string service_id = 1;
+}
+
+// MsgUpdateService is the Msg/UpdateService request type.
+message MsgUpdateService {
+  option (cosmos.msg.v1.signer) = "provider";
+
+  // provider is the provider address
+  string provider = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // service_id is the service ID
+  string service_id = 2;
+
+  // name is the new name (optional)
+  string name = 3;
+
+  // description is the new description (optional)
+  string description = 4;
+
+  // price is the new price (optional)
+  repeated cosmos.base.v1beta1.Coin price = 5 [(gogoproto.nullable) = false];
+}
+
+// MsgUpdateServiceResponse is the Msg/UpdateService response type.
+message MsgUpdateServiceResponse {}
+
+// MsgActivateService is the Msg/ActivateService request type.
+message MsgActivateService {
+  option (cosmos.msg.v1.signer) = "provider";
+
+  // provider is the provider address
+  string provider = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // service_id is the service ID
+  string service_id = 2;
+}
+
+// MsgActivateServiceResponse is the Msg/ActivateService response type.
+message MsgActivateServiceResponse {}
+
+// MsgDeactivateService is the Msg/DeactivateService request type.
+message MsgDeactivateService {
+  option (cosmos.msg.v1.signer) = "provider";
+
+  // provider is the provider address
+  string provider = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // service_id is the service ID
+  string service_id = 2;
+}
+
+// MsgDeactivateServiceResponse is the Msg/DeactivateService response type.
+message MsgDeactivateServiceResponse {}
+
+// MsgPurchaseService is the Msg/PurchaseService request type.
+message MsgPurchaseService {
+  option (cosmos.msg.v1.signer) = "buyer";
+
+  // buyer is the buyer address
+  string buyer = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // service_id is the service ID
+  string service_id = 2;
+
+  // payment is the payment amount
+  repeated cosmos.base.v1beta1.Coin payment = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgPurchaseServiceResponse is the Msg/PurchaseService response type.
+message MsgPurchaseServiceResponse {
+  // transaction_id is the ID of the purchase transaction
+  string transaction_id = 1;
+}

@@ -1,0 +1,88 @@
+syntax = "proto3";
+package sharetoken.marketplace;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/marketplace/service.proto";
+
+option go_package = "sharetoken/x/marketplace/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Services queries all services
+  rpc Services(QueryServicesRequest) returns (QueryServicesResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/marketplace/services";
+  }
+
+  // Service queries a single service by ID
+  rpc Service(QueryServiceRequest) returns (QueryServiceResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/marketplace/services/{service_id}";
+  }
+
+  // ServicesByProvider queries services by provider
+  rpc ServicesByProvider(QueryServicesByProviderRequest) returns (QueryServicesResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/marketplace/provider/{provider}";
+  }
+
+  // ServicesByLevel queries services by level
+  rpc ServicesByLevel(QueryServicesByLevelRequest) returns (QueryServicesResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/marketplace/level/{level}";
+  }
+}
+
+// QueryServicesRequest is the request type for the Query/Services RPC method.
+message QueryServicesRequest {
+  // active filters by active status
+  bool active = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryServicesResponse is the response type for the Query/Services RPC method.
+message QueryServicesResponse {
+  // services is the list of services
+  repeated Service services = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryServiceRequest is the request type for the Query/Service RPC method.
+message QueryServiceRequest {
+  // service_id is the service ID
+  string service_id = 1;
+}
+
+// QueryServiceResponse is the response type for the Query/Service RPC method.
+message QueryServiceResponse {
+  // service is the service
+  Service service = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryServicesByProviderRequest is the request type for the Query/ServicesByProvider RPC method.
+message QueryServicesByProviderRequest {
+  // provider is the provider address
+  string provider = 1;
+
+  // active filters by active status
+  bool active = 2;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryServicesByLevelRequest is the request type for the Query/ServicesByLevel RPC method.
+message QueryServicesByLevelRequest {
+  // level is the service level
+  ServiceLevel level = 1;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}

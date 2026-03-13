@@ -1,0 +1,222 @@
+syntax = "proto3";
+package sharetoken.taskmarket;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "sharetoken/taskmarket/task.proto";
+import "sharetoken/taskmarket/application.proto";
+import "sharetoken/taskmarket/rating.proto";
+
+option go_package = "sharetoken/x/taskmarket/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Tasks queries all tasks
+  rpc Tasks(QueryTasksRequest) returns (QueryTasksResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/taskmarket/tasks";
+  }
+
+  // Task queries a single task by ID
+  rpc Task(QueryTaskRequest) returns (QueryTaskResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/taskmarket/tasks/{task_id}";
+  }
+
+  // Applications queries applications
+  rpc Applications(QueryApplicationsRequest) returns (QueryApplicationsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/taskmarket/applications";
+  }
+
+  // Auction queries an auction by task ID
+  rpc Auction(QueryAuctionRequest) returns (QueryAuctionResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/taskmarket/auctions/{task_id}";
+  }
+
+  // Bids queries bids
+  rpc Bids(QueryBidsRequest) returns (QueryBidsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/taskmarket/bids";
+  }
+
+  // Reputation queries a user's reputation
+  rpc Reputation(QueryReputationRequest) returns (QueryReputationResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/taskmarket/reputation/{user_id}";
+  }
+
+  // Ratings queries ratings
+  rpc Ratings(QueryRatingsRequest) returns (QueryRatingsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/taskmarket/ratings";
+  }
+
+  // Statistics queries marketplace statistics
+  rpc Statistics(QueryStatisticsRequest) returns (QueryStatisticsResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get = "/sharetoken/taskmarket/statistics";
+  }
+}
+
+// QueryTasksRequest is the request type for the Query/Tasks RPC method.
+message QueryTasksRequest {
+  // status filters by task status
+  string status = 1;
+
+  // category filters by task category
+  string category = 2;
+
+  // requester_id filters by requester address
+  string requester_id = 3;
+
+  // worker_id filters by worker address
+  string worker_id = 4;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 5;
+}
+
+// QueryTasksResponse is the response type for the Query/Tasks RPC method.
+message QueryTasksResponse {
+  // tasks is the list of tasks
+  repeated Task tasks = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryTaskRequest is the request type for the Query/Task RPC method.
+message QueryTaskRequest {
+  // task_id is the task ID
+  string task_id = 1;
+}
+
+// QueryTaskResponse is the response type for the Query/Task RPC method.
+message QueryTaskResponse {
+  // task is the task
+  Task task = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryApplicationsRequest is the request type for the Query/Applications RPC method.
+message QueryApplicationsRequest {
+  // task_id filters by task ID
+  string task_id = 1;
+
+  // worker_id filters by worker address
+  string worker_id = 2;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryApplicationsResponse is the response type for the Query/Applications RPC method.
+message QueryApplicationsResponse {
+  // applications is the list of applications
+  repeated Application applications = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryAuctionRequest is the request type for the Query/Auction RPC method.
+message QueryAuctionRequest {
+  // task_id is the task ID
+  string task_id = 1;
+}
+
+// QueryAuctionResponse is the response type for the Query/Auction RPC method.
+message QueryAuctionResponse {
+  // auction is the auction
+  Auction auction = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryBidsRequest is the request type for the Query/Bids RPC method.
+message QueryBidsRequest {
+  // task_id filters by task ID
+  string task_id = 1;
+
+  // worker_id filters by worker address
+  string worker_id = 2;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryBidsResponse is the response type for the Query/Bids RPC method.
+message QueryBidsResponse {
+  // bids is the list of bids
+  repeated Bid bids = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryReputationRequest is the request type for the Query/Reputation RPC method.
+message QueryReputationRequest {
+  // user_id is the user address
+  string user_id = 1;
+}
+
+// QueryReputationResponse is the response type for the Query/Reputation RPC method.
+message QueryReputationResponse {
+  // reputation is the user's reputation
+  Reputation reputation = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryRatingsRequest is the request type for the Query/Ratings RPC method.
+message QueryRatingsRequest {
+  // user_id filters by user being rated
+  string user_id = 1;
+
+  // task_id filters by task ID
+  string task_id = 2;
+
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 3;
+}
+
+// QueryRatingsResponse is the response type for the Query/Ratings RPC method.
+message QueryRatingsResponse {
+  // ratings is the list of ratings
+  repeated Rating ratings = 1 [(gogoproto.nullable) = false];
+
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryStatisticsRequest is the request type for the Query/Statistics RPC method.
+message QueryStatisticsRequest {}
+
+// QueryStatisticsResponse is the response type for the Query/Statistics RPC method.
+message QueryStatisticsResponse {
+  // total_tasks is the total number of tasks
+  int32 total_tasks = 1;
+
+  // open_tasks is the number of open tasks
+  int32 open_tasks = 2;
+
+  // assigned_tasks is the number of assigned tasks
+  int32 assigned_tasks = 3;
+
+  // in_progress_tasks is the number of in-progress tasks
+  int32 in_progress_tasks = 4;
+
+  // completed_tasks is the number of completed tasks
+  int32 completed_tasks = 5;
+
+  // cancelled_tasks is the number of cancelled tasks
+  int32 cancelled_tasks = 6;
+
+  // total_applications is the total number of applications
+  int32 total_applications = 7;
+
+  // total_bids is the total number of bids
+  int32 total_bids = 8;
+
+  // total_ratings is the total number of ratings
+  int32 total_ratings = 9;
+}

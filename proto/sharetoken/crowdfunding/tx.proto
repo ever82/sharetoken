@@ -1,0 +1,226 @@
+syntax = "proto3";
+package sharetoken.crowdfunding;
+
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/crowdfunding/idea.proto";
+import "sharetoken/crowdfunding/campaign.proto";
+
+option go_package = "sharetoken/x/crowdfunding/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // CreateIdea creates a new idea
+  rpc CreateIdea(MsgCreateIdea) returns (MsgCreateIdeaResponse);
+
+  // UpdateIdea updates an existing idea
+  rpc UpdateIdea(MsgUpdateIdea) returns (MsgUpdateIdeaResponse);
+
+  // PublishIdea publishes an idea
+  rpc PublishIdea(MsgPublishIdea) returns (MsgPublishIdeaResponse);
+
+  // CreateCampaign creates a new campaign
+  rpc CreateCampaign(MsgCreateCampaign) returns (MsgCreateCampaignResponse);
+
+  // LaunchCampaign launches a campaign
+  rpc LaunchCampaign(MsgLaunchCampaign) returns (MsgLaunchCampaignResponse);
+
+  // Contribute contributes to a campaign
+  rpc Contribute(MsgContribute) returns (MsgContributeResponse);
+
+  // AddContribution adds a contribution to an idea
+  rpc AddContribution(MsgAddContribution) returns (MsgAddContributionResponse);
+
+  // ApproveContribution approves a contribution
+  rpc ApproveContribution(MsgApproveContribution) returns (MsgApproveContributionResponse);
+
+  // PostUpdate posts an update to a campaign
+  rpc PostUpdate(MsgPostUpdate) returns (MsgPostUpdateResponse);
+}
+
+// MsgCreateIdea is the Msg/CreateIdea request type.
+message MsgCreateIdea {
+  option (cosmos.msg.v1.signer) = "creator_id";
+
+  // creator_id is the creator address
+  string creator_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // title is the idea title
+  string title = 2;
+
+  // description is the idea description
+  string description = 3;
+}
+
+// MsgCreateIdeaResponse is the Msg/CreateIdea response type.
+message MsgCreateIdeaResponse {
+  // idea_id is the ID of the created idea
+  string idea_id = 1;
+}
+
+// MsgUpdateIdea is the Msg/UpdateIdea request type.
+message MsgUpdateIdea {
+  option (cosmos.msg.v1.signer) = "creator_id";
+
+  // creator_id is the creator address
+  string creator_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // idea_id is the idea ID
+  string idea_id = 2;
+
+  // title is the new title
+  string title = 3;
+
+  // description is the new description
+  string description = 4;
+}
+
+// MsgUpdateIdeaResponse is the Msg/UpdateIdea response type.
+message MsgUpdateIdeaResponse {}
+
+// MsgPublishIdea is the Msg/PublishIdea request type.
+message MsgPublishIdea {
+  option (cosmos.msg.v1.signer) = "creator_id";
+
+  // creator_id is the creator address
+  string creator_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // idea_id is the idea ID
+  string idea_id = 2;
+}
+
+// MsgPublishIdeaResponse is the Msg/PublishIdea response type.
+message MsgPublishIdeaResponse {}
+
+// MsgCreateCampaign is the Msg/CreateCampaign request type.
+message MsgCreateCampaign {
+  option (cosmos.msg.v1.signer) = "creator_id";
+
+  // creator_id is the creator address
+  string creator_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // idea_id is the idea ID
+  string idea_id = 2;
+
+  // title is the campaign title
+  string title = 3;
+
+  // description is the campaign description
+  string description = 4;
+
+  // campaign_type is the campaign type
+  CampaignType campaign_type = 5;
+
+  // goal_amount is the goal amount
+  uint64 goal_amount = 6;
+}
+
+// MsgCreateCampaignResponse is the Msg/CreateCampaign response type.
+message MsgCreateCampaignResponse {
+  // campaign_id is the ID of the created campaign
+  string campaign_id = 1;
+}
+
+// MsgLaunchCampaign is the Msg/LaunchCampaign request type.
+message MsgLaunchCampaign {
+  option (cosmos.msg.v1.signer) = "creator_id";
+
+  // creator_id is the creator address
+  string creator_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // campaign_id is the campaign ID
+  string campaign_id = 2;
+
+  // duration is the campaign duration in seconds
+  int64 duration = 3;
+}
+
+// MsgLaunchCampaignResponse is the Msg/LaunchCampaign response type.
+message MsgLaunchCampaignResponse {}
+
+// MsgContribute is the Msg/Contribute request type.
+message MsgContribute {
+  option (cosmos.msg.v1.signer) = "backer_id";
+
+  // backer_id is the backer address
+  string backer_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // campaign_id is the campaign ID
+  string campaign_id = 2;
+
+  // amount is the contribution amount
+  uint64 amount = 3;
+
+  // message is an optional message
+  string message = 4;
+}
+
+// MsgContributeResponse is the Msg/Contribute response type.
+message MsgContributeResponse {
+  // backer_id is the ID of the backer record
+  string backer_id = 1;
+}
+
+// MsgAddContribution is the Msg/AddContribution request type.
+message MsgAddContribution {
+  option (cosmos.msg.v1.signer) = "contributor_id";
+
+  // contributor_id is the contributor address
+  string contributor_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // idea_id is the idea ID
+  string idea_id = 2;
+
+  // category is the contribution category
+  ContributionCategory category = 3;
+
+  // description is the contribution description
+  string description = 4;
+
+  // raw_score is the base score
+  double raw_score = 5;
+}
+
+// MsgAddContributionResponse is the Msg/AddContribution response type.
+message MsgAddContributionResponse {
+  // contribution_id is the ID of the created contribution
+  string contribution_id = 1;
+}
+
+// MsgApproveContribution is the Msg/ApproveContribution request type.
+message MsgApproveContribution {
+  option (cosmos.msg.v1.signer) = "reviewer_id";
+
+  // reviewer_id is the reviewer address
+  string reviewer_id = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // contribution_id is the contribution ID
+  string contribution_id = 2;
+}
+
+// MsgApproveContributionResponse is the Msg/ApproveContribution response type.
+message MsgApproveContributionResponse {}
+
+// MsgPostUpdate is the Msg/PostUpdate request type.
+message MsgPostUpdate {
+  option (cosmos.msg.v1.signer) = "created_by";
+
+  // created_by is the creator address
+  string created_by = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // campaign_id is the campaign ID
+  string campaign_id = 2;
+
+  // title is the update title
+  string title = 3;
+
+  // content is the update content
+  string content = 4;
+}
+
+// MsgPostUpdateResponse is the Msg/PostUpdate response type.
+message MsgPostUpdateResponse {
+  // update_id is the ID of the created update
+  string update_id = 1;
+}

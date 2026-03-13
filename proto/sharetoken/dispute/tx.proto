@@ -1,0 +1,118 @@
+syntax = "proto3";
+package sharetoken.dispute;
+
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/dispute/dispute.proto";
+
+option go_package = "sharetoken/x/dispute/types";
+
+// Msg defines the Msg service.
+service Msg {
+  // OpenDispute opens a new dispute
+  rpc OpenDispute(MsgOpenDispute) returns (MsgOpenDisputeResponse);
+
+  // SubmitEvidence submits evidence for a dispute
+  rpc SubmitEvidence(MsgSubmitEvidence) returns (MsgSubmitEvidenceResponse);
+
+  // Vote casts a vote in a dispute
+  rpc Vote(MsgVote) returns (MsgVoteResponse);
+
+  // Resolve resolves a dispute
+  rpc Resolve(MsgResolve) returns (MsgResolveResponse);
+
+  // Cancel cancels a dispute
+  rpc Cancel(MsgCancel) returns (MsgCancelResponse);
+}
+
+// MsgOpenDispute is the Msg/OpenDispute request type.
+message MsgOpenDispute {
+  option (cosmos.msg.v1.signer) = "requester";
+
+  // requester is the requester address
+  string requester = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // escrow_id is the escrow ID
+  string escrow_id = 2;
+
+  // provider is the provider address
+  string provider = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // reason is the dispute reason
+  string reason = 4;
+}
+
+// MsgOpenDisputeResponse is the Msg/OpenDispute response type.
+message MsgOpenDisputeResponse {
+  // dispute_id is the ID of the created dispute
+  string dispute_id = 1;
+}
+
+// MsgSubmitEvidence is the Msg/SubmitEvidence request type.
+message MsgSubmitEvidence {
+  option (cosmos.msg.v1.signer) = "submitter";
+
+  // submitter is the submitter address
+  string submitter = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // dispute_id is the dispute ID
+  string dispute_id = 2;
+
+  // evidence_type is the evidence type
+  string evidence_type = 3;
+
+  // content is the evidence content
+  string content = 4;
+}
+
+// MsgSubmitEvidenceResponse is the Msg/SubmitEvidence response type.
+message MsgSubmitEvidenceResponse {}
+
+// MsgVote is the Msg/Vote request type.
+message MsgVote {
+  option (cosmos.msg.v1.signer) = "voter";
+
+  // voter is the voter address
+  string voter = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // dispute_id is the dispute ID
+  string dispute_id = 2;
+
+  // decision is the vote decision ("requester", "provider", or "split")
+  string decision = 3;
+}
+
+// MsgVoteResponse is the Msg/Vote response type.
+message MsgVoteResponse {}
+
+// MsgResolve is the Msg/Resolve request type.
+message MsgResolve {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address that controls the dispute module
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // dispute_id is the dispute ID
+  string dispute_id = 2;
+}
+
+// MsgResolveResponse is the Msg/Resolve response type.
+message MsgResolveResponse {
+  // result is the voting result
+  VoteResult result = 1 [(gogoproto.nullable) = false];
+}
+
+// MsgCancel is the Msg/Cancel request type.
+message MsgCancel {
+  option (cosmos.msg.v1.signer) = "initiator";
+
+  // initiator is the dispute initiator address
+  string initiator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // dispute_id is the dispute ID
+  string dispute_id = 2;
+}
+
+// MsgCancelResponse is the Msg/Cancel response type.
+message MsgCancelResponse {}

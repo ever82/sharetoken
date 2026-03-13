@@ -1,0 +1,32 @@
+syntax = "proto3";
+package sharetoken.dispute;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/dispute/dispute.proto";
+
+option go_package = "sharetoken/x/dispute/types";
+
+// GenesisState defines the dispute module's genesis state.
+message GenesisState {
+  // disputes is the list of disputes
+  repeated Dispute disputes = 1 [(gogoproto.nullable) = false];
+
+  // juror_pool is the list of juror addresses
+  repeated string juror_pool = 2;
+}
+
+// Params defines the parameters for the dispute module.
+message Params {
+  option (amino.name) = "sharetoken/x/dispute/Params";
+  option (gogoproto.equal) = true;
+
+  // voting_period is the voting period duration in seconds
+  int64 voting_period = 1;
+
+  // min_jurors is the minimum number of jurors required
+  int32 min_jurors = 2;
+
+  // min_mq_score is the minimum MQ score to be a juror
+  int32 min_mq_score = 3;
+}

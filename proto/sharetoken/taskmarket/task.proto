@@ -1,0 +1,181 @@
+syntax = "proto3";
+package sharetoken.taskmarket;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/taskmarket/types";
+
+// TaskType represents the type of marketplace task
+type TaskType int32;
+
+// TaskType values
+const (
+  TaskTypeOpen    TaskType = 0; // Open application
+  TaskTypeAuction TaskType = 1; // Bidding auction
+);
+
+// TaskStatus represents the status of a marketplace task
+type TaskStatus int32;
+
+// TaskStatus values
+const (
+  TaskStatusDraft      TaskStatus = 0;
+  TaskStatusOpen       TaskStatus = 1; // Accepting applications/bids
+  TaskStatusAssigned   TaskStatus = 2; // Worker selected
+  TaskStatusInProgress TaskStatus = 3;
+  TaskStatusReview     TaskStatus = 4; // Under review
+  TaskStatusCompleted  TaskStatus = 5;
+  TaskStatusCancelled  TaskStatus = 6;
+  TaskStatusDisputed   TaskStatus = 7;
+);
+
+// TaskCategory represents task categories
+type TaskCategory int32;
+
+// TaskCategory values
+const (
+  CategoryDevelopment TaskCategory = 0;
+  CategoryDesign      TaskCategory = 1;
+  CategoryWriting     TaskCategory = 2;
+  CategoryResearch    TaskCategory = 3;
+  CategoryMarketing   TaskCategory = 4;
+  CategoryConsulting  TaskCategory = 5;
+  CategoryOther       TaskCategory = 6;
+);
+
+// Task represents a marketplace task
+message Task {
+  // id is the unique task identifier
+  string id = 1;
+
+  // title is the task title
+  string title = 2;
+
+  // description is the task description
+  string description = 3;
+
+  // requester_id is the address of the task requester
+  string requester_id = 4;
+
+  // worker_id is the address of the assigned worker (if any)
+  string worker_id = 5;
+
+  // type is the task type (open or auction)
+  TaskType task_type = 6;
+
+  // category is the task category
+  TaskCategory category = 7;
+
+  // status is the current task status
+  TaskStatus status = 8;
+
+  // budget is the task budget in STT
+  uint64 budget = 9;
+
+  // currency is the currency symbol (e.g., "STT", "USDC")
+  string currency = 10;
+
+  // deadline is the Unix timestamp deadline
+  int64 deadline = 11;
+
+  // skills are the required skills
+  repeated string skills = 12;
+
+  // subtasks are the decomposed subtasks
+  repeated Subtask subtasks = 13 [(gogoproto.nullable) = false];
+
+  // milestones are the task milestones
+  repeated Milestone milestones = 14 [(gogoproto.nullable) = false];
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 15;
+
+  // updated_at is the Unix timestamp of last update
+  int64 updated_at = 16;
+
+  // assigned_at is the Unix timestamp of assignment
+  int64 assigned_at = 17;
+
+  // completed_at is the Unix timestamp of completion
+  int64 completed_at = 18;
+
+  // view_count is the number of views
+  int32 view_count = 19;
+
+  // application_count is the number of applications
+  int32 application_count = 20;
+
+  // bid_count is the number of bids
+  int32 bid_count = 21;
+}
+
+// Subtask represents a decomposed subtask
+message Subtask {
+  // id is the unique subtask identifier
+  string id = 1;
+
+  // task_id is the parent task ID
+  string task_id = 2;
+
+  // title is the subtask title
+  string title = 3;
+
+  // description is the subtask description
+  string description = 4;
+
+  // order is the display order
+  int32 order = 5;
+
+  // budget is the subtask budget
+  uint64 budget = 6;
+
+  // completed indicates if the subtask is completed
+  bool completed = 7;
+}
+
+// MilestoneStatus represents milestone status
+type MilestoneStatus int32;
+
+// MilestoneStatus values
+const (
+  MilestoneStatusPending   MilestoneStatus = 0;
+  MilestoneStatusActive    MilestoneStatus = 1;
+  MilestoneStatusSubmitted MilestoneStatus = 2;
+  MilestoneStatusApproved  MilestoneStatus = 3;
+  MilestoneStatusRejected  MilestoneStatus = 4;
+  MilestoneStatusPaid      MilestoneStatus = 5;
+);
+
+// Milestone represents a task milestone
+message Milestone {
+  // id is the unique milestone identifier
+  string id = 1;
+
+  // task_id is the parent task ID
+  string task_id = 2;
+
+  // title is the milestone title
+  string title = 3;
+
+  // description is the milestone description
+  string description = 4;
+
+  // amount is the milestone payment amount
+  uint64 amount = 5;
+
+  // order is the display order
+  int32 order = 6;
+
+  // status is the milestone status
+  MilestoneStatus status = 7;
+
+  // deliverables is the submitted deliverables
+  string deliverables = 8;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 9;
+
+  // completed_at is the Unix timestamp of completion
+  int64 completed_at = 10;
+}

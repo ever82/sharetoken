@@ -1,0 +1,23 @@
+syntax = "proto3";
+package sharetoken.marketplace;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/marketplace/service.proto";
+
+option go_package = "sharetoken/x/marketplace/types";
+
+// GenesisState defines the marketplace module's genesis state.
+// Note: Service and GenesisState are defined in service.proto
+
+// Params defines the parameters for the marketplace module.
+message Params {
+  option (amino.name) = "sharetoken/x/marketplace/Params";
+  option (gogoproto.equal) = true;
+
+  // max_service_price is the maximum service price
+  uint64 max_service_price = 1;
+
+  // platform_fee_rate is the platform fee rate (basis points)
+  uint32 platform_fee_rate = 2;
+}

@@ -1,0 +1,90 @@
+syntax = "proto3";
+package sharetoken.taskmarket;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "sharetoken/x/taskmarket/types";
+
+// RatingDimension represents a rating dimension
+type RatingDimension int32;
+
+// RatingDimension values
+const (
+  DimensionQuality         RatingDimension = 0; // Quality of work
+  DimensionCommunication   RatingDimension = 1; // Communication
+  DimensionTimeliness      RatingDimension = 2; // Timeliness
+  DimensionProfessionalism RatingDimension = 3; // Professionalism
+);
+
+// Rating represents a multi-dimensional rating
+message Rating {
+  // id is the unique rating identifier
+  string id = 1;
+
+  // task_id is the task ID
+  string task_id = 2;
+
+  // rater_id is the address of who gave the rating
+  string rater_id = 3;
+
+  // rated_id is the address of who was rated
+  string rated_id = 4;
+
+  // ratings is the score (1-5) for each dimension
+  map<string, int32> ratings = 5;
+
+  // comment is the rating comment
+  string comment = 6;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 7;
+}
+
+// Reputation represents a user's reputation
+message Reputation {
+  // user_id is the user address
+  string user_id = 1;
+
+  // total_ratings is the total number of ratings received
+  int32 total_ratings = 2;
+
+  // average_rating is the average rating score
+  double average_rating = 3;
+
+  // ratings_by_dimension are ratings by dimension
+  map<string, double> ratings_by_dimension = 4;
+
+  // completed_tasks is the number of completed tasks
+  int32 completed_tasks = 5;
+
+  // dispute_rate is the dispute rate percentage
+  double dispute_rate = 6;
+
+  // on_time_delivery is the on-time delivery percentage
+  double on_time_delivery = 7;
+
+  // created_at is the Unix timestamp of creation
+  int64 created_at = 8;
+
+  // updated_at is the Unix timestamp of last update
+  int64 updated_at = 9;
+}
+
+// RatingSummary provides a summary of ratings
+message RatingSummary {
+  // user_id is the user address
+  string user_id = 1;
+
+  // overall is the overall rating
+  double overall = 2;
+
+  // total_reviews is the total number of reviews
+  int32 total_reviews = 3;
+
+  // dimensions are ratings by dimension
+  map<string, double> dimensions = 4;
+
+  // recent_reviews are recent ratings
+  repeated Rating recent_reviews = 5 [(gogoproto.nullable) = false];
+}

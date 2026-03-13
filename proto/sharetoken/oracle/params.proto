@@ -1,0 +1,23 @@
+syntax = "proto3";
+package sharetoken.oracle;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "sharetoken/oracle/price.proto";
+
+option go_package = "sharetoken/x/oracle/types";
+
+// Params defines the parameters for the oracle module.
+message Params {
+  option (amino.name) = "sharetoken/x/oracle/Params";
+  option (gogoproto.equal) = true;
+
+  // price_expiration is the price expiration time in seconds
+  int64 price_expiration = 1;
+
+  // min_confidence is the minimum confidence level required
+  int32 min_confidence = 2;
+
+  // allowed_oracles is the list of addresses allowed to post prices
+  repeated string allowed_oracles = 3;
+}
