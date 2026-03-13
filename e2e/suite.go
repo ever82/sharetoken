@@ -579,10 +579,10 @@ func (s *E2ETestSuite) GetCurrentHeight() (int64, error) {
 }
 
 // QueryIdentityStatus queries the identity verification status
-func (s *E2ETestSuite) QueryIdentityStatus(address string) (*types.Identity, error) {
+func (s *E2ETestSuite) QueryIdentityStatus(address string) (*identitytypes.Identity, error) {
 	if s.Network != nil {
-		identityQueryClient := types.NewQueryClient(s.Network.Validators[0].ClientCtx)
-		resp, err := identityQueryClient.Identity(s.ctx, &types.QueryIdentityRequest{
+		identityQueryClient := identitytypes.NewQueryClient(s.Network.Validators[0].ClientCtx)
+		resp, err := identityQueryClient.Identity(s.ctx, &identitytypes.QueryIdentityRequest{
 			Address: address,
 		})
 		if err != nil {
@@ -600,7 +600,7 @@ func (s *E2ETestSuite) QueryIdentityStatus(address string) (*types.Identity, err
 	defer resp.Body.Close()
 
 	var result struct {
-		Identity types.Identity `json:"identity"`
+		Identity identitytypes.Identity `json:"identity"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err

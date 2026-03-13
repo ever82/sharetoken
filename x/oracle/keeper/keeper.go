@@ -9,7 +9,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"sharetoken/x/identity/types"
+	identitytypes "sharetoken/x/identity/types"
 	"sharetoken/x/oracle/types"
 )
 
@@ -107,7 +107,7 @@ func (c *ChainlinkClient) FetchPrice(symbol string) (types.Price, error) {
 	// For now, return mock data
 	return types.Price{
 		Symbol:     symbol,
-		Price:      sdk.NewDec(types.DefaultSTTPrice),
+		Price:      sdk.NewDec(identitytypes.DefaultSTTPrice),
 		Source:     types.PriceSourceChainlink,
 		Timestamp:  time.Now().Unix(),
 		Confidence: types.PriceSourceConfidenceThreshold + 5,
@@ -233,7 +233,7 @@ func (k Keeper) ValidatePrice(ctx sdk.Context, price types.Price) error {
 	}
 
 	// Check price is not too old (using escrow default duration as max age)
-	if ctx.BlockTime().Unix()-price.Timestamp > types.DefaultEscrowDurationHours*3600 {
+	if ctx.BlockTime().Unix()-price.Timestamp > identitytypes.DefaultEscrowDurationHours*3600 {
 		return types.ErrStalePrice
 	}
 

@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+
 	"sharetoken/x/node/types"
 )
 
@@ -31,6 +34,10 @@ type NodeKeeper struct {
 
 	// State callbacks
 	roleChangeCallbacks []RoleChangeCallback
+
+	// Cosmos SDK storage
+	cdc      codec.BinaryCodec
+	storeKey storetypes.StoreKey
 }
 
 // NodeState represents the current state of the node
@@ -73,7 +80,7 @@ type PluginManager interface {
 	StopAll() error
 }
 
-// NewNodeKeeper creates a new node keeper
+// NewNodeKeeper creates a new node keeper (legacy constructor for file-based config)
 func NewNodeKeeper(configPath string) (*NodeKeeper, error) {
 	k := &NodeKeeper{
 		configPath:          configPath,
@@ -90,6 +97,16 @@ func NewNodeKeeper(configPath string) (*NodeKeeper, error) {
 	}
 
 	return k, nil
+}
+
+// NewKeeper creates a new node keeper for Cosmos SDK module (uses KVStore)
+func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey) NodeKeeper {
+	return NodeKeeper{
+		currentRole:         types.RoleUndefined,
+		roleChangeCallbacks: make([]RoleChangeCallback, 0),
+		cdc:                 cdc,
+		storeKey:            storeKey,
+	}
 }
 
 // loadConfig loads configuration from file

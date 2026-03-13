@@ -7,7 +7,9 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
+	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
@@ -39,7 +41,7 @@ func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 }
 
 // RegisterInterfaces registers the module's interface types
-func (AppModuleBasic) RegisterInterfaces(reg interface{}) {
+func (AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
 	// types.RegisterInterfaces(reg)
 }
 
@@ -109,7 +111,7 @@ func (am AppModule) Name() string {
 }
 
 // RegisterServices registers a GRPC query service to respond to the module-specific GRPC queries.
-func (am AppModule) RegisterServices(cfg interface{}) {
+func (am AppModule) RegisterServices(cfg module.Configurator) {
 	// TODO: Implement when proto files are generated
 }
 

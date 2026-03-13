@@ -6,6 +6,9 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+
 	"sharetoken/x/trust/types"
 )
 
@@ -18,13 +21,27 @@ type MQKeeper struct {
 
 	// Dispute participation history: address -> list of booleans (true = voted with consensus)
 	participation map[string][]bool
+
+	// Cosmos SDK storage
+	cdc      codec.BinaryCodec
+	storeKey storetypes.StoreKey
 }
 
-// NewMQKeeper creates a new MQ keeper
+// NewMQKeeper creates a new MQ keeper (legacy in-memory version)
 func NewMQKeeper() *MQKeeper {
 	return &MQKeeper{
 		scores:        make(map[string]*types.MQScore),
 		participation: make(map[string][]bool),
+	}
+}
+
+// NewKeeper creates a new MQ keeper for Cosmos SDK module (uses KVStore)
+func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey) MQKeeper {
+	return MQKeeper{
+		scores:        make(map[string]*types.MQScore),
+		participation: make(map[string][]bool),
+		cdc:           cdc,
+		storeKey:      storeKey,
 	}
 }
 

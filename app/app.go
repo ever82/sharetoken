@@ -119,9 +119,11 @@ import (
 	identitymodulekeeper "sharetoken/x/identity/keeper"
 	identitymoduletypes "sharetoken/x/identity/types"
 
+	escrowmodule "sharetoken/x/escrow"
 	escrowmodulekeeper "sharetoken/x/escrow/keeper"
 	escrowmoduletypes "sharetoken/x/escrow/types"
 
+	marketplacemodule "sharetoken/x/marketplace"
 	marketplacemodulekeeper "sharetoken/x/marketplace/keeper"
 	marketplacemoduletypes "sharetoken/x/marketplace/types"
 
@@ -133,17 +135,29 @@ import (
 	taskmarketmodulekeeper "sharetoken/x/taskmarket/keeper"
 	taskmarketmoduletypes "sharetoken/x/taskmarket/types"
 
+	oraclemodule "sharetoken/x/oracle"
 	oraclemodulekeeper "sharetoken/x/oracle/keeper"
 	oraclemoduletypes "sharetoken/x/oracle/types"
 
+	crowdfundingmodule "sharetoken/x/crowdfunding"
 	crowdfundingmodulekeeper "sharetoken/x/crowdfunding/keeper"
 	crowdfundingmoduletypes "sharetoken/x/crowdfunding/types"
 
+	nodemodule "sharetoken/x/node"
 	nodemodulekeeper "sharetoken/x/node/keeper"
 	nodemoduletypes "sharetoken/x/node/types"
 
+	agentgatewaymodule "sharetoken/x/agentgateway"
 	agentgatewaymodulekeeper "sharetoken/x/agentgateway/keeper"
 	agentgatewaymoduletypes "sharetoken/x/agentgateway/types"
+
+	disputemodule "sharetoken/x/dispute"
+	disputemodulekeeper "sharetoken/x/dispute/keeper"
+	disputemoduletypes "sharetoken/x/dispute/types"
+
+	trustmodule "sharetoken/x/trust"
+	trustmodulekeeper "sharetoken/x/trust/keeper"
+	trustmoduletypes "sharetoken/x/trust/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	"sharetoken/app/network"
@@ -209,6 +223,14 @@ var (
 		identitymodule.AppModuleBasic{},
 		llmcustodymodule.AppModuleBasic{},
 		taskmarketmodule.AppModuleBasic{},
+		escrowmodule.AppModuleBasic{},
+		marketplacemodule.AppModuleBasic{},
+		crowdfundingmodule.AppModuleBasic{},
+		oraclemodule.AppModuleBasic{},
+		nodemodule.AppModuleBasic{},
+		agentgatewaymodule.AppModuleBasic{},
+		disputemodule.AppModuleBasic{},
+		trustmodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
@@ -223,15 +245,17 @@ var (
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		// Escrow module - holds funds in escrow
-		"escrow": nil,
+		escrowmoduletypes.ModuleName: nil,
 		// Dispute module - holds funds during disputes
-		"dispute": nil,
+		disputemoduletypes.ModuleName: nil,
 		// Crowdfunding module - holds campaign funds
-		"crowdfunding": nil,
+		crowdfundingmoduletypes.ModuleName: nil,
 		// Marketplace module - handles service payments
-		"marketplace": nil,
+		marketplacemoduletypes.ModuleName: nil,
 		// Taskmarket module - holds task payments
-		"taskmarket": nil,
+		taskmarketmoduletypes.ModuleName: nil,
+		// Trust module - holds trust collateral
+		trustmoduletypes.ModuleName: nil,
 		// this line is used by starport scaffolding # stargate/app/maccPerms
 	}
 )
@@ -305,8 +329,10 @@ type App struct {
 	TaskMarketKeeper    taskmarketmodulekeeper.Keeper
 	OracleKeeper        oraclemodulekeeper.Keeper
 	CrowdfundingKeeper  crowdfundingmodulekeeper.Keeper
-	NodeKeeper          *nodemodulekeeper.NodeKeeper
+	NodeKeeper          nodemodulekeeper.NodeKeeper
 	AgentGatewayKeeper  agentgatewaymodulekeeper.Keeper
+	DisputeKeeper       disputemodulekeeper.DisputeKeeper
+	TrustKeeper         trustmodulekeeper.MQKeeper
 
 	// NATManager handles UPnP/NAT port mapping
 	NATManager *network.NATManager
@@ -367,6 +393,8 @@ func New(
 		crowdfundingmoduletypes.StoreKey,
 		nodemoduletypes.StoreKey,
 		agentgatewaymoduletypes.StoreKey,
+		disputemoduletypes.StoreKey,
+		trustmoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -615,23 +643,42 @@ func New(
 		app.BankKeeper,
 		app.AccountKeeper,
 	)
+	escrowModule := escrowmodule.NewAppModule(appCodec, app.EscrowKeeper, app.AccountKeeper, app.BankKeeper)
 
 	app.MarketplaceKeeper = *marketplacemodulekeeper.NewKeeper(appCodec, keys[marketplacemoduletypes.StoreKey])
+	marketplaceModule := marketplacemodule.NewAppModule(appCodec, app.MarketplaceKeeper)
 
 	app.LLMCustodyKeeper = *llmcustodymodulekeeper.NewKeeper(appCodec, keys[llmcustodymoduletypes.StoreKey])
+	llmcustodyModule := llmcustodymodule.NewAppModule(appCodec, app.LLMCustodyKeeper, app.AccountKeeper, app.BankKeeper)
 
 	app.TaskMarketKeeper = *taskmarketmodulekeeper.NewKeeperWithDefaultCodec(
 		keys[taskmarketmoduletypes.StoreKey],
 	)
+	taskmarketModule := taskmarketmodule.NewAppModule(appCodec, app.TaskMarketKeeper)
 
 	app.OracleKeeper = *oraclemodulekeeper.NewKeeper(appCodec, keys[oraclemoduletypes.StoreKey])
+	oracleModule := oraclemodule.NewAppModule(appCodec, app.OracleKeeper)
 
 	app.CrowdfundingKeeper = *crowdfundingmodulekeeper.NewKeeper()
+	crowdfundingModule := crowdfundingmodule.NewAppModule(appCodec, app.CrowdfundingKeeper)
 
-	// NodeKeeper requires config path, will be initialized separately if needed
-	// app.NodeKeeper = nodemodulekeeper.NewKeeper(homePath + "/node_config.json")
+	app.NodeKeeper = nodemodulekeeper.NewKeeper(appCodec, keys[nodemoduletypes.StoreKey])
+	nodeModule := nodemodule.NewAppModule(appCodec, app.NodeKeeper)
 
 	app.AgentGatewayKeeper = *agentgatewaymodulekeeper.NewKeeper()
+	agentgatewayModule := agentgatewaymodule.NewAppModule(appCodec, app.AgentGatewayKeeper)
+
+	app.DisputeKeeper = disputemodulekeeper.NewKeeper(
+		appCodec,
+		keys[disputemoduletypes.StoreKey],
+	)
+	disputeModule := disputemodule.NewAppModule(appCodec, app.DisputeKeeper)
+
+	app.TrustKeeper = trustmodulekeeper.NewKeeper(
+		appCodec,
+		keys[trustmoduletypes.StoreKey],
+	)
+	trustModule := trustmodule.NewAppModule(appCodec, &app.TrustKeeper)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
@@ -696,7 +743,16 @@ func New(
 		icaModule,
 		sharetokenModule,
 		identityModule,
-		llmcustodymodule.NewAppModule(appCodec, app.LLMCustodyKeeper, app.AccountKeeper, app.BankKeeper),
+		llmcustodyModule,
+		taskmarketModule,
+		escrowModule,
+		marketplaceModule,
+		crowdfundingModule,
+		oracleModule,
+		nodeModule,
+		agentgatewayModule,
+		disputeModule,
+		trustModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
@@ -732,6 +788,15 @@ func New(
 		sharetokenmoduletypes.ModuleName,
 		identitymoduletypes.ModuleName,
 		llmcustodymoduletypes.ModuleName,
+		taskmarketmoduletypes.ModuleName,
+		escrowmoduletypes.ModuleName,
+		marketplacemoduletypes.ModuleName,
+		crowdfundingmoduletypes.ModuleName,
+		oraclemoduletypes.ModuleName,
+		nodemoduletypes.ModuleName,
+		agentgatewaymoduletypes.ModuleName,
+		disputemoduletypes.ModuleName,
+		trustmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
@@ -760,6 +825,15 @@ func New(
 		sharetokenmoduletypes.ModuleName,
 		identitymoduletypes.ModuleName,
 		llmcustodymoduletypes.ModuleName,
+		taskmarketmoduletypes.ModuleName,
+		escrowmoduletypes.ModuleName,
+		marketplacemoduletypes.ModuleName,
+		crowdfundingmoduletypes.ModuleName,
+		oraclemoduletypes.ModuleName,
+		nodemoduletypes.ModuleName,
+		agentgatewaymoduletypes.ModuleName,
+		disputemoduletypes.ModuleName,
+		trustmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
@@ -793,6 +867,15 @@ func New(
 		sharetokenmoduletypes.ModuleName,
 		identitymoduletypes.ModuleName,
 		llmcustodymoduletypes.ModuleName,
+		taskmarketmoduletypes.ModuleName,
+		escrowmoduletypes.ModuleName,
+		marketplacemoduletypes.ModuleName,
+		crowdfundingmoduletypes.ModuleName,
+		oraclemoduletypes.ModuleName,
+		nodemoduletypes.ModuleName,
+		agentgatewaymoduletypes.ModuleName,
+		disputemoduletypes.ModuleName,
+		trustmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	}
 	app.mm.SetOrderInitGenesis(genesisModuleOrder...)
@@ -1030,6 +1113,16 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(sharetokenmoduletypes.ModuleName)
 	paramsKeeper.Subspace(identitymoduletypes.ModuleName)
+	paramsKeeper.Subspace(llmcustodymoduletypes.ModuleName)
+	paramsKeeper.Subspace(taskmarketmoduletypes.ModuleName)
+	paramsKeeper.Subspace(escrowmoduletypes.ModuleName)
+	paramsKeeper.Subspace(marketplacemoduletypes.ModuleName)
+	paramsKeeper.Subspace(crowdfundingmoduletypes.ModuleName)
+	paramsKeeper.Subspace(oraclemoduletypes.ModuleName)
+	paramsKeeper.Subspace(nodemoduletypes.ModuleName)
+	paramsKeeper.Subspace(agentgatewaymoduletypes.ModuleName)
+	paramsKeeper.Subspace(disputemoduletypes.ModuleName)
+	paramsKeeper.Subspace(trustmoduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper

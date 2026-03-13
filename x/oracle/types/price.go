@@ -15,6 +15,13 @@ const (
 	PriceSourceUnspecified PriceSource = 0
 	PriceSourceChainlink   PriceSource = 1 // Chainlink oracle
 	PriceSourceManual      PriceSource = 2 // Manual price
+
+	// PriceSourceConfidenceThreshold is the minimum confidence threshold
+	PriceSourceConfidenceThreshold = 50
+	// MaxConfidence is the maximum confidence value
+	MaxConfidence = 100
+	// TokenUnitDivisor is the divisor for token calculations
+	TokenUnitDivisor = 1000
 )
 
 // PriceSourceFromString converts string to PriceSource

@@ -1,4 +1,4 @@
-package marketplace
+package oracle
 
 import (
 	"encoding/json"
@@ -13,8 +13,8 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
-	"sharetoken/x/marketplace/keeper"
-	"sharetoken/x/marketplace/types"
+	"sharetoken/x/oracle/keeper"
+	"sharetoken/x/oracle/types"
 )
 
 var (
@@ -26,17 +26,17 @@ var (
 // AppModuleBasic
 // -----------------------------------------------------------------------------
 
-// AppModuleBasic implements the AppModuleBasic interface for the marketplace module.
+// AppModuleBasic implements the AppModuleBasic interface for the oracle module.
 type AppModuleBasic struct {
 	cdc codec.BinaryCodec
 }
 
-// Name returns the marketplace module's name.
+// Name returns the oracle module's name.
 func (AppModuleBasic) Name() string {
 	return types.ModuleName
 }
 
-// RegisterLegacyAminoCodec registers the marketplace module's types on the LegacyAmino codec.
+// RegisterLegacyAminoCodec registers the oracle module's types on the LegacyAmino codec.
 func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	// types.RegisterCodec(cdc)
 }
@@ -46,14 +46,14 @@ func (AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
 	// types.RegisterInterfaces(reg)
 }
 
-// DefaultGenesis returns default genesis state as raw bytes for the marketplace module.
+// DefaultGenesis returns default genesis state as raw bytes for the oracle module.
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	genesis := types.DefaultGenesis()
 	bytes, _ := json.Marshal(genesis)
 	return bytes
 }
 
-// ValidateGenesis performs genesis state validation for the marketplace module.
+// ValidateGenesis performs genesis state validation for the oracle module.
 func (AppModuleBasic) ValidateGenesis(_ codec.JSONCodec, bz json.RawMessage) error {
 	var data types.GenesisState
 	if err := json.Unmarshal(bz, &data); err != nil {
@@ -63,17 +63,17 @@ func (AppModuleBasic) ValidateGenesis(_ codec.JSONCodec, bz json.RawMessage) err
 	return types.ValidateGenesis(data)
 }
 
-// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the marketplace module.
+// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the oracle module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(_ client.Context, _ *runtime.ServeMux) {
 	// TODO: Implement when proto files are generated
 }
 
-// GetTxCmd returns the root tx command for the marketplace module.
+// GetTxCmd returns the root tx command for the oracle module.
 func (a AppModuleBasic) GetTxCmd() *cobra.Command {
 	return nil
 }
 
-// GetQueryCmd returns the root query command for the marketplace module.
+// GetQueryCmd returns the root query command for the oracle module.
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 	return nil
 }
@@ -82,7 +82,7 @@ func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 // AppModule
 // -----------------------------------------------------------------------------
 
-// AppModule implements the AppModule interface for the marketplace module.
+// AppModule implements the AppModule interface for the oracle module.
 type AppModule struct {
 	AppModuleBasic
 
@@ -100,7 +100,7 @@ func NewAppModule(
 	}
 }
 
-// Name returns the marketplace module's name.
+// Name returns the oracle module's name.
 func (am AppModule) Name() string {
 	return am.AppModuleBasic.Name()
 }
@@ -110,13 +110,13 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 	// TODO: Implement when proto files are generated
 }
 
-// RegisterInvariants registers the marketplace module's invariants.
+// RegisterInvariants registers the oracle module's invariants.
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
 	// TODO: Implement invariants
 	_ = ir
 }
 
-// InitGenesis performs the marketplace module's genesis initialization.
+// InitGenesis performs the oracle module's genesis initialization.
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.RawMessage) []abci.ValidatorUpdate {
 	var genState types.GenesisState
 	if err := json.Unmarshal(gs, &genState); err != nil {
@@ -128,7 +128,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, gs json.Ra
 	return []abci.ValidatorUpdate{}
 }
 
-// ExportGenesis returns the marketplace module's exported genesis state as raw JSON bytes.
+// ExportGenesis returns the oracle module's exported genesis state as raw JSON bytes.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
 	genState := ExportGenesis(ctx, am.keeper)
 	bytes, _ := json.Marshal(genState)
@@ -138,10 +138,10 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 // ConsensusVersion implements ConsensusVersion.
 func (AppModule) ConsensusVersion() uint64 { return 1 }
 
-// BeginBlock executes all ABCI BeginBlock logic respective to the marketplace module.
+// BeginBlock executes all ABCI BeginBlock logic respective to the oracle module.
 func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
-// EndBlock executes all ABCI EndBlock logic respective to the marketplace module.
+// EndBlock executes all ABCI EndBlock logic respective to the oracle module.
 func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }

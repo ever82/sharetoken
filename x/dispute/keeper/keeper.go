@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"sharetoken/x/dispute/types"
@@ -25,6 +27,10 @@ type DisputeKeeper struct {
 
 	// MQ keeper reference (for juror selection)
 	mqKeeper MQKeeperInterface
+
+	// Cosmos SDK storage
+	cdc      codec.BinaryCodec
+	storeKey storetypes.StoreKey
 }
 
 // MQKeeperInterface defines the interface for MQ operations
@@ -33,12 +39,22 @@ type MQKeeperInterface interface {
 	CalculateVotingWeight(address string) int64
 }
 
-// NewDisputeKeeper creates a new dispute keeper
+// NewDisputeKeeper creates a new dispute keeper (legacy version with MQ keeper)
 func NewDisputeKeeper(mqKeeper MQKeeperInterface) *DisputeKeeper {
 	return &DisputeKeeper{
 		disputes:  make(map[string]*types.Dispute),
 		jurorPool: make([]string, 0),
 		mqKeeper:  mqKeeper,
+	}
+}
+
+// NewKeeper creates a new dispute keeper for Cosmos SDK module (uses KVStore)
+func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey) DisputeKeeper {
+	return DisputeKeeper{
+		disputes:  make(map[string]*types.Dispute),
+		jurorPool: make([]string, 0),
+		cdc:       cdc,
+		storeKey:  storeKey,
 	}
 }
 

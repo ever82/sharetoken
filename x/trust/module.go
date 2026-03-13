@@ -106,7 +106,7 @@ func (am AppModule) Name() string {
 }
 
 // RegisterServices registers a GRPC query service to respond to the module-specific GRPC queries.
-func (am AppModule) RegisterServices(cfg interface{}) {
+func (am AppModule) RegisterServices(cfg module.Configurator) {
 	// TODO: Implement when proto files are generated
 }
 
