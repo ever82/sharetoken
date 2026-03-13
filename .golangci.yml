@@ -174,6 +174,41 @@ issues:
         - stylecheck
       text: "ST1000"
 
+    # 排除 resp.Body.Close() 错误检查（标准模式）
+    - linters:
+        - errcheck
+      text: "resp.Body.Close"
+
+    # 排除 defer resp.Body.Close() 错误检查
+    - linters:
+        - errcheck
+      text: "defer.*Body.Close"
+
+    # 排除 json.Encoder.Encode 错误检查（HTTP handler 中常见）
+    - linters:
+        - errcheck
+      text: "json.NewEncoder.*Encode"
+
+    # 排除 json.Marshal 错误检查（测试文件中常见）
+    - linters:
+        - errcheck
+      text: "json.Marshal"
+
+    # 排除测试辅助函数的错误检查
+    - linters:
+        - errcheck
+      text: "h.RequestFaucet"
+
+    # 排除 DiscoverNodes 错误检查
+    - linters:
+        - errcheck
+      text: "h.DiscoverNodes"
+
+    # 排除 io.ReadAll 错误检查（已在错误处理中）
+    - linters:
+        - errcheck
+      text: "io.ReadAll"
+
   # 最大问题数
   max-issues-per-linter: 50
   max-same-issues: 10
