@@ -61,7 +61,10 @@ func runHTTP(k *keeper.Keeper, port string) {
 		}
 
 		resp := mcpServer.Handle(req)
-		json.NewEncoder(w).Encode(resp)
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		}
 	})
 
 	// MCP SSE endpoint (流式响应)
