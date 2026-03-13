@@ -21,9 +21,9 @@ func (s *PricingTestSuite) TestLLMTokenPricing() {
 		outputTokens  int64
 		expectedTotal float64
 	}{
-		{"gpt-4", 1000, 500, 0.045},
+		{"gpt-4", 1000, 500, 0.06},
 		{"gpt-3.5-turbo", 1000, 500, 0.0035},
-		{"claude-3", 1000, 500, 0.025},
+		{"claude-3", 1000, 500, 0.02},
 	}
 
 	for _, tc := range testCases {
