@@ -219,6 +219,17 @@ issues:
         - errcheck
       text: "s.chain."
 
+    # 排除 e2e 测试中的 suite 辅助函数错误检查
+    - linters:
+        - errcheck
+      text: "s.VerifyIdentity"
+    - linters:
+        - errcheck
+      text: "s.Simulate"
+    - linters:
+        - errcheck
+      text: "s.CreateTestReview"
+
     # 排除类型断言错误检查（测试中常见）
     - linters:
         - errcheck
@@ -232,6 +243,21 @@ issues:
     - linters:
         - errcheck
       text: ".(bool)"
+
+    # 排除 json.Unmarshal 错误检查
+    - linters:
+        - errcheck
+      text: "json.Unmarshal"
+
+    # 排除 rand.Read 错误检查
+    - linters:
+        - errcheck
+      text: "rand.Read"
+
+    # 排除 keeper SetAPIKey 错误检查
+    - linters:
+        - errcheck
+      text: "k.SetAPIKey"
 
   # 最大问题数
   max-issues-per-linter: 50
