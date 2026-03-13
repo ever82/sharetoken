@@ -119,6 +119,10 @@
   ],
   "author": "ShareToken Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ever82/sharetoken.git"
+  },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
     "electron": "^28.0.0",
