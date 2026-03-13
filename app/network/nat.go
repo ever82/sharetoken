@@ -13,6 +13,8 @@ import (
 	"github.com/huin/goupnp"
 	"github.com/huin/goupnp/dcps/internetgateway1"
 	"github.com/huin/goupnp/dcps/internetgateway2"
+
+	"sharetoken/x/identity/types"
 )
 
 // NATConfig holds NAT configuration options
@@ -158,7 +160,7 @@ func (nm *NATManager) setupUPnP() error {
 	externalPort := uint16(nm.config.P2PPort)
 	internalPort := uint16(nm.config.P2PPort)
 	description := "ShareToken P2P"
-	leaseDuration := uint32(3600) // 1 hour lease, will be renewed by keepalive
+	leaseDuration := types.NATPortMappingLeaseSeconds
 
 	err = client.AddPortMapping(
 		protocol,
@@ -252,7 +254,7 @@ func (nm *NATManager) cleanupUPnP() {
 
 // keepalive periodically renews UPnP port mappings
 func (nm *NATManager) keepalive() {
-	ticker := time.NewTicker(30 * time.Minute)
+	ticker := time.NewTicker(time.Duration(types.NATRefreshIntervalMinutes) * time.Minute)
 	defer ticker.Stop()
 
 	for {
@@ -277,7 +279,7 @@ func (nm *NATManager) keepalive() {
 					mapping.InternalIP,
 					true,
 					mapping.Description,
-					3600, // 1 hour lease
+					types.NATPortMappingLeaseSeconds,
 				)
 				if err != nil {
 					nm.logger.Error("Failed to renew port mapping",

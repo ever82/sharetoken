@@ -13,6 +13,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
+	identitytypes "sharetoken/x/identity/types"
 	"sharetoken/x/llmcustody/types"
 )
 
@@ -51,8 +52,8 @@ func createAccessRules() []types.AccessRule {
 	return []types.AccessRule{
 		{
 			ServiceID:   "service-1",
-			RateLimit:   100,
-			MaxRequests: 1000,
+			RateLimit:   identitytypes.DefaultRateLimit,
+			MaxRequests: identitytypes.DefaultMaxRequests,
 			PricePerReq: 10,
 		},
 		{
@@ -398,8 +399,8 @@ func TestMsgServer_RecordUsage_Success(t *testing.T) {
 	accessRules := []types.AccessRule{
 		{
 			ServiceID:   "service-1",
-			RateLimit:   100,
-			MaxRequests: 1000,
+			RateLimit:   identitytypes.DefaultRateLimit,
+			MaxRequests: identitytypes.DefaultMaxRequests,
 			PricePerReq: 10,
 		},
 	}
@@ -435,8 +436,8 @@ func TestMsgServer_RecordUsage_InvalidService(t *testing.T) {
 	accessRules := []types.AccessRule{
 		{
 			ServiceID:   "service-1",
-			RateLimit:   100,
-			MaxRequests: 1000,
+			RateLimit:   identitytypes.DefaultRateLimit,
+			MaxRequests: identitytypes.DefaultMaxRequests,
 			PricePerReq: 10,
 		},
 	}
@@ -488,8 +489,8 @@ func TestMsgServer_RecordUsage_InactiveKey(t *testing.T) {
 	accessRules := []types.AccessRule{
 		{
 			ServiceID:   "service-1",
-			RateLimit:   100,
-			MaxRequests: 1000,
+			RateLimit:   identitytypes.DefaultRateLimit,
+			MaxRequests: identitytypes.DefaultMaxRequests,
 			PricePerReq: 10,
 		},
 	}

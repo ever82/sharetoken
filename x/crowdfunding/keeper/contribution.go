@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"sharetoken/x/crowdfunding/types"
+	identitytypes "sharetoken/x/identity/types"
 )
 
 // SubmitContribution submits a contribution
@@ -200,7 +201,7 @@ func (k *Keeper) DistributeRevenue(ideaID string, totalAmount uint64) (*types.Re
 
 // AutoCloseExpiredCampaigns auto-closes expired campaigns
 func (k *Keeper) AutoCloseExpiredCampaigns(ctx context.Context) {
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(time.Duration(identitytypes.CrowdfundingCheckIntervalMinutes) * time.Minute)
 	defer ticker.Stop()
 
 	for {

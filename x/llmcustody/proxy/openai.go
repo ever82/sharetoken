@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"sharetoken/x/identity/types"
 )
 
 // OpenAIProxy OpenAI API 代理
@@ -21,11 +23,11 @@ type OpenAIProxy struct {
 func NewOpenAIProxy() *OpenAIProxy {
 	return &OpenAIProxy{
 		client: &http.Client{
-			Timeout: 60 * time.Second,
+			Timeout: types.DefaultEscrowDurationHours * time.Hour / 24 * 60, // 60 seconds
 		},
 		baseURL:    "https://api.openai.com/v1",
-		maxRetries: 3,
-		timeout:    60 * time.Second,
+		maxRetries: types.MaxAPIRetries,
+		timeout:    types.DefaultEscrowDurationHours * time.Hour / 24 * 60, // 60 seconds
 	}
 }
 
@@ -133,7 +135,7 @@ func (p *OpenAIProxy) CallChatCompletion(apiKey string, req ChatCompletionReques
 			_ = resp.Body.Close()
 		}
 		if i < p.maxRetries-1 {
-			time.Sleep(time.Second * time.Duration(i+1))
+			time.Sleep(time.Duration(types.InitialBackoffSeconds) * time.Second * time.Duration(i+1))
 		}
 	}
 

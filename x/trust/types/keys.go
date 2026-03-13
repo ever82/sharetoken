@@ -6,6 +6,9 @@ const (
 
 	// QuerierRoute is the querier route for the trust module
 	QuerierRoute = ModuleName
+
+	// StoreKey is the string store key for the trust module
+	StoreKey = ModuleName
 )
 
 // Key prefixes for store

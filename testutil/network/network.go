@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"sharetoken/app"
+	"sharetoken/x/identity/types"
 )
 
 type (
@@ -51,7 +52,7 @@ func New(t *testing.T, configs ...Config) *Network {
 func DefaultConfig() network.Config {
 	var (
 		encoding = app.MakeEncodingConfig()
-		chainID  = "chain-" + tmrand.NewRand().Str(6)
+		chainID  = "chain-" + tmrand.NewRand().Str(types.ChainIDRandLength)
 	)
 	return network.Config{
 		Codec:             encoding.Marshaler,

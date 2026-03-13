@@ -9,6 +9,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"sharetoken/x/identity/types"
 	"sharetoken/x/oracle/types"
 )
 
@@ -102,10 +103,10 @@ func (c *ChainlinkClient) FetchPrice(symbol string) (types.Price, error) {
 	// For now, return mock data
 	return types.Price{
 		Symbol:     symbol,
-		Price:      sdk.NewDec(100),
+		Price:      sdk.NewDec(types.DefaultSTTPrice),
 		Source:     types.PriceSourceChainlink,
 		Timestamp:  time.Now().Unix(),
-		Confidence: 95,
+		Confidence: types.PriceSourceConfidenceThreshold + 5,
 	}, nil
 }
 
@@ -136,9 +137,9 @@ func (k Keeper) CalculateLLMPrice(ctx sdk.Context, model string, inputTokens, ou
 	usdPriceDec := sdk.NewDecFromIntWithPrec(sdk.NewInt(int64(usdPricePer1K*1e6)), 6)
 	sttRate := sttPrice.Price
 
-	// Calculate: (totalTokens / 1000) * usdPricePer1K / sttRate
-	// = totalTokens * usdPricePer1K / (1000 * sttRate)
-	sttCost := totalTokensDec.Mul(usdPriceDec).Quo(sttRate.MulInt64(1000))
+	// Calculate: (totalTokens / TokenUnitDivisor) * usdPricePer1K / sttRate
+	// = totalTokens * usdPricePer1K / (TokenUnitDivisor * sttRate)
+	sttCost := totalTokensDec.Mul(usdPriceDec).Quo(sttRate.MulInt64(types.TokenUnitDivisor))
 
 	return sdk.NewCoins(sdk.NewCoin("ustt", sttCost.TruncateInt())), nil
 }
@@ -196,7 +197,7 @@ func (pa *PriceAggregator) AggregatePrice(symbol string) (types.Price, error) {
 		Price:      median,
 		Source:     types.PriceSourceManual, // aggregated
 		Timestamp:  time.Now().Unix(),
-		Confidence: 90,
+		Confidence: types.PriceSourceConfidenceThreshold,
 	}, nil
 }
 
@@ -208,7 +209,7 @@ func (k Keeper) UpdatePrices(ctx sdk.Context) error {
 	for _, symbol := range symbols {
 		// In production, this would fetch from actual sources
 		// For now, use mock data
-		price := types.NewPrice(symbol, sdk.NewDec(1), types.PriceSourceManual, 100)
+		price := types.NewPrice(symbol, sdk.NewDec(1), types.PriceSourceManual, types.MaxConfidence)
 		if err := k.SetPrice(ctx, *price); err != nil {
 			return err
 		}
@@ -227,8 +228,8 @@ func (k Keeper) ValidatePrice(ctx sdk.Context, price types.Price) error {
 		return types.ErrInvalidPrice
 	}
 
-	// Check price is not too old
-	if ctx.BlockTime().Unix()-price.Timestamp > 3600 { // 1 hour
+	// Check price is not too old (using escrow default duration as max age)
+	if ctx.BlockTime().Unix()-price.Timestamp > types.DefaultEscrowDurationHours*3600 {
 		return types.ErrStalePrice
 	}
 

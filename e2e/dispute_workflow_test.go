@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/suite"
+
+	"sharetoken/x/identity/types"
 )
 
 // DisputeWorkflowSuite tests the complete dispute resolution process
@@ -95,8 +97,8 @@ func (s *DisputeWorkflowSuite) Test02_AIMediationOnly() {
 	aiResolution := map[string]interface{}{
 		"dispute_id": disputeID,
 		"proposal": map[string]interface{}{
-			"user_share":     70, // 70% to user
-			"provider_share": 30, // 30% to provider
+			"user_share":     types.DefaultUserSharePercent,     // Default % to user
+			"provider_share": types.DefaultProviderSharePercent, // Default % to provider
 			"reason":         "Partial delivery, quality issues",
 		},
 		"evidence": []string{"chat_logs", "delivery_analysis"},
@@ -133,8 +135,8 @@ func (s *DisputeWorkflowSuite) Test02_AIMediationOnly() {
 	dispute, err := s.queryDispute(disputeID)
 	s.RequireNoError(err)
 	s.RequireEqual("resolved", dispute.Status, "Dispute should be resolved")
-	s.RequireEqual(int64(70), dispute.UserShare, "User should get 70%")
-	s.RequireEqual(int64(30), dispute.ProviderShare, "Provider should get 30%")
+	s.RequireEqual(types.DefaultUserSharePercent, dispute.UserShare, "User should get default share")
+	s.RequireEqual(types.DefaultProviderSharePercent, dispute.ProviderShare, "Provider should get default share")
 }
 
 // Test 3: Jury Voting Distribution
@@ -162,11 +164,11 @@ func (s *DisputeWorkflowSuite) Test03_JuryVotingDistribution() {
 	}
 
 	// Jurors vote
-	// Juror1 votes for user (70%)
-	s.jurorVote(disputeID, s.Juror1, "user", 70)
+	// Juror1 votes for user
+	s.jurorVote(disputeID, s.Juror1, "user", types.DefaultUserSharePercent)
 
-	// Juror2 votes for user (70%)
-	s.jurorVote(disputeID, s.Juror2, "user", 70)
+	// Juror2 votes for user
+	s.jurorVote(disputeID, s.Juror2, "user", types.DefaultUserSharePercent)
 
 	// Juror3 votes for provider (should be minority - will lose MQ)
 	s.jurorVote(disputeID, s.Juror3, "provider", 50)
@@ -333,9 +335,9 @@ func (s *DisputeWorkflowSuite) jurorVoting(disputeID string) {
 	s.selectJury(disputeID)
 
 	// Jurors vote
-	s.jurorVote(disputeID, s.Juror1, "user", 75)
-	s.jurorVote(disputeID, s.Juror2, "user", 75)
-	s.jurorVote(disputeID, s.Juror3, "user", 75) // Unanimous
+	s.jurorVote(disputeID, s.Juror1, "user", types.DefaultUserSharePercent)
+	s.jurorVote(disputeID, s.Juror2, "user", types.DefaultUserSharePercent)
+	s.jurorVote(disputeID, s.Juror3, "user", types.DefaultUserSharePercent) // Unanimous
 }
 
 func (s *DisputeWorkflowSuite) resolveDispute(disputeID string) {
@@ -410,8 +412,8 @@ func (s *DisputeWorkflowSuite) queryDispute(id string) (*DisputeResult, error) {
 	return &DisputeResult{
 		ID:            id,
 		Status:        "resolved",
-		UserShare:     70,
-		ProviderShare: 30,
+		UserShare:     types.DefaultUserSharePercent,
+		ProviderShare: types.DefaultProviderSharePercent,
 	}, nil
 }
 

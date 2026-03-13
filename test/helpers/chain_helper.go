@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"sharetoken/x/identity/types"
 )
 
 // ChainHelper 提供与链交互的辅助函数
@@ -247,7 +249,7 @@ func (h *ChainHelper) QueryServices(limit int) ([]*Service, error) {
 
 // QueryServicesByLevel 按层级查询服务
 func (h *ChainHelper) QueryServicesByLevel(level int, limit int) ([]*Service, error) {
-	services, err := h.QueryAllServices(100)
+	services, err := h.QueryAllServices(types.MaxPageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -419,7 +421,7 @@ func (h *ChainHelper) QueryRefundProgress(refundID string) (*RefundProgress, err
 		ID:                  refundID,
 		Status:              "pending_review",
 		CreatedAt:           time.Now().Add(-time.Hour),
-		EstimatedCompletion: time.Now().Add(time.Hour * 24),
+		EstimatedCompletion: time.Now().Add(time.Duration(types.DefaultEscrowDurationHours) * time.Hour),
 	}, nil
 }
 

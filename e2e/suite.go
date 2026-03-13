@@ -22,14 +22,15 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"sharetoken/testutil/network"
-	"sharetoken/x/identity/types"
+	identitytypes "sharetoken/x/identity/types"
+	trusttypes "sharetoken/x/trust/types"
 )
 
 var (
 	// Default test configuration
 	DefaultChainID     = "sharetoken-e2e"
 	DefaultDenom       = "ustt"
-	DefaultMinGasPrice = "0.025"
+	DefaultMinGasPrice = identitytypes.DefaultMinGasPrice
 	DefaultRPCAddr     = "tcp://localhost:26657"
 	DefaultLCDAddr     = "http://localhost:1317"
 )
@@ -490,7 +491,7 @@ func (s *E2ETestSuite) SendTx(from, to string, amount int64, gasLimit uint64) (s
 	}
 
 	txBuilder.SetGasLimit(gasLimit)
-	txBuilder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(s.Denom, sdk.NewInt(int64(gasLimit)*25/10000)))) // 0.025 gas price
+	txBuilder.SetFeeAmount(sdk.NewCoins(sdk.NewCoin(s.Denom, sdk.NewInt(int64(gasLimit)*identitytypes.DefaultGasPriceMultiplier/identitytypes.DefaultGasPriceDivisor))))
 
 	// For now, return a mock hash
 	// In a full implementation, this would sign and broadcast
@@ -1254,10 +1255,10 @@ type UserLimits struct {
 func (s *E2ETestSuite) QueryUserLimits(address string) (*UserLimits, error) {
 	// Placeholder implementation - returns mock limits
 	return &UserLimits{
-		TransactionLimit: 1000000000,
-		WithdrawalLimit:  500000000,
-		DisputeLimit:     100000000,
-		ServiceLimit:     500000000,
+		TransactionLimit: identitytypes.UnverifiedUserTransactionLimit,
+		WithdrawalLimit:  identitytypes.UnverifiedUserWithdrawalLimit,
+		DisputeLimit:     identitytypes.UnverifiedUserDisputeLimit,
+		ServiceLimit:     identitytypes.UnverifiedUserServiceLimit,
 	}, nil
 }
 
@@ -1271,7 +1272,7 @@ type JurorEligibility struct {
 func (s *E2ETestSuite) QueryJurorEligibility(address string) (*JurorEligibility, error) {
 	return &JurorEligibility{
 		IsEligible:       true,
-		MinRequiredScore: 100,
+		MinRequiredScore: identitytypes.JurorMinRequiredScore,
 	}, nil
 }
 
@@ -1284,7 +1285,7 @@ type MQScore struct {
 // QueryMQScore queries the MQ score for a user
 func (s *E2ETestSuite) QueryMQScore(address string) (*MQScore, error) {
 	return &MQScore{
-		Score: 100,
+		Score: int64(trusttypes.InitialMQ),
 		Level: "normal",
 	}, nil
 }
@@ -1292,20 +1293,20 @@ func (s *E2ETestSuite) QueryMQScore(address string) (*MQScore, error) {
 // QueryMQScoreHistory queries the MQ score history for a user
 func (s *E2ETestSuite) QueryMQScoreHistory(address string) ([]*MQScore, error) {
 	return []*MQScore{
-		{Score: 100, Level: "normal"},
+		{Score: int64(trusttypes.InitialMQ), Level: "normal"},
 	}, nil
 }
 
 // GetReputationLevel gets the reputation level for a given MQ score
 func (s *E2ETestSuite) GetReputationLevel(mqScore int64) (string, error) {
 	switch {
-	case mqScore >= 500:
+	case mqScore >= identitytypes.ReputationLevelOutstandingMin:
 		return "outstanding", nil
-	case mqScore >= 200:
+	case mqScore >= identitytypes.ReputationLevelExcellentMin:
 		return "excellent", nil
-	case mqScore >= 100:
+	case mqScore >= identitytypes.ReputationLevelGoodMin:
 		return "good", nil
-	case mqScore >= 50:
+	case mqScore >= identitytypes.ReputationLevelNormalMin:
 		return "normal", nil
 	default:
 		return "novice", nil
@@ -1329,10 +1330,10 @@ type ReputationBenefits struct {
 // QueryReputationBenefits queries the benefits for a user based on reputation
 func (s *E2ETestSuite) QueryReputationBenefits(address string) (*ReputationBenefits, error) {
 	return &ReputationBenefits{
-		TransactionLimit: 1000000000,
-		WithdrawalLimit:  500000000,
-		DisputeLimit:     100000000,
-		ServiceLimit:     500000000,
+		TransactionLimit: identitytypes.UnverifiedUserTransactionLimit,
+		WithdrawalLimit:  identitytypes.UnverifiedUserWithdrawalLimit,
+		DisputeLimit:     identitytypes.UnverifiedUserDisputeLimit,
+		ServiceLimit:     identitytypes.UnverifiedUserServiceLimit,
 	}, nil
 }
 

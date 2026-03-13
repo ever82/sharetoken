@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"sharetoken/x/escrow/types"
+	identitytypes "sharetoken/x/identity/types"
 )
 
 func TestEscrow_ValidateBasic(t *testing.T) {
@@ -149,7 +150,7 @@ func TestNewEscrow(t *testing.T) {
 	validAddress := sdk.AccAddress([]byte("test_address_1")).String()
 	validAddress2 := sdk.AccAddress([]byte("test_address_2")).String()
 	validCoins := sdk.NewCoins(sdk.NewCoin("ustt", sdk.NewInt(1000)))
-	duration := time.Hour * 24
+	duration := time.Duration(identitytypes.DefaultEscrowDurationHours) * time.Hour
 
 	escrow := types.NewEscrow("escrow-1", validAddress, validAddress2, validCoins, duration)
 

@@ -5,6 +5,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+
+	"sharetoken/x/identity/types"
 )
 
 // IdentityLimitsTest 测试身份认证相关的限额功能
@@ -26,9 +28,9 @@ func (s *IdentityLimitsTest) TestUnverifiedUserLimits() {
 	s.Require().NoError(err)
 
 	// 验证未认证用户限额较低
-	assert.Equal(s.T(), int64(1000000000), limits.TransactionLimit, "未认证用户交易限额应为 1000 STT")
-	assert.Equal(s.T(), int64(500000000), limits.WithdrawalLimit, "未认证用户提现限额应为 500 STT")
-	assert.Equal(s.T(), int64(100000000), limits.DisputeLimit, "未认证用户争议限额应为 100 STT")
+	assert.Equal(s.T(), types.UnverifiedUserTransactionLimit, limits.TransactionLimit, "未认证用户交易限额应为 1000 STT")
+	assert.Equal(s.T(), types.UnverifiedUserWithdrawalLimit, limits.WithdrawalLimit, "未认证用户提现限额应为 500 STT")
+	assert.Equal(s.T(), types.UnverifiedUserDisputeLimit, limits.DisputeLimit, "未认证用户争议限额应为 100 STT")
 }
 
 // TestVerifiedUserLimits 测试已认证用户限额
@@ -41,9 +43,9 @@ func (s *IdentityLimitsTest) TestVerifiedUserLimits() {
 	s.Require().NoError(err)
 
 	// 验证已认证用户限额更高
-	assert.Equal(s.T(), int64(10000000000), limits.TransactionLimit, "认证用户交易限额应为 10000 STT")
-	assert.Equal(s.T(), int64(5000000000), limits.WithdrawalLimit, "认证用户提现限额应为 5000 STT")
-	assert.Equal(s.T(), int64(1000000000), limits.DisputeLimit, "认证用户争议限额应为 1000 STT")
+	assert.Equal(s.T(), types.VerifiedUserTransactionLimit, limits.TransactionLimit, "认证用户交易限额应为 10000 STT")
+	assert.Equal(s.T(), types.VerifiedUserWithdrawalLimit, limits.WithdrawalLimit, "认证用户提现限额应为 5000 STT")
+	assert.Equal(s.T(), types.VerifiedUserDisputeLimit, limits.DisputeLimit, "认证用户争议限额应为 1000 STT")
 }
 
 // TestMultipleVerificationMethods 测试多种认证方式
@@ -72,10 +74,10 @@ func (s *IdentityLimitsTest) TestLimitEnforcement() {
 	user := s.CreateUnverifiedUser()
 
 	// 给用户提供足够的资金
-	s.FundAccount(user.Address, 2000000000) // 2000 STT
+	s.FundAccount(user.Address, types.UnverifiedUserTransactionLimit*2) // 2000 STT
 
 	// 尝试超过交易限额
-	_, err := s.CreateEscrowByAddress(user.Address, 1500000000) // 1500 STT，超过 1000 限额
+	_, err := s.CreateEscrowByAddress(user.Address, types.UnverifiedUserTransactionLimit+types.STTBaseUnit*500) // 1500 STT，超过 1000 限额
 
 	// 应被拒绝
 	assert.Error(s.T(), err, "超过限额的交易应被拒绝")
@@ -108,12 +110,12 @@ func (s *IdentityLimitsTest) TestJurorEligibilityByLevel() {
 		name             string
 		mqScore          int64
 		isEligible       bool
-		minRequiredScore int64
+		minRequiredScore int
 	}{
-		{"新手不可", 50, false, 100},
-		{"普通刚好", 100, true, 100},
-		{"良好可以", 150, true, 100},
-		{"优秀可以", 200, true, 100},
+		{"新手不可", 50, false, types.JurorMinRequiredScore},
+		{"普通刚好", 100, true, types.JurorMinRequiredScore},
+		{"良好可以", 150, true, types.JurorMinRequiredScore},
+		{"优秀可以", 200, true, types.JurorMinRequiredScore},
 	}
 
 	for _, tc := range testCases {
@@ -127,7 +129,7 @@ func (s *IdentityLimitsTest) TestJurorEligibilityByLevel() {
 
 			// 验证资格
 			assert.Equal(s.T(), tc.isEligible, eligibility.IsEligible)
-			assert.Equal(s.T(), tc.minRequiredScore, eligibility.MinRequiredScore)
+			assert.Equal(s.T(), int64(tc.minRequiredScore), int64(eligibility.MinRequiredScore))
 		})
 	}
 }

@@ -8,11 +8,12 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	// "github.com/cosmos/cosmos-sdk/client/flags"
-	"sharetoken/x/sharetoken/types"
+	"sharetoken/x/identity/types"
+	sharetokentypes "sharetoken/x/sharetoken/types"
 )
 
 var (
-	DefaultRelativePacketTimeoutTimestamp = uint64((time.Duration(10) * time.Minute).Nanoseconds())
+	DefaultRelativePacketTimeoutTimestamp = uint64((time.Duration(types.DefaultPacketTimeoutMinutes) * time.Minute).Nanoseconds())
 )
 
 // nolint:unused // Constants reserved for future IBC implementation
