@@ -145,7 +145,7 @@ func (h *ChainHelper) CreateAccount(name string) *TestAccount {
 func (h *ChainHelper) CreateAccountWithBalance(name, balance string) *TestAccount {
 	acc := h.CreateAccount(name)
 	// 从水龙头或验证者转入资金
-	h.RequestFaucet(acc.Address, balance)
+	_ = h.RequestFaucet(acc.Address, balance)
 	return acc
 }
 
@@ -247,7 +247,10 @@ func (h *ChainHelper) QueryServices(limit int) ([]*Service, error) {
 
 // QueryServicesByLevel 按层级查询服务
 func (h *ChainHelper) QueryServicesByLevel(level int, limit int) ([]*Service, error) {
-	services, _ := h.QueryAllServices(100)
+	services, err := h.QueryAllServices(100)
+	if err != nil {
+		return nil, err
+	}
 	var result []*Service
 	for _, s := range services {
 		if s.Level == level {

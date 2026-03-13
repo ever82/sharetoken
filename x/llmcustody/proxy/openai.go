@@ -215,10 +215,13 @@ func (p *OpenAIProxy) ListModels(apiKey string) ([]ModelInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to call OpenAI API: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("OpenAI API error %d: failed to read error body: %w", resp.StatusCode, err)
+		}
 		return nil, fmt.Errorf("OpenAI API error %d: %s", resp.StatusCode, string(body))
 	}
 
