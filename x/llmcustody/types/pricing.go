@@ -7,12 +7,12 @@ import (
 
 // PricingConfig 定价配置
 type PricingConfig struct {
-	ID            string        `json:"id"`
-	Owner         string        `json:"owner"`
-	APIKeyID      string        `json:"api_key_id"`
-	Provider      Provider      `json:"provider"`
-	Model         string        `json:"model"`
-	PricingMode   PricingMode   `json:"pricing_mode"` // fixed, dynamic, auction
+	ID          string      `json:"id"`
+	Owner       string      `json:"owner"`
+	APIKeyID    string      `json:"api_key_id"`
+	Provider    Provider    `json:"provider"`
+	Model       string      `json:"model"`
+	PricingMode PricingMode `json:"pricing_mode"` // fixed, dynamic, auction
 
 	// 固定价格配置
 	FixedPrice FixedPriceConfig `json:"fixed_price,omitempty"`
@@ -51,13 +51,13 @@ type FixedPriceConfig struct {
 
 // DynamicPriceConfig 动态价格配置
 type DynamicPriceConfig struct {
-	BaseInputPrice   int64   `json:"base_input_price"`   // 基础 input 价格
-	BaseOutputPrice  int64   `json:"base_output_price"`  // 基础 output 价格
-	DemandMultiplier float64 `json:"demand_multiplier"`  // 需求倍数
-	SupplyMultiplier float64 `json:"supply_multiplier"`  // 供应倍数
-	MinMultiplier    float64 `json:"min_multiplier"`     // 最小倍数
-	MaxMultiplier    float64 `json:"max_multiplier"`     // 最大倍数
-	UpdateInterval   int64   `json:"update_interval"`    // 价格更新间隔（秒）
+	BaseInputPrice   int64   `json:"base_input_price"`  // 基础 input 价格
+	BaseOutputPrice  int64   `json:"base_output_price"` // 基础 output 价格
+	DemandMultiplier float64 `json:"demand_multiplier"` // 需求倍数
+	SupplyMultiplier float64 `json:"supply_multiplier"` // 供应倍数
+	MinMultiplier    float64 `json:"min_multiplier"`    // 最小倍数
+	MaxMultiplier    float64 `json:"max_multiplier"`    // 最大倍数
+	UpdateInterval   int64   `json:"update_interval"`   // 价格更新间隔（秒）
 }
 
 // AuctionPriceConfig 竞价价格配置
@@ -71,12 +71,12 @@ type AuctionPriceConfig struct {
 
 // UsageStats 使用统计
 type UsageStats struct {
-	APIKeyID         string    `json:"api_key_id"`
-	TotalRequests    int64     `json:"total_requests"`
-	TotalInputTokens int64     `json:"total_input_tokens"`
-	TotalOutputTokens int64    `json:"total_output_tokens"`
-	TotalRevenue     int64     `json:"total_revenue"` // ustt
-	LastUsedAt       time.Time `json:"last_used_at"`
+	APIKeyID          string    `json:"api_key_id"`
+	TotalRequests     int64     `json:"total_requests"`
+	TotalInputTokens  int64     `json:"total_input_tokens"`
+	TotalOutputTokens int64     `json:"total_output_tokens"`
+	TotalRevenue      int64     `json:"total_revenue"` // ustt
+	LastUsedAt        time.Time `json:"last_used_at"`
 }
 
 // CalculateCost 计算调用成本

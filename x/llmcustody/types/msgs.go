@@ -48,10 +48,10 @@ func GenerateAPIKeyID() string {
 
 // MsgRegisterAPIKey is the message for registering a new API key
 type MsgRegisterAPIKey struct {
-	Owner       string       `json:"owner"`
-	Provider    string       `json:"provider"`
-	EncryptedKey []byte      `json:"encrypted_key"`
-	AccessRules []AccessRule `json:"access_rules"`
+	Owner        string       `json:"owner"`
+	Provider     string       `json:"provider"`
+	EncryptedKey []byte       `json:"encrypted_key"`
+	AccessRules  []AccessRule `json:"access_rules"`
 }
 
 // NewMsgRegisterAPIKey creates a new MsgRegisterAPIKey
@@ -209,11 +209,11 @@ func (msg MsgRevokeAPIKey) ValidateBasic() error {
 
 // MsgRecordUsage is the message for recording API usage
 type MsgRecordUsage struct {
-	APIKeyID  string `json:"api_key_id"`
-	ServiceID string `json:"service_id"`
-	RequestCount int64 `json:"request_count"`
-	TokenCount   int64 `json:"token_count"`
-	Cost         int64 `json:"cost"` // in ustt
+	APIKeyID     string `json:"api_key_id"`
+	ServiceID    string `json:"service_id"`
+	RequestCount int64  `json:"request_count"`
+	TokenCount   int64  `json:"token_count"`
+	Cost         int64  `json:"cost"` // in ustt
 }
 
 // NewMsgRecordUsage creates a new MsgRecordUsage

@@ -67,6 +67,7 @@ func (k Keeper) DeleteEscrow(ctx sdk.Context, id string) {
 }
 
 // setEscrowByRequester sets the escrow by requester index
+//
 //go:noinline
 func (k Keeper) setEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
@@ -75,6 +76,7 @@ func (k Keeper) setEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 }
 
 // deleteEscrowByRequester deletes the escrow by requester index
+//
 //go:noinline
 func (k Keeper) deleteEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
@@ -83,6 +85,7 @@ func (k Keeper) deleteEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 }
 
 // setEscrowByProvider sets the escrow by provider index
+//
 //go:noinline
 func (k Keeper) setEscrowByProvider(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
@@ -91,6 +94,7 @@ func (k Keeper) setEscrowByProvider(ctx sdk.Context, escrow types.Escrow) {
 }
 
 // deleteEscrowByProvider deletes the escrow by provider index
+//
 //go:noinline
 func (k Keeper) deleteEscrowByProvider(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
