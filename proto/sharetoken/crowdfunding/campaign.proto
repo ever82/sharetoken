@@ -7,27 +7,23 @@ import "gogoproto/gogo.proto";
 option go_package = "sharetoken/x/crowdfunding/types";
 
 // CampaignType represents the type of crowdfunding campaign
-type CampaignType int32;
-
-// CampaignType values
-const (
-  CampaignTypeInvestment CampaignType = 0;
-  CampaignTypeLending    CampaignType = 1;
-  CampaignTypeDonation   CampaignType = 2;
-);
+enum CampaignType {
+  CAMPAIGN_TYPE_UNSPECIFIED = 0;
+  CAMPAIGN_TYPE_INVESTMENT = 1;
+  CAMPAIGN_TYPE_LENDING = 2;
+  CAMPAIGN_TYPE_DONATION = 3;
+}
 
 // CampaignStatus represents the status of a campaign
-type CampaignStatus int32;
-
-// CampaignStatus values
-const (
-  CampaignStatusDraft     CampaignStatus = 0;
-  CampaignStatusActive    CampaignStatus = 1;
-  CampaignStatusFunded    CampaignStatus = 2;
-  CampaignStatusExpired   CampaignStatus = 3;
-  CampaignStatusCancelled CampaignStatus = 4;
-  CampaignStatusClosed    CampaignStatus = 5;
-);
+enum CampaignStatus {
+  CAMPAIGN_STATUS_UNSPECIFIED = 0;
+  CAMPAIGN_STATUS_DRAFT = 1;
+  CAMPAIGN_STATUS_ACTIVE = 2;
+  CAMPAIGN_STATUS_FUNDED = 3;
+  CAMPAIGN_STATUS_EXPIRED = 4;
+  CAMPAIGN_STATUS_CANCELLED = 5;
+  CAMPAIGN_STATUS_CLOSED = 6;
+}
 
 // Campaign represents a crowdfunding campaign
 message Campaign {
@@ -153,14 +149,12 @@ message CampaignUpdate {
 }
 
 // DistributionStatus represents distribution status
-type DistributionStatus int32;
-
-// DistributionStatus values
-const (
-  DistributionStatusPending   DistributionStatus = 0;
-  DistributionStatusProcessed DistributionStatus = 1;
-  DistributionStatusFailed    DistributionStatus = 2;
-);
+enum DistributionStatus {
+  DISTRIBUTION_STATUS_UNSPECIFIED = 0;
+  DISTRIBUTION_STATUS_PENDING = 1;
+  DISTRIBUTION_STATUS_PROCESSED = 2;
+  DISTRIBUTION_STATUS_FAILED = 3;
+}
 
 // ContributorPayout represents a payout to a contributor
 message ContributorPayout {

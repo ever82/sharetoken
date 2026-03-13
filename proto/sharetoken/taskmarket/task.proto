@@ -7,42 +7,36 @@ import "gogoproto/gogo.proto";
 option go_package = "sharetoken/x/taskmarket/types";
 
 // TaskType represents the type of marketplace task
-type TaskType int32;
-
-// TaskType values
-const (
-  TaskTypeOpen    TaskType = 0; // Open application
-  TaskTypeAuction TaskType = 1; // Bidding auction
-);
+enum TaskType {
+  TASK_TYPE_UNSPECIFIED = 0;
+  TASK_TYPE_OPEN = 1;
+  TASK_TYPE_AUCTION = 2;
+}
 
 // TaskStatus represents the status of a marketplace task
-type TaskStatus int32;
-
-// TaskStatus values
-const (
-  TaskStatusDraft      TaskStatus = 0;
-  TaskStatusOpen       TaskStatus = 1; // Accepting applications/bids
-  TaskStatusAssigned   TaskStatus = 2; // Worker selected
-  TaskStatusInProgress TaskStatus = 3;
-  TaskStatusReview     TaskStatus = 4; // Under review
-  TaskStatusCompleted  TaskStatus = 5;
-  TaskStatusCancelled  TaskStatus = 6;
-  TaskStatusDisputed   TaskStatus = 7;
-);
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_DRAFT = 1;
+  TASK_STATUS_OPEN = 2;
+  TASK_STATUS_ASSIGNED = 3;
+  TASK_STATUS_IN_PROGRESS = 4;
+  TASK_STATUS_REVIEW = 5;
+  TASK_STATUS_COMPLETED = 6;
+  TASK_STATUS_CANCELLED = 7;
+  TASK_STATUS_DISPUTED = 8;
+}
 
 // TaskCategory represents task categories
-type TaskCategory int32;
-
-// TaskCategory values
-const (
-  CategoryDevelopment TaskCategory = 0;
-  CategoryDesign      TaskCategory = 1;
-  CategoryWriting     TaskCategory = 2;
-  CategoryResearch    TaskCategory = 3;
-  CategoryMarketing   TaskCategory = 4;
-  CategoryConsulting  TaskCategory = 5;
-  CategoryOther       TaskCategory = 6;
-);
+enum TaskCategory {
+  TASK_CATEGORY_UNSPECIFIED = 0;
+  TASK_CATEGORY_DEVELOPMENT = 1;
+  TASK_CATEGORY_DESIGN = 2;
+  TASK_CATEGORY_WRITING = 3;
+  TASK_CATEGORY_RESEARCH = 4;
+  TASK_CATEGORY_MARKETING = 5;
+  TASK_CATEGORY_CONSULTING = 6;
+  TASK_CATEGORY_OTHER = 7;
+}
 
 // Task represents a marketplace task
 message Task {
@@ -61,7 +55,7 @@ message Task {
   // worker_id is the address of the assigned worker (if any)
   string worker_id = 5;
 
-  // type is the task type (open or auction)
+  // task_type is the task type (open or auction)
   TaskType task_type = 6;
 
   // category is the task category
@@ -135,17 +129,15 @@ message Subtask {
 }
 
 // MilestoneStatus represents milestone status
-type MilestoneStatus int32;
-
-// MilestoneStatus values
-const (
-  MilestoneStatusPending   MilestoneStatus = 0;
-  MilestoneStatusActive    MilestoneStatus = 1;
-  MilestoneStatusSubmitted MilestoneStatus = 2;
-  MilestoneStatusApproved  MilestoneStatus = 3;
-  MilestoneStatusRejected  MilestoneStatus = 4;
-  MilestoneStatusPaid      MilestoneStatus = 5;
-);
+enum MilestoneStatus {
+  MILESTONE_STATUS_UNSPECIFIED = 0;
+  MILESTONE_STATUS_PENDING = 1;
+  MILESTONE_STATUS_ACTIVE = 2;
+  MILESTONE_STATUS_SUBMITTED = 3;
+  MILESTONE_STATUS_APPROVED = 4;
+  MILESTONE_STATUS_REJECTED = 5;
+  MILESTONE_STATUS_PAID = 6;
+}
 
 // Milestone represents a task milestone
 message Milestone {

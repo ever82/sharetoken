@@ -7,17 +7,15 @@ import "gogoproto/gogo.proto";
 option go_package = "sharetoken/x/crowdfunding/types";
 
 // IdeaStatus represents the status of an idea
-type IdeaStatus int32;
-
-// IdeaStatus values
-const (
-  IdeaStatusDraft      IdeaStatus = 0;
-  IdeaStatusActive     IdeaStatus = 1;
-  IdeaStatusFunding    IdeaStatus = 2;
-  IdeaStatusDeveloping IdeaStatus = 3;
-  IdeaStatusCompleted  IdeaStatus = 4;
-  IdeaStatusArchived   IdeaStatus = 5;
-);
+enum IdeaStatus {
+  IDEA_STATUS_UNSPECIFIED = 0;
+  IDEA_STATUS_DRAFT = 1;
+  IDEA_STATUS_ACTIVE = 2;
+  IDEA_STATUS_FUNDING = 3;
+  IDEA_STATUS_DEVELOPING = 4;
+  IDEA_STATUS_COMPLETED = 5;
+  IDEA_STATUS_ARCHIVED = 6;
+}
 
 // Idea represents a creative idea/project
 message Idea {
@@ -95,27 +93,23 @@ message IdeaVersion {
 }
 
 // ContributionCategory represents types of contributions
-type ContributionCategory int32;
-
-// ContributionCategory values
-const (
-  ContributionCategoryCode      ContributionCategory = 0;
-  ContributionCategoryDesign    ContributionCategory = 1;
-  ContributionCategoryDocs      ContributionCategory = 2;
-  ContributionCategoryResearch  ContributionCategory = 3;
-  ContributionCategoryMarketing ContributionCategory = 4;
-  ContributionCategoryTesting   ContributionCategory = 5;
-);
+enum ContributionCategory {
+  CONTRIBUTION_CATEGORY_UNSPECIFIED = 0;
+  CONTRIBUTION_CATEGORY_CODE = 1;
+  CONTRIBUTION_CATEGORY_DESIGN = 2;
+  CONTRIBUTION_CATEGORY_DOCS = 3;
+  CONTRIBUTION_CATEGORY_RESEARCH = 4;
+  CONTRIBUTION_CATEGORY_MARKETING = 5;
+  CONTRIBUTION_CATEGORY_TESTING = 6;
+}
 
 // ContributionStatus represents contribution status
-type ContributionStatus int32;
-
-// ContributionStatus values
-const (
-  ContributionStatusPending  ContributionStatus = 0;
-  ContributionStatusApproved ContributionStatus = 1;
-  ContributionStatusRejected ContributionStatus = 2;
-);
+enum ContributionStatus {
+  CONTRIBUTION_STATUS_UNSPECIFIED = 0;
+  CONTRIBUTION_STATUS_PENDING = 1;
+  CONTRIBUTION_STATUS_APPROVED = 2;
+  CONTRIBUTION_STATUS_REJECTED = 3;
+}
 
 // Contribution represents a contribution to an idea
 message Contribution {

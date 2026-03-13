@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -29,7 +28,7 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey) *Keeper {
 func (k Keeper) SetAPIKey(ctx sdk.Context, apiKey types.APIKey) error {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetAPIKeyKey(apiKey.ID)
-	value, err := json.Marshal(apiKey)
+	value, err := k.cdc.Marshal(&apiKey)
 	if err != nil {
 		return fmt.Errorf("failed to marshal API key: %w", err)
 	}
@@ -48,7 +47,7 @@ func (k Keeper) GetAPIKey(ctx sdk.Context, id string) (types.APIKey, bool) {
 	}
 
 	var apiKey types.APIKey
-	if err := json.Unmarshal(value, &apiKey); err != nil {
+	if err := k.cdc.Unmarshal(value, &apiKey); err != nil {
 		return types.APIKey{}, false
 	}
 	return apiKey, true
@@ -77,7 +76,7 @@ func (k Keeper) GetAllAPIKeys(ctx sdk.Context) []types.APIKey {
 	var apiKeys []types.APIKey
 	for ; iterator.Valid(); iterator.Next() {
 		var apiKey types.APIKey
-		if err := json.Unmarshal(iterator.Value(), &apiKey); err != nil {
+		if err := k.cdc.Unmarshal(iterator.Value(), &apiKey); err != nil {
 			ctx.Logger().Error("failed to unmarshal API key", "error", err)
 			continue
 		}

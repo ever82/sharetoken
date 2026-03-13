@@ -4,6 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+
+	"github.com/cosmos/gogoproto/proto"
 )
 
 // Provider represents LLM provider type
@@ -19,6 +21,14 @@ func IsValidProvider(p string) bool {
 	return p == string(ProviderOpenAI) || p == string(ProviderAnthropic)
 }
 
+// ProviderFromString converts string to Provider
+func ProviderFromString(s string) Provider {
+	if s == string(ProviderAnthropic) {
+		return ProviderAnthropic
+	}
+	return ProviderOpenAI
+}
+
 // AccessRule represents an access control rule
 type AccessRule struct {
 	ServiceID   string `json:"service_id"`    // 允许访问的服务ID
@@ -27,6 +37,17 @@ type AccessRule struct {
 	MaxRequests int64  `json:"max_requests"`  // 总请求上限
 	PricePerReq int64  `json:"price_per_req"` // 每次请求价格 (ustt)
 }
+
+// Reset implements proto.Message
+func (m *AccessRule) Reset() { *m = AccessRule{} }
+
+// String implements proto.Message
+func (m AccessRule) String() string {
+	return fmt.Sprintf("AccessRule{service_id: %s, allowed: %v}", m.ServiceID, m.Allowed)
+}
+
+// ProtoMessage implements proto.Message
+func (*AccessRule) ProtoMessage() {}
 
 // APIKey represents an encrypted API key stored on chain
 type APIKey struct {
@@ -40,6 +61,107 @@ type APIKey struct {
 	LastUsedAt   int64        `json:"last_used_at"`
 	UsageCount   int64        `json:"usage_count"`
 	Active       bool         `json:"active"`
+}
+
+// Reset implements proto.Message
+func (m *APIKey) Reset() { *m = APIKey{} }
+
+// String implements proto.Message
+func (m APIKey) String() string {
+	return fmt.Sprintf("APIKey{%s: %s, owner: %s, active: %v, usage: %d}",
+		m.ID, m.Provider, m.Owner, m.Active, m.UsageCount)
+}
+
+// ProtoMessage implements proto.Message
+func (*APIKey) ProtoMessage() {}
+
+// Marshal implements codec.ProtoMarshaler
+func (m APIKey) Marshal() ([]byte, error) {
+	return proto.Marshal(m.toProto())
+}
+
+// MarshalTo implements codec.ProtoMarshaler
+func (m APIKey) MarshalTo(data []byte) (n int, err error) {
+	return m.MarshalToSizedBuffer(data)
+}
+
+// MarshalToSizedBuffer implements codec.ProtoMarshaler
+func (m APIKey) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	encoded, err := m.Marshal()
+	if err != nil {
+		return 0, err
+	}
+	n := len(encoded)
+	if len(dAtA) < n {
+		return 0, fmt.Errorf("buffer too small")
+	}
+	copy(dAtA[:n], encoded)
+	return n, nil
+}
+
+// Size implements codec.ProtoMarshaler
+func (m APIKey) Size() int {
+	data, _ := m.Marshal()
+	return len(data)
+}
+
+// Unmarshal implements codec.ProtoMarshaler
+func (m *APIKey) Unmarshal(data []byte) error {
+	pm := &APIKeyProto{}
+	if err := proto.Unmarshal(data, pm); err != nil {
+		return err
+	}
+	m.fromProto(pm)
+	return nil
+}
+
+// toProto converts APIKey to proto message
+func (m APIKey) toProto() *APIKeyProto {
+	rules := make([]*AccessRuleProto, len(m.AccessRules))
+	for i, r := range m.AccessRules {
+		rules[i] = &AccessRuleProto{
+			ServiceId:   r.ServiceID,
+			Allowed:     r.Allowed,
+			RateLimit:   r.RateLimit,
+			MaxRequests: r.MaxRequests,
+			PricePerReq: r.PricePerReq,
+		}
+	}
+	return &APIKeyProto{
+		Id:           m.ID,
+		Provider:     string(m.Provider),
+		EncryptedKey: m.EncryptedKey,
+		Hash:         m.Hash,
+		Owner:        m.Owner,
+		AccessRules:  rules,
+		CreatedAt:    m.CreatedAt,
+		LastUsedAt:   m.LastUsedAt,
+		UsageCount:   m.UsageCount,
+		Active:       m.Active,
+	}
+}
+
+// fromProto converts proto message to APIKey
+func (m *APIKey) fromProto(pm *APIKeyProto) {
+	m.ID = pm.Id
+	m.Provider = ProviderFromString(pm.Provider)
+	m.EncryptedKey = pm.EncryptedKey
+	m.Hash = pm.Hash
+	m.Owner = pm.Owner
+	m.AccessRules = make([]AccessRule, len(pm.AccessRules))
+	for i, r := range pm.AccessRules {
+		m.AccessRules[i] = AccessRule{
+			ServiceID:   r.ServiceId,
+			Allowed:     r.Allowed,
+			RateLimit:   r.RateLimit,
+			MaxRequests: r.MaxRequests,
+			PricePerReq: r.PricePerReq,
+		}
+	}
+	m.CreatedAt = pm.CreatedAt
+	m.LastUsedAt = pm.LastUsedAt
+	m.UsageCount = pm.UsageCount
+	m.Active = pm.Active
 }
 
 // NewAPIKey creates a new API key record
@@ -104,12 +226,6 @@ func (k APIKey) CanAccess(serviceID string) bool {
 func (k *APIKey) RecordUsage() {
 	k.UsageCount++
 	k.LastUsedAt = 0 // Will be set by keeper with block time
-}
-
-// String implements stringer
-func (k APIKey) String() string {
-	return fmt.Sprintf("APIKey{%s: %s, owner: %s, active: %v, usage: %d}",
-		k.ID, k.Provider, k.Owner, k.Active, k.UsageCount)
 }
 
 // SecureWipe securely wipes sensitive data from memory

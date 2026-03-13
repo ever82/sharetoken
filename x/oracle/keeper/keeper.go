@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 	"time"
@@ -34,7 +33,7 @@ func NewKeeper(
 func (k Keeper) SetPrice(ctx sdk.Context, price types.Price) error {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetPriceKey(price.Symbol)
-	value, err := json.Marshal(price)
+	value, err := k.cdc.Marshal(&price)
 	if err != nil {
 		return fmt.Errorf("failed to marshal price: %w", err)
 	}
@@ -53,7 +52,7 @@ func (k Keeper) GetPrice(ctx sdk.Context, symbol string) (types.Price, bool) {
 	}
 
 	var price types.Price
-	if err := json.Unmarshal(value, &price); err != nil {
+	if err := k.cdc.Unmarshal(value, &price); err != nil {
 		return types.Price{}, false
 	}
 	return price, true
@@ -68,7 +67,7 @@ func (k Keeper) GetAllPrices(ctx sdk.Context) []types.Price {
 	var prices []types.Price
 	for ; iterator.Valid(); iterator.Next() {
 		var price types.Price
-		if err := json.Unmarshal(iterator.Value(), &price); err != nil {
+		if err := k.cdc.Unmarshal(iterator.Value(), &price); err != nil {
 			ctx.Logger().Error("failed to unmarshal price", "error", err)
 			continue
 		}

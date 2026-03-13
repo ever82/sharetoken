@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -23,7 +22,7 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey) *Keeper {
 func (k Keeper) SetService(ctx sdk.Context, service types.Service) error {
 	store := ctx.KVStore(k.storeKey)
 	key := types.GetServiceKey(service.ID)
-	value, err := json.Marshal(service)
+	value, err := k.cdc.Marshal(&service)
 	if err != nil {
 		return fmt.Errorf("failed to marshal service: %w", err)
 	}
@@ -39,7 +38,7 @@ func (k Keeper) GetService(ctx sdk.Context, id string) (types.Service, bool) {
 		return types.Service{}, false
 	}
 	var service types.Service
-	if err := json.Unmarshal(value, &service); err != nil {
+	if err := k.cdc.Unmarshal(value, &service); err != nil {
 		return types.Service{}, false
 	}
 	return service, true
@@ -54,7 +53,7 @@ func (k Keeper) GetAllServices(ctx sdk.Context) []types.Service {
 	var services []types.Service
 	for ; iterator.Valid(); iterator.Next() {
 		var service types.Service
-		if err := json.Unmarshal(iterator.Value(), &service); err != nil {
+		if err := k.cdc.Unmarshal(iterator.Value(), &service); err != nil {
 			ctx.Logger().Error("failed to unmarshal service", "error", err)
 			continue
 		}

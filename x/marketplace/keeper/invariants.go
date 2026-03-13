@@ -76,7 +76,7 @@ func (k Keeper) ServicePricingInvariant() sdk.Invariant {
 				types.PricingModeAuction:
 				// Valid pricing mode
 			default:
-				invalidPricing = append(invalidPricing, fmt.Sprintf("%s:invalid pricing mode %s", service.ID, service.PricingMode))
+				invalidPricing = append(invalidPricing, fmt.Sprintf("%s:invalid pricing mode %d", service.ID, service.PricingMode))
 				continue
 			}
 

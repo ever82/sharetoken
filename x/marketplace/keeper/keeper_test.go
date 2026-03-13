@@ -21,7 +21,7 @@ func TestNewService(t *testing.T) {
 }
 
 func TestPricingModes(t *testing.T) {
-	require.Equal(t, types.PricingModeFixed, types.PricingMode("fixed"))
-	require.Equal(t, types.PricingModeDynamic, types.PricingMode("dynamic"))
-	require.Equal(t, types.PricingModeAuction, types.PricingMode("auction"))
+	require.Equal(t, types.PricingModeFixed, types.PricingModeFromString("fixed"))
+	require.Equal(t, types.PricingModeDynamic, types.PricingModeFromString("dynamic"))
+	require.Equal(t, types.PricingModeAuction, types.PricingModeFromString("auction"))
 }
