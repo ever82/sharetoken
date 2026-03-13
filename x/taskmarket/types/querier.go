@@ -4,8 +4,8 @@ package types
 
 // QueryTasksRequest is the request type for querying tasks
 type QueryTasksRequest struct {
-	Status   string `json:"status,omitempty"`
-	Category string `json:"category,omitempty"`
+	Status      string `json:"status,omitempty"`
+	Category    string `json:"category,omitempty"`
 	RequesterID string `json:"requester_id,omitempty"`
 	WorkerID    string `json:"worker_id,omitempty"`
 	Limit       int    `json:"limit,omitempty"`

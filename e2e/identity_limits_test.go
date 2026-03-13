@@ -105,10 +105,10 @@ func (s *IdentityLimitsTest) TestLimitUpgradeAfterVerification() {
 // TestJurorEligibilityByLevel 测试等级与陪审员资格
 func (s *IdentityLimitsTest) TestJurorEligibilityByLevel() {
 	testCases := []struct {
-		name              string
-		mqScore           int64
-		isEligible        bool
-		minRequiredScore  int64
+		name             string
+		mqScore          int64
+		isEligible       bool
+		minRequiredScore int64
 	}{
 		{"新手不可", 50, false, 100},
 		{"普通刚好", 100, true, 100},

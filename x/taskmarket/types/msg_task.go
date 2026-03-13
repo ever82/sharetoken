@@ -9,11 +9,11 @@ import (
 
 // Message types for task tasks
 const (
-	TypeMsgCreateTask   = "create_task"
-	TypeMsgUpdateTask   = "update_task"
-	TypeMsgPublishTask  = "publish_task"
-	TypeMsgCancelTask   = "cancel_task"
-	TypeMsgStartTask    = "start_task"
+	TypeMsgCreateTask  = "create_task"
+	TypeMsgUpdateTask  = "update_task"
+	TypeMsgPublishTask = "publish_task"
+	TypeMsgCancelTask  = "cancel_task"
+	TypeMsgStartTask   = "start_task"
 )
 
 // Response types

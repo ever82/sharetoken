@@ -119,7 +119,7 @@ func (s *MCPHandlerTestSuite) TestChatWithGenieTool() {
 	params := map[string]interface{}{
 		"name": "chat_with_genie",
 		"arguments": map[string]interface{}{
-			"message":   "Hello Genie",
+			"message":    "Hello Genie",
 			"session_id": "test-session-mcp",
 		},
 	}
