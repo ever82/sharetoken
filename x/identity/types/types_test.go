@@ -75,7 +75,7 @@ func TestIdentity_ValidateBasic(t *testing.T) {
 			name: "valid - minimal DID format",
 			identity: types.Identity{
 				Address: validAddress,
-				Did:     "did:xx",
+				Did:     "did:method:test",
 			},
 			wantErr: false,
 		},
