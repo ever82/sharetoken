@@ -7,15 +7,13 @@ import "gogoproto/gogo.proto";
 option go_package = "sharetoken/x/taskmarket/types";
 
 // ApplicationStatus represents application status
-type ApplicationStatus int32;
-
-// ApplicationStatus values
-const (
-  ApplicationStatusPending   ApplicationStatus = 0;
-  ApplicationStatusAccepted  ApplicationStatus = 1;
-  ApplicationStatusRejected  ApplicationStatus = 2;
-  ApplicationStatusWithdrawn ApplicationStatus = 3;
-);
+enum ApplicationStatus {
+  APPLICATION_STATUS_UNSPECIFIED = 0;
+  APPLICATION_STATUS_PENDING = 1;
+  APPLICATION_STATUS_ACCEPTED = 2;
+  APPLICATION_STATUS_REJECTED = 3;
+  APPLICATION_STATUS_WITHDRAWN = 4;
+}
 
 // Application represents a worker's application for an open task
 message Application {
@@ -54,16 +52,14 @@ message Application {
 }
 
 // BidStatus represents bid status
-type BidStatus int32;
-
-// BidStatus values
-const (
-  BidStatusPending   BidStatus = 0;
-  BidStatusAccepted  BidStatus = 1;
-  BidStatusRejected  BidStatus = 2;
-  BidStatusWithdrawn BidStatus = 3;
-  BidStatusOutbid    BidStatus = 4;
-);
+enum BidStatus {
+  BID_STATUS_UNSPECIFIED = 0;
+  BID_STATUS_PENDING = 1;
+  BID_STATUS_ACCEPTED = 2;
+  BID_STATUS_REJECTED = 3;
+  BID_STATUS_WITHDRAWN = 4;
+  BID_STATUS_OUTBID = 5;
+}
 
 // Bid represents a bid for an auction task
 message Bid {

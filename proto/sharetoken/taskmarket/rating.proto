@@ -7,15 +7,13 @@ import "gogoproto/gogo.proto";
 option go_package = "sharetoken/x/taskmarket/types";
 
 // RatingDimension represents a rating dimension
-type RatingDimension int32;
-
-// RatingDimension values
-const (
-  DimensionQuality         RatingDimension = 0; // Quality of work
-  DimensionCommunication   RatingDimension = 1; // Communication
-  DimensionTimeliness      RatingDimension = 2; // Timeliness
-  DimensionProfessionalism RatingDimension = 3; // Professionalism
-);
+enum RatingDimension {
+  RATING_DIMENSION_UNSPECIFIED = 0;
+  RATING_DIMENSION_QUALITY = 1;
+  RATING_DIMENSION_COMMUNICATION = 2;
+  RATING_DIMENSION_TIMELINESS = 3;
+  RATING_DIMENSION_PROFESSIONALISM = 4;
+}
 
 // Rating represents a multi-dimensional rating
 message Rating {

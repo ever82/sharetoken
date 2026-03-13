@@ -8,16 +8,14 @@ import "gogoproto/gogo.proto";
 option go_package = "sharetoken/x/dispute/types";
 
 // DisputeStatus represents the status of a dispute
-type DisputeStatus int32;
-
-// DisputeStatus values
-const (
-  DisputeStatusOpen      DisputeStatus = 0;
-  DisputeStatusMediating DisputeStatus = 1;
-  DisputeStatusVoting    DisputeStatus = 2;
-  DisputeStatusResolved  DisputeStatus = 3;
-  DisputeStatusCancelled DisputeStatus = 4;
-);
+enum DisputeStatus {
+  DISPUTE_STATUS_UNSPECIFIED = 0;
+  DISPUTE_STATUS_OPEN = 1;
+  DISPUTE_STATUS_MEDIATING = 2;
+  DISPUTE_STATUS_VOTING = 3;
+  DISPUTE_STATUS_RESOLVED = 4;
+  DISPUTE_STATUS_CANCELLED = 5;
+}
 
 // Evidence represents evidence submitted in a dispute
 message Evidence {
