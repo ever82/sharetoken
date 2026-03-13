@@ -167,17 +167,17 @@ func (lc *LimitConfig) RecordTransaction(amount sdk.Coin) {
 // resetTxCountersIfNeeded resets daily/monthly counters if needed
 func (lc *LimitConfig) resetTxCountersIfNeeded() {
 	now := uint64(time.Now().Unix())
-	nowDay := now / 86400
-	nowMonth := now / (86400 * 30)
+	nowDay := now / SecondsPerDay
+	nowMonth := now / (SecondsPerDay * DaysPerMonth)
 
-	lastDay := lc.TxLimit.LastResetDay / 86400
+	lastDay := lc.TxLimit.LastResetDay / SecondsPerDay
 	if nowDay > lastDay {
 		lc.TxLimit.DailyTxCount = 0
 		lc.TxLimit.DailySpent = DefaultCoin()
 		lc.TxLimit.LastResetDay = now
 	}
 
-	lastMonth := lc.TxLimit.LastResetMonth / (86400 * 30)
+	lastMonth := lc.TxLimit.LastResetMonth / (SecondsPerDay * DaysPerMonth)
 	if nowMonth > lastMonth {
 		lc.TxLimit.MonthlyTxCount = 0
 		lc.TxLimit.MonthlySpent = DefaultCoin()
@@ -195,7 +195,7 @@ func (lc *LimitConfig) CheckWithdrawalLimit(amount sdk.Coin) error {
 
 	// Check cooldown
 	now := time.Now().Unix()
-	cooldownSeconds := int64(lc.WithdrawalLimit.CooldownHours) * 3600
+	cooldownSeconds := int64(lc.WithdrawalLimit.CooldownHours) * SecondsPerHour
 	if int64(lc.WithdrawalLimit.LastWithdrawalTime) > 0 && now-int64(lc.WithdrawalLimit.LastWithdrawalTime) < cooldownSeconds {
 		remaining := cooldownSeconds - (now - int64(lc.WithdrawalLimit.LastWithdrawalTime))
 		return LimitError{
@@ -231,9 +231,9 @@ func (lc *LimitConfig) RecordWithdrawal(amount sdk.Coin) {
 // resetWithdrawalCountersIfNeeded resets daily counters if needed
 func (lc *LimitConfig) resetWithdrawalCountersIfNeeded() {
 	now := uint64(time.Now().Unix())
-	nowDay := now / 86400
+	nowDay := now / SecondsPerDay
 
-	lastDay := lc.WithdrawalLimit.LastResetDay / 86400
+	lastDay := lc.WithdrawalLimit.LastResetDay / SecondsPerDay
 	if nowDay > lastDay {
 		lc.WithdrawalLimit.DailyWithdrawn = DefaultCoin()
 		lc.WithdrawalLimit.LastResetDay = now
@@ -310,9 +310,9 @@ func (lc *LimitConfig) ReleaseServiceCall() {
 // resetServiceCountersIfNeeded resets rate limit counters if needed
 func (lc *LimitConfig) resetServiceCountersIfNeeded() {
 	now := uint64(time.Now().Unix())
-	nowMinute := now / 60
+	nowMinute := now / SecondsPerMinute
 
-	lastMinute := lc.ServiceLimit.LastRateReset / 60
+	lastMinute := lc.ServiceLimit.LastRateReset / SecondsPerMinute
 	if nowMinute > lastMinute {
 		lc.ServiceLimit.RequestsLastMinute = 0
 		lc.ServiceLimit.LastRateReset = now

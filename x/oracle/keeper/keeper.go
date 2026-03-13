@@ -233,7 +233,7 @@ func (k Keeper) ValidatePrice(ctx sdk.Context, price types.Price) error {
 	}
 
 	// Check price is not too old (using escrow default duration as max age)
-	if ctx.BlockTime().Unix()-price.Timestamp > identitytypes.DefaultEscrowDurationHours*3600 {
+	if ctx.BlockTime().Unix()-price.Timestamp > int64(identitytypes.DefaultEscrowDurationHours)*identitytypes.SecondsPerHour {
 		return types.ErrStalePrice
 	}
 

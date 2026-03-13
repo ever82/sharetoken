@@ -77,6 +77,20 @@ const (
 	CrowdfundingCheckIntervalMinutes = 1
 )
 
+// Time conversion constants
+const (
+	// SecondsPerMinute is the number of seconds in a minute
+	SecondsPerMinute = 60
+	// SecondsPerHour is the number of seconds in an hour
+	SecondsPerHour = 3600
+	// SecondsPerDay is the number of seconds in a day
+	SecondsPerDay = 86400
+	// HoursPerDay is the number of hours in a day
+	HoursPerDay = 24
+	// DaysPerMonth is the average number of days in a month (used for monthly calculations)
+	DaysPerMonth = 30
+)
+
 // Gas and fee constants
 const (
 	// DefaultMinGasPrice is the default minimum gas price

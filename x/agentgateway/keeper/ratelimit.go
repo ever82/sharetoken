@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"time"
+
+	"sharetoken/x/agentgateway/types"
 )
 
 // RateLimit 速率限制状态
@@ -36,7 +38,7 @@ func (k *Keeper) CheckRateLimit(address string) bool {
 	}
 
 	// 检查是否超过限制（60 req/min）
-	if limit.RequestCount >= 60 {
+	if limit.RequestCount >= types.DefaultRateLimitPerMinute {
 		return false
 	}
 

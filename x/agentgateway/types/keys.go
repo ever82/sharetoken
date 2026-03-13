@@ -14,6 +14,12 @@ const (
 	QuerierRoute = ModuleName
 )
 
+// Rate limit constants
+const (
+	// DefaultRateLimitPerMinute is the default maximum requests per minute per address
+	DefaultRateLimitPerMinute = 60
+)
+
 // Key prefixes for store
 var (
 	// SessionKey is the prefix for session store

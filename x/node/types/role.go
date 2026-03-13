@@ -8,6 +8,31 @@ import (
 // NodeRole represents the role of a ShareToken node
 type NodeRole int32
 
+// Node configuration constants
+const (
+	// DefaultLightMaxPeers is the default maximum peers for light nodes
+	DefaultLightMaxPeers = 10
+	// DefaultFullMaxPeers is the default maximum peers for full nodes
+	DefaultFullMaxPeers = 40
+	// DefaultServiceMaxPeers is the default maximum peers for service nodes
+	DefaultServiceMaxPeers = 20
+	// DefaultArchiveMaxPeers is the default maximum peers for archive nodes
+	DefaultArchiveMaxPeers = 50
+
+	// DefaultFullPruningKeepRecent is the default number of recent blocks to keep for full nodes
+	DefaultFullPruningKeepRecent uint64 = 100
+	// DefaultFullPruningKeepEvery is the default interval to keep blocks for full nodes
+	DefaultFullPruningKeepEvery uint64 = 10000
+
+	// DefaultWASMMaxMemory is the default maximum memory for WASM sandboxes (MB)
+	DefaultWASMMaxMemory = 512
+	// DefaultWASMMaxCPUTime is the default maximum CPU time for WASM execution (ms)
+	DefaultWASMMaxCPUTime = 30000
+
+	// DefaultBlockExplorerPort is the default port for block explorer API
+	DefaultBlockExplorerPort = 8080
+)
+
 const (
 	// RoleUndefined is an invalid/undefined role
 	RoleUndefined NodeRole = 0
@@ -178,7 +203,7 @@ type ArchiveNodeConfig struct {
 // DefaultLightConfig returns default light node config
 func DefaultLightConfig() *LightNodeConfig {
 	return &LightNodeConfig{
-		MaxPeers:         10,
+		MaxPeers:         DefaultLightMaxPeers,
 		PruningStrategy:  "everything",
 		EnableGenieBot:   true,
 		TrustedFullNodes: []string{},
@@ -188,10 +213,10 @@ func DefaultLightConfig() *LightNodeConfig {
 // DefaultFullConfig returns default full node config
 func DefaultFullConfig() *FullNodeConfig {
 	return &FullNodeConfig{
-		MaxPeers:          40,
+		MaxPeers:          DefaultFullMaxPeers,
 		PruningStrategy:   "custom",
-		PruningKeepRecent: 100,
-		PruningKeepEvery:  10000,
+		PruningKeepRecent: DefaultFullPruningKeepRecent,
+		PruningKeepEvery:  DefaultFullPruningKeepEvery,
 		EnableIndexer:     true,
 	}
 }
@@ -199,12 +224,12 @@ func DefaultFullConfig() *FullNodeConfig {
 // DefaultServiceConfig returns default service node config
 func DefaultServiceConfig() *ServiceNodeConfig {
 	return &ServiceNodeConfig{
-		MaxPeers:             20,
+		MaxPeers:             DefaultServiceMaxPeers,
 		EnableLLMPlugin:      true,
 		EnableAgentPlugin:    true,
 		EnableWorkflowPlugin: true,
-		WASMMaxMemory:        512,
-		WASMMaxCPUTime:       30000,
+		WASMMaxMemory:        DefaultWASMMaxMemory,
+		WASMMaxCPUTime:       DefaultWASMMaxCPUTime,
 		TrustedFullNodes:     []string{},
 	}
 }
@@ -212,9 +237,9 @@ func DefaultServiceConfig() *ServiceNodeConfig {
 // DefaultArchiveConfig returns default archive node config
 func DefaultArchiveConfig() *ArchiveNodeConfig {
 	return &ArchiveNodeConfig{
-		MaxPeers:              50,
+		MaxPeers:              DefaultArchiveMaxPeers,
 		EnableBlockExplorer:   true,
-		BlockExplorerPort:     8080,
+		BlockExplorerPort:     DefaultBlockExplorerPort,
 		IndexAllTransactions:  true,
 		IndexEvents:           true,
 		CompressionEnabled:    true,
@@ -305,6 +330,29 @@ type NodeCapabilities struct {
 	MemoryRequirementGB int
 }
 
+// Storage and memory requirements for different node roles (in GB)
+const (
+	// LightNodeStorageRequirementGB is the storage requirement for light nodes
+	LightNodeStorageRequirementGB = 10
+	// LightNodeMemoryRequirementGB is the memory requirement for light nodes
+	LightNodeMemoryRequirementGB = 2
+
+	// FullNodeStorageRequirementGB is the storage requirement for full nodes
+	FullNodeStorageRequirementGB = 100
+	// FullNodeMemoryRequirementGB is the memory requirement for full nodes
+	FullNodeMemoryRequirementGB = 4
+
+	// ServiceNodeStorageRequirementGB is the storage requirement for service nodes
+	ServiceNodeStorageRequirementGB = 50
+	// ServiceNodeMemoryRequirementGB is the memory requirement for service nodes
+	ServiceNodeMemoryRequirementGB = 8
+
+	// ArchiveNodeStorageRequirementGB is the storage requirement for archive nodes
+	ArchiveNodeStorageRequirementGB = 1000
+	// ArchiveNodeMemoryRequirementGB is the memory requirement for archive nodes
+	ArchiveNodeMemoryRequirementGB = 16
+)
+
 // GetCapabilities returns capabilities for a role
 func (r NodeRole) GetCapabilities() NodeCapabilities {
 	switch r {
@@ -316,8 +364,8 @@ func (r NodeRole) GetCapabilities() NodeCapabilities {
 			CanServeLightClients: false,
 			CanRunPlugins:        true, // GenieBot only
 			CanIndexBlocks:       false,
-			StorageRequirementGB: 10,
-			MemoryRequirementGB:  2,
+			StorageRequirementGB: LightNodeStorageRequirementGB,
+			MemoryRequirementGB:  LightNodeMemoryRequirementGB,
 		}
 	case RoleFull:
 		return NodeCapabilities{
@@ -327,8 +375,8 @@ func (r NodeRole) GetCapabilities() NodeCapabilities {
 			CanServeLightClients: true,
 			CanRunPlugins:        false,
 			CanIndexBlocks:       false,
-			StorageRequirementGB: 100,
-			MemoryRequirementGB:  4,
+			StorageRequirementGB: FullNodeStorageRequirementGB,
+			MemoryRequirementGB:  FullNodeMemoryRequirementGB,
 		}
 	case RoleService:
 		return NodeCapabilities{
@@ -338,8 +386,8 @@ func (r NodeRole) GetCapabilities() NodeCapabilities {
 			CanServeLightClients: false,
 			CanRunPlugins:        true, // All service plugins
 			CanIndexBlocks:       false,
-			StorageRequirementGB: 50,
-			MemoryRequirementGB:  8,
+			StorageRequirementGB: ServiceNodeStorageRequirementGB,
+			MemoryRequirementGB:  ServiceNodeMemoryRequirementGB,
 		}
 	case RoleArchive:
 		return NodeCapabilities{
@@ -349,8 +397,8 @@ func (r NodeRole) GetCapabilities() NodeCapabilities {
 			CanServeLightClients: true,
 			CanRunPlugins:        false,
 			CanIndexBlocks:       true,
-			StorageRequirementGB: 1000,
-			MemoryRequirementGB:  16,
+			StorageRequirementGB: ArchiveNodeStorageRequirementGB,
+			MemoryRequirementGB:  ArchiveNodeMemoryRequirementGB,
 		}
 	default:
 		return NodeCapabilities{}
