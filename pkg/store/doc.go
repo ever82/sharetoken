@@ -25,5 +25,4 @@
 //	// Prefix iteration
 //	start, end := store.PrefixRange([]byte{0x01})
 //	iterator := sdk.KVStorePrefixIterator(store, []byte{0x01})
-//
 package store

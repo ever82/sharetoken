@@ -51,13 +51,13 @@ type ClaudeMessage struct {
 
 // MessagesResponse Claude Messages API 响应
 type MessagesResponse struct {
-	ID           string          `json:"id"`
-	Type         string          `json:"type"`
-	Role         string          `json:"role"`
-	Model        string          `json:"model"`
-	Content      []ContentBlock  `json:"content"`
-	StopReason   string          `json:"stop_reason"`
-	StopSequence string          `json:"stop_sequence,omitempty"`
+	ID           string           `json:"id"`
+	Type         string           `json:"type"`
+	Role         string           `json:"role"`
+	Model        string           `json:"model"`
+	Content      []ContentBlock   `json:"content"`
+	StopReason   string           `json:"stop_reason"`
+	StopSequence string           `json:"stop_sequence,omitempty"`
 	Usage        ClaudeTokenUsage `json:"usage"`
 }
 
