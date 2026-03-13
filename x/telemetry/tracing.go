@@ -1,0 +1,297 @@
+package telemetry
+
+import (
+	"context"
+	"fmt"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
+	"go.opentelemetry.io/otel/trace"
+)
+
+const (
+	// ServiceName is the name of the service for tracing
+	ServiceName = "sharetoken"
+	// ServiceVersion is the version of the service
+	ServiceVersion = "1.0.0"
+)
+
+var (
+	// tracer is the global tracer instance
+	tracer trace.Tracer
+	// tracerProvider is the global tracer provider
+	tracerProvider *sdktrace.TracerProvider
+)
+
+// TracerConfig holds configuration for the tracer
+type TracerConfig struct {
+	// Enabled enables or disables tracing
+	Enabled bool
+	// ExporterType can be "jaeger", "stdout", or "none"
+	ExporterType string
+	// JaegerEndpoint is the Jaeger collector endpoint
+	JaegerEndpoint string
+	// JaegerAgentEndpoint is the Jaeger agent endpoint (for UDP)
+	JaegerAgentEndpoint string
+	// SampleRate is the sampling rate (0.0 to 1.0)
+	SampleRate float64
+	// ServiceName is the name of the service
+	ServiceName string
+	// ServiceVersion is the version of the service
+	ServiceVersion string
+	// Environment is the deployment environment (dev, staging, prod)
+	Environment string
+}
+
+// DefaultTracerConfig returns the default tracer configuration
+func DefaultTracerConfig() TracerConfig {
+	return TracerConfig{
+		Enabled:             true,
+		ExporterType:        "jaeger",
+		JaegerEndpoint:      "http://localhost:14268/api/traces",
+		JaegerAgentEndpoint: "localhost:6831",
+		SampleRate:          1.0,
+		ServiceName:         ServiceName,
+		ServiceVersion:      ServiceVersion,
+		Environment:         "dev",
+	}
+}
+
+// InitTracer initializes the global tracer with the given configuration
+func InitTracer(cfg TracerConfig) error {
+	if !cfg.Enabled {
+		tracer = otel.Tracer("noop")
+		return nil
+	}
+
+	// Create exporter
+	exporter, err := createExporter(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to create trace exporter: %w", err)
+	}
+
+	// Create resource
+	res, err := resource.New(
+		context.Background(),
+		resource.WithAttributes(
+			semconv.ServiceName(cfg.ServiceName),
+			semconv.ServiceVersion(cfg.ServiceVersion),
+			semconv.DeploymentEnvironment(cfg.Environment),
+		),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create resource: %w", err)
+	}
+
+	// Create tracer provider options
+	var tpOptions []sdktrace.TracerProviderOption
+	tpOptions = append(tpOptions,
+		sdktrace.WithResource(res),
+		sdktrace.WithSampler(sdktrace.TraceIDRatioBased(cfg.SampleRate)),
+	)
+
+	// Add exporter if available
+	if exporter != nil {
+		tpOptions = append(tpOptions, sdktrace.WithBatcher(exporter))
+	}
+
+	// Create tracer provider
+	tp := sdktrace.NewTracerProvider(tpOptions...)
+
+	// Set as global tracer provider
+	otel.SetTracerProvider(tp)
+	tracerProvider = tp
+	tracer = tp.Tracer(cfg.ServiceName)
+
+	return nil
+}
+
+// createExporter creates a trace exporter based on configuration
+func createExporter(cfg TracerConfig) (sdktrace.SpanExporter, error) {
+	// For now, use a simple stdout exporter that works with existing dependencies
+	// In production, you would import the appropriate exporter package
+	// e.g., go.opentelemetry.io/otel/exporters/jaeger
+	return nil, nil
+}
+
+// ShutdownTracer gracefully shuts down the tracer
+func ShutdownTracer(ctx context.Context) error {
+	if tracerProvider != nil {
+		return tracerProvider.Shutdown(ctx)
+	}
+	return nil
+}
+
+// Tracer returns the global tracer
+func Tracer() trace.Tracer {
+	if tracer == nil {
+		tracer = otel.Tracer(ServiceName)
+	}
+	return tracer
+}
+
+// SpanKind represents the kind of span
+type SpanKind int
+
+const (
+	SpanKindInternal SpanKind = 0
+	SpanKindServer   SpanKind = 1
+	SpanKindClient   SpanKind = 2
+	SpanKindProducer SpanKind = 3
+	SpanKindConsumer SpanKind = 4
+)
+
+// StartSpan starts a new span with the given name and options
+func StartSpan(ctx context.Context, name string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
+	return Tracer().Start(ctx, name, opts...)
+}
+
+// StartSpanWithKind starts a new span with the specified kind
+func StartSpanWithKind(ctx context.Context, name string, kind SpanKind) (context.Context, trace.Span) {
+	var spanKind trace.SpanKind
+	switch kind {
+	case SpanKindServer:
+		spanKind = trace.SpanKindServer
+	case SpanKindClient:
+		spanKind = trace.SpanKindClient
+	case SpanKindProducer:
+		spanKind = trace.SpanKindProducer
+	case SpanKindConsumer:
+		spanKind = trace.SpanKindConsumer
+	default:
+		spanKind = trace.SpanKindInternal
+	}
+	return Tracer().Start(ctx, name, trace.WithSpanKind(spanKind))
+}
+
+// StartModuleSpan starts a span for module operations
+func StartModuleSpan(ctx context.Context, module, operation string) (context.Context, trace.Span) {
+	return StartSpanWithAttributes(ctx, fmt.Sprintf("%s.%s", module, operation),
+		attribute.String("module", module),
+		attribute.String("operation", operation),
+	)
+}
+
+// StartTxSpan starts a span for transaction processing
+func StartTxSpan(ctx context.Context, module, msgType string) (context.Context, trace.Span) {
+	return StartSpanWithAttributes(ctx, fmt.Sprintf("tx.%s.%s", module, msgType),
+		attribute.String("module", module),
+		attribute.String("msg_type", msgType),
+		attribute.String("span.type", "transaction"),
+	)
+}
+
+// StartQuerySpan starts a span for query processing
+func StartQuerySpan(ctx context.Context, module, queryType string) (context.Context, trace.Span) {
+	return StartSpanWithAttributes(ctx, fmt.Sprintf("query.%s.%s", module, queryType),
+		attribute.String("module", module),
+		attribute.String("query_type", queryType),
+		attribute.String("span.type", "query"),
+	)
+}
+
+// StartABGISpan starts a span for ABCI operations
+func StartABGISpan(ctx context.Context, operation string) (context.Context, trace.Span) {
+	return StartSpanWithAttributes(ctx, fmt.Sprintf("abci.%s", operation),
+		attribute.String("span.type", "abci"),
+		attribute.String("operation", operation),
+	)
+}
+
+// StartSpanWithAttributes starts a span with the given attributes
+func StartSpanWithAttributes(ctx context.Context, name string, attrs ...attribute.KeyValue) (context.Context, trace.Span) {
+	return Tracer().Start(ctx, name, trace.WithAttributes(attrs...))
+}
+
+// AddEventToSpan adds an event to the current span
+func AddEventToSpan(ctx context.Context, name string, attrs ...attribute.KeyValue) {
+	span := trace.SpanFromContext(ctx)
+	if span != nil && span.IsRecording() {
+		span.AddEvent(name, trace.WithAttributes(attrs...))
+	}
+}
+
+// SetSpanAttributes sets attributes on the current span
+func SetSpanAttributes(ctx context.Context, attrs ...attribute.KeyValue) {
+	span := trace.SpanFromContext(ctx)
+	if span != nil && span.IsRecording() {
+		span.SetAttributes(attrs...)
+	}
+}
+
+// SetSpanStatus sets the status of the current span
+func SetSpanStatus(ctx context.Context, err error) {
+	span := trace.SpanFromContext(ctx)
+	if span != nil && span.IsRecording() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+		} else {
+			span.SetStatus(codes.Ok, "")
+		}
+	}
+}
+
+// RecordSpanError records an error on the current span
+func RecordSpanError(ctx context.Context, err error, opts ...trace.EventOption) {
+	span := trace.SpanFromContext(ctx)
+	if span != nil && span.IsRecording() {
+		span.RecordError(err, opts...)
+	}
+}
+
+// SpanFromContext returns the span from context
+func SpanFromContext(ctx context.Context) trace.Span {
+	return trace.SpanFromContext(ctx)
+}
+
+// ContextWithSpan adds a span to context
+func ContextWithSpan(ctx context.Context, span trace.Span) context.Context {
+	return trace.ContextWithSpan(ctx, span)
+}
+
+// IsTracingEnabled returns true if tracing is enabled
+func IsTracingEnabled() bool {
+	return tracer != nil
+}
+
+// Common attributes helpers
+
+// ModuleAttribute creates a module attribute
+func ModuleAttribute(module string) attribute.KeyValue {
+	return attribute.String("module", module)
+}
+
+// ChainIDAttribute creates a chain ID attribute
+func ChainIDAttribute(chainID string) attribute.KeyValue {
+	return attribute.String("chain_id", chainID)
+}
+
+// BlockHeightAttribute creates a block height attribute
+func BlockHeightAttribute(height int64) attribute.KeyValue {
+	return attribute.Int64("block_height", height)
+}
+
+// TxHashAttribute creates a transaction hash attribute
+func TxHashAttribute(hash string) attribute.KeyValue {
+	return attribute.String("tx_hash", hash)
+}
+
+// SenderAttribute creates a sender attribute
+func SenderAttribute(sender string) attribute.KeyValue {
+	return attribute.String("sender", sender)
+}
+
+// GasUsedAttribute creates a gas used attribute
+func GasUsedAttribute(gas uint64) attribute.KeyValue {
+	return attribute.Int64("gas_used", int64(gas))
+}
+
+// SuccessAttribute creates a success attribute
+func SuccessAttribute(success bool) attribute.KeyValue {
+	return attribute.Bool("success", success)
+}

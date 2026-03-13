@@ -1,0 +1,499 @@
+package telemetry
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/rs/zerolog"
+)
+
+// LogLevel represents the log level
+type LogLevel int
+
+const (
+	DebugLevel LogLevel = 0
+	InfoLevel  LogLevel = 1
+	WarnLevel  LogLevel = 2
+	ErrorLevel LogLevel = 3
+	FatalLevel LogLevel = 4
+	PanicLevel LogLevel = 5
+)
+
+// LoggerConfig holds configuration for the logger
+type LoggerConfig struct {
+	// Format can be "json" or "text"
+	Format string
+	// Level is the minimum log level
+	Level LogLevel
+	// Output is the output writer (default: os.Stdout)
+	Output io.Writer
+	// TimeFormat is the time format for text logs (default: RFC3339)
+	TimeFormat string
+	// CallerEnabled enables caller info in logs
+	CallerEnabled bool
+	// StackTraceEnabled enables stack traces for errors
+	StackTraceEnabled bool
+	// ServiceName is the service name
+	ServiceName string
+	// Environment is the deployment environment
+	Environment string
+}
+
+// DefaultLoggerConfig returns the default logger configuration
+func DefaultLoggerConfig() LoggerConfig {
+	return LoggerConfig{
+		Format:            "json",
+		Level:             InfoLevel,
+		Output:            os.Stdout,
+		TimeFormat:        time.RFC3339,
+		CallerEnabled:     true,
+		StackTraceEnabled: false,
+		ServiceName:       ServiceName,
+		Environment:       "dev",
+	}
+}
+
+var (
+	// globalLogger is the global logger instance
+	globalLogger *Logger
+	// loggerMutex protects global logger initialization
+	loggerMutex sync.Once
+)
+
+// Logger wraps zerolog with structured logging capabilities
+type Logger struct {
+	logger    zerolog.Logger
+	config    LoggerConfig
+	context   map[string]interface{}
+	contextMu sync.RWMutex
+}
+
+// InitLogger initializes the global logger with the given configuration
+func InitLogger(config LoggerConfig) {
+	loggerMutex.Do(func() {
+		globalLogger = NewLogger(config)
+	})
+}
+
+// NewLogger creates a new Logger instance
+func NewLogger(config LoggerConfig) *Logger {
+	// Configure zerolog
+	zerolog.TimeFieldFormat = config.TimeFormat
+	zerolog.SetGlobalLevel(toZerologLevel(config.Level))
+
+	// Create output writer
+	output := config.Output
+	if output == nil {
+		output = os.Stdout
+	}
+
+	// Configure format
+	var logger zerolog.Logger
+	if config.Format == "json" {
+		logger = zerolog.New(output).With().Timestamp().Logger()
+	} else {
+		logger = zerolog.New(zerolog.ConsoleWriter{
+			Out:        output,
+			TimeFormat: config.TimeFormat,
+			NoColor:    false,
+		}).With().Timestamp().Logger()
+	}
+
+	// Add service context
+	logger = logger.With().
+		Str("service", config.ServiceName).
+		Str("environment", config.Environment).
+		Logger()
+
+	if config.CallerEnabled {
+		logger = logger.With().Caller().Logger()
+	}
+
+	return &Logger{
+		logger:  logger,
+		config:  config,
+		context: make(map[string]interface{}),
+	}
+}
+
+// GetLogger returns the global logger instance
+func GetLogger() *Logger {
+	if globalLogger == nil {
+		InitLogger(DefaultLoggerConfig())
+	}
+	return globalLogger
+}
+
+// Logger returns the underlying zerolog logger
+func (l *Logger) Logger() zerolog.Logger {
+	return l.logger
+}
+
+// WithContext returns a new logger with the given context fields
+func (l *Logger) WithContext(ctx context.Context) *Logger {
+	return &Logger{
+		logger:  l.logger.With().Ctx(ctx).Logger(),
+		config:  l.config,
+		context: l.getContextCopy(),
+	}
+}
+
+// WithField returns a new logger with a single field
+func (l *Logger) WithField(key string, value interface{}) *Logger {
+	return &Logger{
+		logger:  l.logger.With().Interface(key, value).Logger(),
+		config:  l.config,
+		context: l.getContextCopy(),
+	}
+}
+
+// WithFields returns a new logger with multiple fields
+func (l *Logger) WithFields(fields map[string]interface{}) *Logger {
+	ctx := l.logger.With()
+	for k, v := range fields {
+		ctx = ctx.Interface(k, v)
+	}
+	return &Logger{
+		logger:  ctx.Logger(),
+		config:  l.config,
+		context: l.getContextCopy(),
+	}
+}
+
+// WithModule returns a logger with module context
+func (l *Logger) WithModule(module string) *Logger {
+	return l.WithField("module", module)
+}
+
+// WithBlockHeight returns a logger with block height context
+func (l *Logger) WithBlockHeight(height int64) *Logger {
+	return l.WithField("block_height", height)
+}
+
+// WithTxHash returns a logger with transaction hash context
+func (l *Logger) WithTxHash(hash string) *Logger {
+	return l.WithField("tx_hash", hash)
+}
+
+// WithSender returns a logger with sender context
+func (l *Logger) WithSender(sender string) *Logger {
+	return l.WithField("sender", sender)
+}
+
+// WithError returns a logger with error context
+func (l *Logger) WithError(err error) *Logger {
+	return l.WithField("error", err.Error())
+}
+
+// SetContextField sets a persistent context field
+func (l *Logger) SetContextField(key string, value interface{}) {
+	l.contextMu.Lock()
+	l.context[key] = value
+	l.contextMu.Unlock()
+}
+
+// getContextCopy returns a copy of the context map
+func (l *Logger) getContextCopy() map[string]interface{} {
+	l.contextMu.RLock()
+	defer l.contextMu.RUnlock()
+
+	copy := make(map[string]interface{}, len(l.context))
+	for k, v := range l.context {
+		copy[k] = v
+	}
+	return copy
+}
+
+// Debug logs a debug message
+func (l *Logger) Debug(msg string) {
+	l.logger.Debug().Msg(msg)
+}
+
+// Debugf logs a formatted debug message
+func (l *Logger) Debugf(format string, args ...interface{}) {
+	l.logger.Debug().Msg(fmt.Sprintf(format, args...))
+}
+
+// Info logs an info message
+func (l *Logger) Info(msg string) {
+	l.logger.Info().Msg(msg)
+}
+
+// Infof logs a formatted info message
+func (l *Logger) Infof(format string, args ...interface{}) {
+	l.logger.Info().Msg(fmt.Sprintf(format, args...))
+}
+
+// Warn logs a warning message
+func (l *Logger) Warn(msg string) {
+	l.logger.Warn().Msg(msg)
+}
+
+// Warnf logs a formatted warning message
+func (l *Logger) Warnf(format string, args ...interface{}) {
+	l.logger.Warn().Msg(fmt.Sprintf(format, args...))
+}
+
+// Error logs an error message
+func (l *Logger) Error(msg string, err error) {
+	l.logger.Error().Err(err).Msg(msg)
+}
+
+// Errorf logs a formatted error message
+func (l *Logger) Errorf(format string, args ...interface{}) {
+	l.logger.Error().Msg(fmt.Sprintf(format, args...))
+}
+
+// Fatal logs a fatal message and exits
+func (l *Logger) Fatal(msg string, err error) {
+	l.logger.Fatal().Err(err).Msg(msg)
+}
+
+// Fatalf logs a formatted fatal message and exits
+func (l *Logger) Fatalf(format string, args ...interface{}) {
+	l.logger.Fatal().Msg(fmt.Sprintf(format, args...))
+}
+
+// Panic logs a panic message and panics
+func (l *Logger) Panic(msg string, err error) {
+	l.logger.Panic().Err(err).Msg(msg)
+}
+
+// Structured logging methods with events
+
+// LogEvent logs a structured event
+func (l *Logger) LogEvent(event string, fields map[string]interface{}) {
+	eventLogBuilder := l.logger.With().Str("event_type", event)
+	for k, v := range fields {
+		eventLogBuilder = eventLogBuilder.Interface(k, v)
+	}
+	logger := eventLogBuilder.Logger()
+	logger.Info().Msg(event)
+}
+
+// LogTx logs a transaction event
+func (l *Logger) LogTx(module, txType string, fields map[string]interface{}) {
+	fields["module"] = module
+	fields["tx_type"] = txType
+	l.LogEvent("transaction", fields)
+}
+
+// LogQuery logs a query event
+func (l *Logger) LogQuery(module, queryType string, fields map[string]interface{}) {
+	fields["module"] = module
+	fields["query_type"] = queryType
+	l.LogEvent("query", fields)
+}
+
+// LogABCI logs an ABCI event
+func (l *Logger) LogABCI(operation string, fields map[string]interface{}) {
+	fields["operation"] = operation
+	l.LogEvent("abci", fields)
+}
+
+// LogModuleOperation logs a module operation
+func (l *Logger) LogModuleOperation(module, operation string, fields map[string]interface{}) {
+	fields["module"] = module
+	fields["operation"] = operation
+	l.LogEvent("module_operation", fields)
+}
+
+// SDKLogger implements cosmos-sdk log.Logger interface
+type SDKLogger struct {
+	logger *Logger
+}
+
+// NewSDKLogger creates a cosmos-sdk compatible logger
+func NewSDKLogger(logger *Logger) *SDKLogger {
+	return &SDKLogger{logger: logger}
+}
+
+// Debug implements sdk.Logger
+func (l *SDKLogger) Debug(msg string, keyvals ...interface{}) {
+	l.logger.logger.Debug().Fields(keyValuesToMap(keyvals...)).Msg(msg)
+}
+
+// Info implements sdk.Logger
+func (l *SDKLogger) Info(msg string, keyvals ...interface{}) {
+	l.logger.logger.Info().Fields(keyValuesToMap(keyvals...)).Msg(msg)
+}
+
+// Error implements sdk.Logger
+func (l *SDKLogger) Error(msg string, keyvals ...interface{}) {
+	l.logger.logger.Error().Fields(keyValuesToMap(keyvals...)).Msg(msg)
+}
+
+// With implements sdk.Logger
+func (l *SDKLogger) With(keyvals ...interface{}) *SDKLogger {
+	return &SDKLogger{
+		logger: &Logger{
+			logger:  l.logger.logger.With().Fields(keyValuesToMap(keyvals...)).Logger(),
+			config:  l.logger.config,
+			context: l.logger.getContextCopy(),
+		},
+	}
+}
+
+// Impl implements sdk.Logger
+func (l *SDKLogger) Impl() interface{} {
+	return l.logger.logger
+}
+
+// keyValuesToMap converts key-value pairs to a map
+func keyValuesToMap(keyvals ...interface{}) map[string]interface{} {
+	if len(keyvals)%2 != 0 {
+		keyvals = append(keyvals, "(MISSING)")
+	}
+
+	m := make(map[string]interface{}, len(keyvals)/2)
+	for i := 0; i < len(keyvals); i += 2 {
+		key, ok := keyvals[i].(string)
+		if !ok {
+			key = fmt.Sprintf("%v", keyvals[i])
+		}
+		m[key] = keyvals[i+1]
+	}
+	return m
+}
+
+// toZerologLevel converts LogLevel to zerolog.Level
+func toZerologLevel(level LogLevel) zerolog.Level {
+	switch level {
+	case DebugLevel:
+		return zerolog.DebugLevel
+	case InfoLevel:
+		return zerolog.InfoLevel
+	case WarnLevel:
+		return zerolog.WarnLevel
+	case ErrorLevel:
+		return zerolog.ErrorLevel
+	case FatalLevel:
+		return zerolog.FatalLevel
+	case PanicLevel:
+		return zerolog.PanicLevel
+	default:
+		return zerolog.InfoLevel
+	}
+}
+
+// ParseLogLevel parses a log level string
+func ParseLogLevel(level string) LogLevel {
+	switch strings.ToLower(level) {
+	case "debug":
+		return DebugLevel
+	case "info":
+		return InfoLevel
+	case "warn", "warning":
+		return WarnLevel
+	case "error":
+		return ErrorLevel
+	case "fatal":
+		return FatalLevel
+	case "panic":
+		return PanicLevel
+	default:
+		return InfoLevel
+	}
+}
+
+// Package-level helper functions for convenient logging
+
+// Debug logs a debug message using the global logger
+func Debug(msg string) {
+	GetLogger().Debug(msg)
+}
+
+// Debugf logs a formatted debug message using the global logger
+func Debugf(format string, args ...interface{}) {
+	GetLogger().Debugf(format, args...)
+}
+
+// Info logs an info message using the global logger
+func Info(msg string) {
+	GetLogger().Info(msg)
+}
+
+// Infof logs a formatted info message using the global logger
+func Infof(format string, args ...interface{}) {
+	GetLogger().Infof(format, args...)
+}
+
+// Warn logs a warning message using the global logger
+func Warn(msg string) {
+	GetLogger().Warn(msg)
+}
+
+// Warnf logs a formatted warning message using the global logger
+func Warnf(format string, args ...interface{}) {
+	GetLogger().Warnf(format, args...)
+}
+
+// Error logs an error message using the global logger
+func Error(msg string, err error) {
+	GetLogger().Error(msg, err)
+}
+
+// Errorf logs a formatted error message using the global logger
+func Errorf(format string, args ...interface{}) {
+	GetLogger().Errorf(format, args...)
+}
+
+// Fatal logs a fatal message using the global logger
+func Fatal(msg string, err error) {
+	GetLogger().Fatal(msg, err)
+}
+
+// Fatalf logs a formatted fatal message using the global logger
+func Fatalf(format string, args ...interface{}) {
+	GetLogger().Fatalf(format, args...)
+}
+
+// WithModule returns a logger with module context using the global logger
+func WithModule(module string) *Logger {
+	return GetLogger().WithModule(module)
+}
+
+// WithFields returns a logger with fields using the global logger
+func WithFields(fields map[string]interface{}) *Logger {
+	return GetLogger().WithFields(fields)
+}
+
+// LogEvent logs an event using the global logger
+func LogEvent(event string, fields map[string]interface{}) {
+	GetLogger().LogEvent(event, fields)
+}
+
+// LogTx logs a transaction using the global logger
+func LogTx(module, txType string, fields map[string]interface{}) {
+	GetLogger().LogTx(module, txType, fields)
+}
+
+// LogQuery logs a query using the global logger
+func LogQuery(module, queryType string, fields map[string]interface{}) {
+	GetLogger().LogQuery(module, queryType, fields)
+}
+
+// JSONFormatter is a helper for formatting log output as JSON
+func JSONFormatter(w io.Writer) io.Writer {
+	return &jsonWriter{w}
+}
+
+type jsonWriter struct {
+	w io.Writer
+}
+
+func (j *jsonWriter) Write(p []byte) (n int, err error) {
+	// Ensure output is valid JSON
+	var data map[string]interface{}
+	if err := json.Unmarshal(p, &data); err != nil {
+		// If not valid JSON, wrap in a simple JSON structure
+		p = []byte(fmt.Sprintf(`{"message":%q}`, string(p)))
+	}
+	return j.w.Write(p)
+}
