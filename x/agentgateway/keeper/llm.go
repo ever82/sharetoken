@@ -80,8 +80,7 @@ func (k *Keeper) handleClaudeCodeToken() string {
 func (k *Keeper) buildPrompt(messages []Message) string {
 	var conversation string
 	for _, msg := range messages {
-		role := msg.Role
-		if role == "user" {
+		if msg.Role == "user" {
 			conversation += fmt.Sprintf("\nHuman: %s", msg.Content)
 		} else {
 			conversation += fmt.Sprintf("\nAssistant: %s", msg.Content)
