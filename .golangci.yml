@@ -254,6 +254,11 @@ issues:
         - errcheck
       text: "rand.Read"
 
+    # 排除 keeper SetAPIKey 错误检查
+    - linters:
+        - errcheck
+      text: "SetAPIKey"
+
     # 排除 gosec 安全警告（开发阶段允许）
     - linters:
         - gosec
