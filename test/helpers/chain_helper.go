@@ -364,7 +364,10 @@ func (h *ChainHelper) DiscoverNodes() ([]*NodeInfo, error) {
 
 // SelectBestNode 选择最佳节点
 func (h *ChainHelper) SelectBestNode() (*NodeInfo, error) {
-	nodes, _ := h.DiscoverNodes()
+	nodes, err := h.DiscoverNodes()
+	if err != nil {
+		return nil, err
+	}
 	if len(nodes) > 0 {
 		return nodes[0], nil
 	}
