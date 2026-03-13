@@ -3,9 +3,8 @@ package types
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
-
-	"github.com/cosmos/gogoproto/proto"
 )
 
 // Provider represents LLM provider type
@@ -78,7 +77,7 @@ func (*APIKey) ProtoMessage() {}
 
 // Marshal implements codec.ProtoMarshaler
 func (m APIKey) Marshal() ([]byte, error) {
-	return proto.Marshal(m.toProto())
+	return json.Marshal(m)
 }
 
 // MarshalTo implements codec.ProtoMarshaler
@@ -108,62 +107,7 @@ func (m APIKey) Size() int {
 
 // Unmarshal implements codec.ProtoMarshaler
 func (m *APIKey) Unmarshal(data []byte) error {
-	pm := &APIKeyProto{}
-	if err := proto.Unmarshal(data, pm); err != nil {
-		return err
-	}
-	m.fromProto(pm)
-	return nil
-}
-
-// toProto converts APIKey to proto message
-func (m APIKey) toProto() *APIKeyProto {
-	rules := make([]*AccessRuleProto, len(m.AccessRules))
-	for i, r := range m.AccessRules {
-		rules[i] = &AccessRuleProto{
-			ServiceId:   r.ServiceID,
-			Allowed:     r.Allowed,
-			RateLimit:   r.RateLimit,
-			MaxRequests: r.MaxRequests,
-			PricePerReq: r.PricePerReq,
-		}
-	}
-	return &APIKeyProto{
-		Id:           m.ID,
-		Provider:     string(m.Provider),
-		EncryptedKey: m.EncryptedKey,
-		Hash:         m.Hash,
-		Owner:        m.Owner,
-		AccessRules:  rules,
-		CreatedAt:    m.CreatedAt,
-		LastUsedAt:   m.LastUsedAt,
-		UsageCount:   m.UsageCount,
-		Active:       m.Active,
-	}
-}
-
-// fromProto converts proto message to APIKey
-func (m *APIKey) fromProto(pm *APIKeyProto) {
-	m.ID = pm.Id
-	m.Provider = ProviderFromString(pm.Provider)
-	m.EncryptedKey = pm.EncryptedKey
-	m.Hash = pm.Hash
-	m.Owner = pm.Owner
-	m.AccessRules = make([]AccessRule, len(pm.AccessRules))
-	for i, r := range pm.AccessRules {
-		m.AccessRules[i] = AccessRule{
-			ServiceID:   r.ServiceId,
-			Allowed:     r.Allowed,
-			RateLimit:   r.RateLimit,
-			MaxRequests: r.MaxRequests,
-			PricePerReq: r.PricePerReq,
-		}
-	}
-	m.CreatedAt = pm.CreatedAt
-	m.LastUsedAt = pm.LastUsedAt
-	m.UsageCount = pm.UsageCount
-	m.Active = pm.Active
-	m.Version = 1
+	return json.Unmarshal(data, m)
 }
 
 // NewAPIKey creates a new API key record
