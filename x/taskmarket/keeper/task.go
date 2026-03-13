@@ -41,8 +41,15 @@ func (lk *LegacyKeeper) UpdateTask(task *types.Task) error {
 	}
 
 	// Check if worker changed to update worker index
-	if oldTask, exists := lk.tasks[task.ID]; exists && oldTask.WorkerID != task.WorkerID && task.WorkerID != "" {
-		lk.tasksByWorker[task.WorkerID] = append(lk.tasksByWorker[task.WorkerID], task.ID)
+	if oldTask, exists := lk.tasks[task.ID]; exists && oldTask.WorkerID != task.WorkerID {
+		// Remove from old worker index if old worker existed
+		if oldTask.WorkerID != "" {
+			lk.tasksByWorker[oldTask.WorkerID] = removeFromSlice(lk.tasksByWorker[oldTask.WorkerID], task.ID)
+		}
+		// Add to new worker index if new worker is set
+		if task.WorkerID != "" {
+			lk.tasksByWorker[task.WorkerID] = append(lk.tasksByWorker[task.WorkerID], task.ID)
+		}
 	}
 
 	lk.tasks[task.ID] = task
