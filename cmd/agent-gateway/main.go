@@ -25,7 +25,7 @@ func main() {
 	k := keeper.NewKeeper()
 
 	// TODO: 使用 chainEndpoint 配置 keeper 的链客户端
-	_ = *chainEndpoint
+	log.Printf("Chain endpoint configured: %s (not yet implemented)", *chainEndpoint)
 
 	// 启动对应 transport
 	switch *transport {
@@ -86,10 +86,12 @@ func runHTTP(k *keeper.Keeper, port string) {
 	// Health check
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]string{
+		if err := json.NewEncoder(w).Encode(map[string]string{
 			"status":  "ok",
 			"version": "1.0.0",
-		})
+		}); err != nil {
+			log.Printf("Failed to encode health response: %v", err)
+		}
 	})
 
 	// WebSocket endpoint

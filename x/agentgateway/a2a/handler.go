@@ -3,6 +3,7 @@ package a2a
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"sharetoken/x/agentgateway/keeper"
@@ -163,15 +164,21 @@ func (h *Handler) handleNegotiate(w http.ResponseWriter, r *http.Request) {
 		"message":  "Bid accepted",
 	}
 
-	_ = json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// 在协商响应中，如果编码失败，我们无法再做太多
+		log.Printf("Failed to encode negotiate response: %v", err)
+	}
 }
 
 // writeError 写入错误响应
 func (h *Handler) writeError(w http.ResponseWriter, status int, message string) {
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"error": message,
-	})
+	}); err != nil {
+		// 如果连错误响应都编码失败，只能记录日志
+		log.Printf("Failed to encode error response: %v", err)
+	}
 }
 
 // Routes 返回 A2A 路由
