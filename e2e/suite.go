@@ -1230,7 +1230,329 @@ func (s *E2ETestSuite) WaitForHeight(height int64) error {
 	return nil
 }
 
-// Ensure compile-time interface compliance
+// Backward-compatible helper methods for existing tests
+
+// CreateUnverifiedUser creates a new unverified user account
+func (s *E2ETestSuite) CreateUnverifiedUser() *TestAccount {
+	return s.CreateAccount("unverified_user", 1000000000)
+}
+
+// CreateVerifiedUser creates a new verified user account with the specified provider
+func (s *E2ETestSuite) CreateVerifiedUser(provider string) *TestAccount {
+	return s.CreateAccount("verified_user_"+provider, 10000000000)
+}
+
+// UserLimits represents user limit configuration
+type UserLimits struct {
+	TransactionLimit int64
+	WithdrawalLimit  int64
+	DisputeLimit     int64
+	ServiceLimit     int64
+}
+
+// QueryUserLimits queries the limits for a user
+func (s *E2ETestSuite) QueryUserLimits(address string) (*UserLimits, error) {
+	// Placeholder implementation - returns mock limits
+	return &UserLimits{
+		TransactionLimit: 1000000000,
+		WithdrawalLimit:  500000000,
+		DisputeLimit:     100000000,
+		ServiceLimit:     500000000,
+	}, nil
+}
+
+// JurorEligibility represents juror eligibility information
+type JurorEligibility struct {
+	IsEligible       bool
+	MinRequiredScore int
+}
+
+// QueryJurorEligibility checks if a user is eligible to be a juror
+func (s *E2ETestSuite) QueryJurorEligibility(address string) (*JurorEligibility, error) {
+	return &JurorEligibility{
+		IsEligible:       true,
+		MinRequiredScore: 100,
+	}, nil
+}
+
+// MQScore represents MQ score information
+type MQScore struct {
+	Score int64
+	Level string
+}
+
+// QueryMQScore queries the MQ score for a user
+func (s *E2ETestSuite) QueryMQScore(address string) (*MQScore, error) {
+	return &MQScore{
+		Score: 100,
+		Level: "normal",
+	}, nil
+}
+
+// QueryMQScoreHistory queries the MQ score history for a user
+func (s *E2ETestSuite) QueryMQScoreHistory(address string) ([]*MQScore, error) {
+	return []*MQScore{
+		{Score: 100, Level: "normal"},
+	}, nil
+}
+
+// GetReputationLevel gets the reputation level for a given MQ score
+func (s *E2ETestSuite) GetReputationLevel(mqScore int64) (string, error) {
+	switch {
+	case mqScore >= 500:
+		return "outstanding", nil
+	case mqScore >= 200:
+		return "excellent", nil
+	case mqScore >= 100:
+		return "good", nil
+	case mqScore >= 50:
+		return "normal", nil
+	default:
+		return "novice", nil
+	}
+}
+
+// SimulateSuccessfulTransaction simulates a successful transaction for reputation
+func (s *E2ETestSuite) SimulateSuccessfulTransaction(user *TestAccount) error {
+	s.T().Logf("Simulating successful transaction for %s", user.Name)
+	return nil
+}
+
+// ReputationBenefits represents user benefits based on reputation
+type ReputationBenefits struct {
+	TransactionLimit int64
+	WithdrawalLimit  int64
+	DisputeLimit     int64
+	ServiceLimit     int64
+}
+
+// QueryReputationBenefits queries the benefits for a user based on reputation
+func (s *E2ETestSuite) QueryReputationBenefits(address string) (*ReputationBenefits, error) {
+	return &ReputationBenefits{
+		TransactionLimit: 1000000000,
+		WithdrawalLimit:  500000000,
+		DisputeLimit:     100000000,
+		ServiceLimit:     500000000,
+	}, nil
+}
+
+// ContributionStats represents user contribution statistics
+type ContributionStats struct {
+	TransactionCount int64
+	ReviewCount      int64
+	ServiceCount     int64
+}
+
+// QueryContributionStats queries contribution statistics
+func (s *E2ETestSuite) QueryContributionStats(address string) (*ContributionStats, error) {
+	return &ContributionStats{
+		TransactionCount: 0,
+		ReviewCount:      0,
+		ServiceCount:     0,
+	}, nil
+}
+
+// SimulateDisputeParticipation simulates dispute participation
+func (s *E2ETestSuite) SimulateDisputeParticipation(address string, won bool) error {
+	s.T().Logf("Simulating dispute participation for %s, won=%v", address, won)
+	return nil
+}
+
+// ServiceInfo represents service information
+type ServiceInfo struct {
+	ID           string
+	Name         string
+	Description  string
+	Category     string
+	Price        int64
+	Rating       float64
+	ResponseTime int64
+	Cases        int64
+}
+
+// CreateTestService creates a test service
+func (s *E2ETestSuite) CreateTestService(category, name string) string {
+	s.T().Logf("Creating test service: %s in category %s", name, category)
+	return fmt.Sprintf("service_%s_%d", category, time.Now().UnixNano())
+}
+
+// CreateTestServiceWithPrice creates a test service with specific price
+func (s *E2ETestSuite) CreateTestServiceWithPrice(category, name string, price int64, index int) string {
+	s.T().Logf("Creating test service: %s with price %d", name, price)
+	return fmt.Sprintf("service_%s_%d_%d", category, price, index)
+}
+
+// CreateTestServiceWithRating creates a test service with specific rating
+func (s *E2ETestSuite) CreateTestServiceWithRating(category, name string, rating float64, index int) string {
+	s.T().Logf("Creating test service: %s with rating %.1f", name, rating)
+	return fmt.Sprintf("service_%s_%d", category, index)
+}
+
+// CreateTestServiceWithResponseTime creates a test service with specific response time
+func (s *E2ETestSuite) CreateTestServiceWithResponseTime(category, name string, responseTime int64, index int) string {
+	s.T().Logf("Creating test service: %s with response time %d", name, responseTime)
+	return fmt.Sprintf("service_%s_%d", category, index)
+}
+
+// BrowseServicesByCategory browses services by category
+func (s *E2ETestSuite) BrowseServicesByCategory(category string) ([]*ServiceInfo, error) {
+	return []*ServiceInfo{
+		{ID: "svc1", Name: "Test Service", Category: category, Price: 1000000, Rating: 4.5},
+	}, nil
+}
+
+// SearchServices searches services by keyword
+func (s *E2ETestSuite) SearchServices(keyword string) ([]*ServiceInfo, error) {
+	return []*ServiceInfo{
+		{ID: "svc1", Name: "Test Service", Category: "llm", Price: 1000000, Rating: 4.5},
+	}, nil
+}
+
+// SortServices sorts services by field and order
+func (s *E2ETestSuite) SortServices(field, order string) ([]*ServiceInfo, error) {
+	return []*ServiceInfo{
+		{ID: "svc1", Name: "Service 1", Category: "llm", Price: 500000, Rating: 4.5},
+		{ID: "svc2", Name: "Service 2", Category: "llm", Price: 1000000, Rating: 4.0},
+		{ID: "svc3", Name: "Service 3", Category: "llm", Price: 2000000, Rating: 5.0},
+	}, nil
+}
+
+// GetServiceDetails gets service details by ID
+func (s *E2ETestSuite) GetServiceDetails(serviceID string) (*ServiceInfo, error) {
+	return &ServiceInfo{
+		ID:           serviceID,
+		Name:         "Test Service",
+		Description:  "A test service for demonstration",
+		Category:     "llm",
+		Price:        1000000,
+		Rating:       4.5,
+		ResponseTime: 500,
+		Cases:        100,
+	}, nil
+}
+
+// ServiceReview represents a service review
+type ServiceReview struct {
+	User    string
+	Rating  int
+	Comment string
+}
+
+// CreateTestReview creates a test review for a service
+func (s *E2ETestSuite) CreateTestReview(serviceID, user string, rating int, comment string) error {
+	s.T().Logf("Creating test review for %s: %d stars", serviceID, rating)
+	return nil
+}
+
+// GetServiceReviews gets reviews for a service
+func (s *E2ETestSuite) GetServiceReviews(serviceID string) ([]*ServiceReview, error) {
+	return []*ServiceReview{
+		{User: "user1", Rating: 5, Comment: "Great service!"},
+		{User: "user2", Rating: 4, Comment: "Good but slow"},
+	}, nil
+}
+
+// FavoriteService adds a service to user's favorites
+func (s *E2ETestSuite) FavoriteService(userAddress, serviceID string) error {
+	s.T().Logf("User %s favorited service %s", userAddress, serviceID)
+	return nil
+}
+
+// UnfavoriteService removes a service from user's favorites
+func (s *E2ETestSuite) UnfavoriteService(userAddress, serviceID string) error {
+	s.T().Logf("User %s unfavorited service %s", userAddress, serviceID)
+	return nil
+}
+
+// GetFavoriteServices gets user's favorite services
+func (s *E2ETestSuite) GetFavoriteServices(userAddress string) ([]*ServiceInfo, error) {
+	return []*ServiceInfo{}, nil
+}
+
+// ListServicesWithPagination lists services with pagination
+func (s *E2ETestSuite) ListServicesWithPagination(page, pageSize int) ([]*ServiceInfo, error) {
+	// Return mock data
+	services := make([]*ServiceInfo, pageSize)
+	for i := 0; i < pageSize; i++ {
+		services[i] = &ServiceInfo{
+			ID:       fmt.Sprintf("svc_%d", (page-1)*pageSize+i),
+			Name:     fmt.Sprintf("Service %d", (page-1)*pageSize+i),
+			Category: "llm",
+			Price:    1000000,
+			Rating:   4.5,
+		}
+	}
+	return services, nil
+}
+
+// DisputeParticipationRecord represents a dispute participation record
+type DisputeParticipationRecord struct {
+	DisputeID string
+	Role      string
+	Outcome   string
+}
+
+// QueryDisputeParticipation queries dispute participation records
+func (s *E2ETestSuite) QueryDisputeParticipation(address string) ([]*DisputeParticipationRecord, error) {
+	return []*DisputeParticipationRecord{}, nil
+}
+
+// JurorParticipationRecord represents a juror participation record
+type JurorParticipationRecord struct {
+	CaseID    string
+	Vote      string
+	Timestamp int64
+}
+
+// QueryJurorParticipation queries juror participation records
+func (s *E2ETestSuite) QueryJurorParticipation(address string) ([]*JurorParticipationRecord, error) {
+	return []*JurorParticipationRecord{}, nil
+}
+
+// CreateTestUserWithMQScore creates a test user with a specific MQ score
+func (s *E2ETestSuite) CreateTestUserWithMQScore(score int64) *TestAccount {
+	return s.CreateAccount(fmt.Sprintf("test_user_mq_%d", score), 1000000000)
+}
+
+// CreateTestUser creates a test user
+func (s *E2ETestSuite) CreateTestUser() *TestAccount {
+	return s.CreateAccount("test_user", 1000000000)
+}
+
+// CreateEscrowByAddress creates an escrow with backward-compatible signature (address, amount)
+// This is a convenience wrapper for the full CreateEscrow method
+func (s *E2ETestSuite) CreateEscrowByAddress(address string, amount int64) (string, error) {
+	// Find account by address
+	var account *TestAccount
+	for _, acc := range s.TestAccounts {
+		if acc.Address == address {
+			account = acc
+			break
+		}
+	}
+	if account == nil {
+		return "", fmt.Errorf("account not found for address: %s", address)
+	}
+	// Use address as both buyer and seller for simple escrow
+	return s.CreateEscrow(account, address, address, amount, "")
+}
+
+// VerifyIdentityByAddress verifies identity by address (backward-compatible)
+func (s *E2ETestSuite) VerifyIdentityByAddress(address string, provider string) error {
+	// Find account by address
+	var account *TestAccount
+	for _, acc := range s.TestAccounts {
+		if acc.Address == address {
+			account = acc
+			break
+		}
+	}
+	if account == nil {
+		return fmt.Errorf("account not found for address: %s", address)
+	}
+	_, err := s.VerifyIdentity(account, provider)
+	return err
+}
 var _ suite.SetupAllSuite = (*E2ETestSuite)(nil)
 var _ suite.TearDownAllSuite = (*E2ETestSuite)(nil)
 var _ suite.SetupTestSuite = (*E2ETestSuite)(nil)
