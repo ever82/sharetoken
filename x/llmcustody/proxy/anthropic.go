@@ -115,7 +115,7 @@ func (p *AnthropicProxy) CallMessages(apiKey string, req MessagesRequest) (*Mess
 			break
 		}
 		if resp != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 		if i < p.maxRetries-1 {
 			time.Sleep(time.Second * time.Duration(i+1))
@@ -125,10 +125,13 @@ func (p *AnthropicProxy) CallMessages(apiKey string, req MessagesRequest) (*Mess
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to call Anthropic API: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, 0, fmt.Errorf("Anthropic API error %d: failed to read error body: %w", resp.StatusCode, err)
+		}
 		return nil, 0, fmt.Errorf("Anthropic API error %d: %s", resp.StatusCode, string(body))
 	}
 
@@ -163,10 +166,13 @@ func (p *AnthropicProxy) CallComplete(apiKey string, req CompleteRequest) (*Comp
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to call Anthropic API: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, 0, fmt.Errorf("Anthropic API error %d: failed to read error body: %w", resp.StatusCode, err)
+		}
 		return nil, 0, fmt.Errorf("Anthropic API error %d: %s", resp.StatusCode, string(body))
 	}
 

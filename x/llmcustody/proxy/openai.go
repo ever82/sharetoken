@@ -130,7 +130,7 @@ func (p *OpenAIProxy) CallChatCompletion(apiKey string, req ChatCompletionReques
 			break
 		}
 		if resp != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 		if i < p.maxRetries-1 {
 			time.Sleep(time.Second * time.Duration(i+1))
@@ -140,10 +140,13 @@ func (p *OpenAIProxy) CallChatCompletion(apiKey string, req ChatCompletionReques
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to call OpenAI API: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, 0, fmt.Errorf("OpenAI API error %d: failed to read error body: %w", resp.StatusCode, err)
+		}
 		return nil, 0, fmt.Errorf("OpenAI API error %d: %s", resp.StatusCode, string(body))
 	}
 
@@ -178,10 +181,13 @@ func (p *OpenAIProxy) CallEmbeddings(apiKey string, req EmbeddingsRequest) (*Emb
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to call OpenAI API: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, 0, fmt.Errorf("OpenAI API error %d: failed to read error body: %w", resp.StatusCode, err)
+		}
 		return nil, 0, fmt.Errorf("OpenAI API error %d: %s", resp.StatusCode, string(body))
 	}
 
