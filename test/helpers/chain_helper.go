@@ -50,12 +50,12 @@ type Service struct {
 
 // ServiceProvider 表示服务提供者
 type ServiceProvider struct {
-	Address              string
-	MQScore              float64
-	Price                float64
-	QualityScore         float64
-	ResponseSpeedScore   float64
-	CompletionRate       float64
+	Address            string
+	MQScore            float64
+	Price              float64
+	QualityScore       float64
+	ResponseSpeedScore float64
+	CompletionRate     float64
 }
 
 // ServiceDetail 表示服务详情

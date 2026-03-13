@@ -11,10 +11,10 @@ import (
 
 // OpenAIProxy OpenAI API 代理
 type OpenAIProxy struct {
-	client      *http.Client
-	baseURL     string
-	maxRetries  int
-	timeout     time.Duration
+	client     *http.Client
+	baseURL    string
+	maxRetries int
+	timeout    time.Duration
 }
 
 // NewOpenAIProxy 创建新的 OpenAI 代理
@@ -31,13 +31,13 @@ func NewOpenAIProxy() *OpenAIProxy {
 
 // ChatCompletionRequest 聊天完成请求
 type ChatCompletionRequest struct {
-	Model       string              `json:"model"`
-	Messages    []ChatMessage       `json:"messages"`
-	MaxTokens   int                 `json:"max_tokens,omitempty"`
-	Temperature float64             `json:"temperature,omitempty"`
-	TopP        float64             `json:"top_p,omitempty"`
-	N           int                 `json:"n,omitempty"`
-	Stream      bool                `json:"stream,omitempty"`
+	Model       string        `json:"model"`
+	Messages    []ChatMessage `json:"messages"`
+	MaxTokens   int           `json:"max_tokens,omitempty"`
+	Temperature float64       `json:"temperature,omitempty"`
+	TopP        float64       `json:"top_p,omitempty"`
+	N           int           `json:"n,omitempty"`
+	Stream      bool          `json:"stream,omitempty"`
 }
 
 // ChatMessage 聊天消息
@@ -100,10 +100,10 @@ type ModelsResponse struct {
 
 // ModelInfo 模型信息
 type ModelInfo struct {
-	ID         string `json:"id"`
-	Object     string `json:"object"`
-	Created    int64  `json:"created"`
-	OwnedBy    string `json:"owned_by"`
+	ID      string `json:"id"`
+	Object  string `json:"object"`
+	Created int64  `json:"created"`
+	OwnedBy string `json:"owned_by"`
 }
 
 // CallChatCompletion 调用聊天完成 API
@@ -240,11 +240,11 @@ func (p *OpenAIProxy) calculateChatCost(model string, usage TokenUsage) float64 
 		Input  float64
 		Output float64
 	}{
-		"gpt-4":               {Input: 0.03, Output: 0.06},
-		"gpt-4-32k":           {Input: 0.06, Output: 0.12},
-		"gpt-4-turbo":         {Input: 0.01, Output: 0.03},
-		"gpt-3.5-turbo":       {Input: 0.0005, Output: 0.0015},
-		"gpt-3.5-turbo-16k":   {Input: 0.001, Output: 0.002},
+		"gpt-4":             {Input: 0.03, Output: 0.06},
+		"gpt-4-32k":         {Input: 0.06, Output: 0.12},
+		"gpt-4-turbo":       {Input: 0.01, Output: 0.03},
+		"gpt-3.5-turbo":     {Input: 0.0005, Output: 0.0015},
+		"gpt-3.5-turbo-16k": {Input: 0.001, Output: 0.002},
 	}
 
 	price, ok := prices[model]
