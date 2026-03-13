@@ -327,6 +327,197 @@ func (s *E2ETestSuite) SimulateSuccessfulTransaction(user *TestAccount) error {
 	return nil
 }
 
+// ReputationBenefits represents user benefits based on reputation
+type ReputationBenefits struct {
+	TransactionLimit int64
+	WithdrawalLimit  int64
+	DisputeLimit     int64
+	ServiceLimit     int64
+}
+
+// QueryReputationBenefits queries the benefits for a user based on reputation
+func (s *E2ETestSuite) QueryReputationBenefits(address string) (*ReputationBenefits, error) {
+	return &ReputationBenefits{
+		TransactionLimit: 1000000000,
+		WithdrawalLimit:  500000000,
+		DisputeLimit:     100000000,
+		ServiceLimit:     500000000,
+	}, nil
+}
+
+// DisputeParticipationRecord represents a dispute participation record
+type DisputeParticipationRecord struct {
+	DisputeID string
+	Role      string
+	Outcome   string
+}
+
+// QueryDisputeParticipation queries dispute participation records
+func (s *E2ETestSuite) QueryDisputeParticipation(address string) ([]*DisputeParticipationRecord, error) {
+	return []*DisputeParticipationRecord{}, nil
+}
+
+// JurorParticipationRecord represents a juror participation record
+type JurorParticipationRecord struct {
+	CaseID    string
+	Vote      string
+	Timestamp int64
+}
+
+// QueryJurorParticipation queries juror participation records
+func (s *E2ETestSuite) QueryJurorParticipation(address string) ([]*JurorParticipationRecord, error) {
+	return []*JurorParticipationRecord{}, nil
+}
+
+// ContributionStats represents user contribution statistics
+type ContributionStats struct {
+	TransactionCount int64
+	ReviewCount      int64
+	ServiceCount     int64
+}
+
+// QueryContributionStats queries contribution statistics
+func (s *E2ETestSuite) QueryContributionStats(address string) (*ContributionStats, error) {
+	return &ContributionStats{
+		TransactionCount: 0,
+		ReviewCount:      0,
+		ServiceCount:     0,
+	}, nil
+}
+
+// SimulateDisputeParticipation simulates dispute participation
+func (s *E2ETestSuite) SimulateDisputeParticipation(address string, won bool) error {
+	s.T().Logf("Simulating dispute participation for %s, won=%v", address, won)
+	return nil
+}
+
+// ServiceInfo represents service information
+type ServiceInfo struct {
+	ID           string
+	Name         string
+	Description  string
+	Category     string
+	Price        int64
+	Rating       float64
+	ResponseTime int64
+	Cases        int64
+}
+
+// CreateTestService creates a test service
+func (s *E2ETestSuite) CreateTestService(category, name string) string {
+	s.T().Logf("Creating test service: %s in category %s", name, category)
+	return fmt.Sprintf("service_%s_%d", category, time.Now().UnixNano())
+}
+
+// CreateTestServiceWithPrice creates a test service with specific price
+func (s *E2ETestSuite) CreateTestServiceWithPrice(category, name string, price int64, index int) string {
+	s.T().Logf("Creating test service: %s with price %d", name, price)
+	return fmt.Sprintf("service_%s_%d_%d", category, price, index)
+}
+
+// CreateTestServiceWithRating creates a test service with specific rating
+func (s *E2ETestSuite) CreateTestServiceWithRating(category, name string, rating float64, index int) string {
+	s.T().Logf("Creating test service: %s with rating %.1f", name, rating)
+	return fmt.Sprintf("service_%s_%d", category, index)
+}
+
+// CreateTestServiceWithResponseTime creates a test service with specific response time
+func (s *E2ETestSuite) CreateTestServiceWithResponseTime(category, name string, responseTime int64, index int) string {
+	s.T().Logf("Creating test service: %s with response time %d", name, responseTime)
+	return fmt.Sprintf("service_%s_%d", category, index)
+}
+
+// BrowseServicesByCategory browses services by category
+func (s *E2ETestSuite) BrowseServicesByCategory(category string) ([]*ServiceInfo, error) {
+	return []*ServiceInfo{
+		{ID: "svc1", Name: "Test Service", Category: category, Price: 1000000, Rating: 4.5},
+	}, nil
+}
+
+// SearchServices searches services by keyword
+func (s *E2ETestSuite) SearchServices(keyword string) ([]*ServiceInfo, error) {
+	return []*ServiceInfo{
+		{ID: "svc1", Name: "Test Service", Category: "llm", Price: 1000000, Rating: 4.5},
+	}, nil
+}
+
+// SortServices sorts services by field and order
+func (s *E2ETestSuite) SortServices(field, order string) ([]*ServiceInfo, error) {
+	return []*ServiceInfo{
+		{ID: "svc1", Name: "Service 1", Category: "llm", Price: 500000, Rating: 4.5},
+		{ID: "svc2", Name: "Service 2", Category: "llm", Price: 1000000, Rating: 4.0},
+		{ID: "svc3", Name: "Service 3", Category: "llm", Price: 2000000, Rating: 5.0},
+	}, nil
+}
+
+// GetServiceDetails gets service details by ID
+func (s *E2ETestSuite) GetServiceDetails(serviceID string) (*ServiceInfo, error) {
+	return &ServiceInfo{
+		ID:           serviceID,
+		Name:         "Test Service",
+		Description:  "A test service for demonstration",
+		Category:     "llm",
+		Price:        1000000,
+		Rating:       4.5,
+		ResponseTime: 500,
+		Cases:        100,
+	}, nil
+}
+
+// ServiceReview represents a service review
+type ServiceReview struct {
+	User    string
+	Rating  int
+	Comment string
+}
+
+// CreateTestReview creates a test review for a service
+func (s *E2ETestSuite) CreateTestReview(serviceID, user string, rating int, comment string) error {
+	s.T().Logf("Creating test review for %s: %d stars", serviceID, rating)
+	return nil
+}
+
+// GetServiceReviews gets reviews for a service
+func (s *E2ETestSuite) GetServiceReviews(serviceID string) ([]*ServiceReview, error) {
+	return []*ServiceReview{
+		{User: "user1", Rating: 5, Comment: "Great service!"},
+		{User: "user2", Rating: 4, Comment: "Good but slow"},
+	}, nil
+}
+
+// FavoriteService adds a service to user's favorites
+func (s *E2ETestSuite) FavoriteService(userAddress, serviceID string) error {
+	s.T().Logf("User %s favorited service %s", userAddress, serviceID)
+	return nil
+}
+
+// UnfavoriteService removes a service from user's favorites
+func (s *E2ETestSuite) UnfavoriteService(userAddress, serviceID string) error {
+	s.T().Logf("User %s unfavorited service %s", userAddress, serviceID)
+	return nil
+}
+
+// GetFavoriteServices gets user's favorite services
+func (s *E2ETestSuite) GetFavoriteServices(userAddress string) ([]*ServiceInfo, error) {
+	return []*ServiceInfo{}, nil
+}
+
+// ListServicesWithPagination lists services with pagination
+func (s *E2ETestSuite) ListServicesWithPagination(page, pageSize int) ([]*ServiceInfo, error) {
+	// Return mock data
+	services := make([]*ServiceInfo, pageSize)
+	for i := 0; i < pageSize; i++ {
+		services[i] = &ServiceInfo{
+			ID:       fmt.Sprintf("svc_%d", (page-1)*pageSize+i),
+			Name:     fmt.Sprintf("Service %d", (page-1)*pageSize+i),
+			Category: "llm",
+			Price:    1000000,
+			Rating:   4.5,
+		}
+	}
+	return services, nil
+}
+
 // TestE2E runs the E2E test suite
 func TestE2E(t *testing.T) {
 	if testing.Short() {

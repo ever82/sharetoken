@@ -37,7 +37,7 @@ func (s *ReputationDashboardTest) TestMQScoreHistory() {
 
 	// 执行一些操作影响 MQ 分数
 	// 模拟一次成功的交易
-	s.SimulateSuccessfulTransaction(user.Address)
+	s.SimulateSuccessfulTransaction(user)
 
 	// 查询 MQ 分数历史
 	history, err := s.QueryMQScoreHistory(user.Address)
