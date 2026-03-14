@@ -24,13 +24,13 @@ var _ types.QueryServer = queryServer{}
 func (k queryServer) APIKey(ctx context.Context, req *types.QueryAPIKeyRequest) (*types.QueryAPIKeyResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	apiKey, found := k.GetAPIKey(sdkCtx, req.ID)
+	apiKey, found := k.GetAPIKey(sdkCtx, req.Id)
 	if !found {
 		return nil, types.ErrAPIKeyNotFound
 	}
 
 	return &types.QueryAPIKeyResponse{
-		APIKey: apiKey,
+		ApiKey: apiKey,
 	}, nil
 }
 
@@ -42,8 +42,16 @@ func (k queryServer) APIKeysByOwner(ctx context.Context, req *types.QueryAPIKeys
 
 	// Apply pagination
 	total := len(allKeys)
-	start := req.Offset
-	end := start + req.Limit
+	start := 0
+	end := total
+
+	if req.Pagination != nil {
+		start = int(req.Pagination.Offset)
+		limit := int(req.Pagination.Limit)
+		if limit > 0 {
+			end = start + limit
+		}
+	}
 
 	if start > total {
 		start = total
@@ -51,13 +59,10 @@ func (k queryServer) APIKeysByOwner(ctx context.Context, req *types.QueryAPIKeys
 	if end > total {
 		end = total
 	}
-	if req.Limit == 0 {
-		end = total
-	}
 
 	return &types.QueryAPIKeysByOwnerResponse{
-		APIKeys: allKeys[start:end],
-		Total:   total,
+		ApiKeys: allKeys[start:end],
+		Total:   uint64(total),
 	}, nil
 }
 
@@ -69,8 +74,16 @@ func (k queryServer) AllAPIKeys(ctx context.Context, req *types.QueryAllAPIKeysR
 
 	// Apply pagination
 	total := len(allKeys)
-	start := req.Offset
-	end := start + req.Limit
+	start := 0
+	end := total
+
+	if req.Pagination != nil {
+		start = int(req.Pagination.Offset)
+		limit := int(req.Pagination.Limit)
+		if limit > 0 {
+			end = start + limit
+		}
+	}
 
 	if start > total {
 		start = total
@@ -78,13 +91,10 @@ func (k queryServer) AllAPIKeys(ctx context.Context, req *types.QueryAllAPIKeysR
 	if end > total {
 		end = total
 	}
-	if req.Limit == 0 {
-		end = total
-	}
 
 	return &types.QueryAllAPIKeysResponse{
-		APIKeys: allKeys[start:end],
-		Total:   total,
+		ApiKeys: allKeys[start:end],
+		Total:   uint64(total),
 	}, nil
 }
 
@@ -92,10 +102,10 @@ func (k queryServer) AllAPIKeys(ctx context.Context, req *types.QueryAllAPIKeysR
 func (k queryServer) UsageStats(ctx context.Context, req *types.QueryUsageStatsRequest) (*types.QueryUsageStatsResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	stats, found := k.GetAPIKeyStats(sdkCtx, req.APIKeyID)
+	stats, found := k.GetAPIKeyStats(sdkCtx, req.ApiKeyId)
 	if !found {
 		// Return empty stats if not found
-		stats = *types.NewAPIKeyUsageStats(req.APIKeyID)
+		stats = *types.NewAPIKeyUsageStats(req.ApiKeyId)
 	}
 
 	return &types.QueryUsageStatsResponse{
@@ -107,10 +117,10 @@ func (k queryServer) UsageStats(ctx context.Context, req *types.QueryUsageStatsR
 func (k queryServer) DailyUsage(ctx context.Context, req *types.QueryDailyUsageRequest) (*types.QueryDailyUsageResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	stats, found := k.GetDailyStats(sdkCtx, req.Date, req.APIKeyID)
+	stats, found := k.GetDailyStats(sdkCtx, req.Date, req.ApiKeyId)
 	if !found {
 		// Return empty stats if not found
-		stats = *types.NewDailyUsageStats(req.Date, req.APIKeyID)
+		stats = *types.NewDailyUsageStats(req.Date, req.ApiKeyId)
 	}
 
 	return &types.QueryDailyUsageResponse{
@@ -123,11 +133,11 @@ func (k queryServer) DailyUsage(ctx context.Context, req *types.QueryDailyUsageR
 func (k queryServer) ServiceUsage(ctx context.Context, req *types.QueryServiceUsageRequest) (*types.QueryServiceUsageResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	stats, found := k.GetServiceStats(sdkCtx, req.ServiceID, req.APIKeyID)
+	stats, found := k.GetServiceStats(sdkCtx, req.ServiceId, req.ApiKeyId)
 	if !found {
 		// Return empty stats if not found
 		stats = types.ServiceUsageStats{
-			ServiceID: req.ServiceID,
+			ServiceId: req.ServiceId,
 		}
 	}
 

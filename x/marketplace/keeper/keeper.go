@@ -21,7 +21,7 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey) *Keeper {
 
 func (k Keeper) SetService(ctx sdk.Context, service types.Service) error {
 	store := ctx.KVStore(k.storeKey)
-	key := types.GetServiceKey(service.ID)
+	key := types.GetServiceKey(service.Id)
 	value, err := k.cdc.Marshal(&service)
 	if err != nil {
 		return fmt.Errorf("failed to marshal service: %w", err)

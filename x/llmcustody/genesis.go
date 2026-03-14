@@ -10,7 +10,7 @@ import (
 // InitGenesis initializes the module's state from a genesis state.
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) {
 	// Store all API keys
-	for _, apiKey := range genState.APIKeys {
+	for _, apiKey := range genState.ApiKeys {
 		// Don't restore keys with empty encrypted data (genesis export clears them)
 		if len(apiKey.EncryptedKey) > 0 {
 			if err := k.SetAPIKey(ctx, apiKey); err != nil {
@@ -27,7 +27,7 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	// Export all API keys (with sensitive data cleared)
 	allKeys := k.GetAllAPIKeys(ctx)
 	for _, key := range allKeys {
-		genesis.APIKeys = append(genesis.APIKeys, types.ExportAPIKeyForGenesis(key))
+		genesis.ApiKeys = append(genesis.ApiKeys, types.ExportAPIKeyForGenesis(key))
 	}
 
 	return genesis

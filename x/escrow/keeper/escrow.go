@@ -13,7 +13,7 @@ import (
 // SetEscrow sets an escrow in the store
 func (k Keeper) SetEscrow(ctx sdk.Context, escrow types.Escrow) error {
 	store := ctx.KVStore(k.storeKey)
-	key := types.GetEscrowKey(escrow.ID)
+	key := types.GetEscrowKey(escrow.Id)
 	value, err := json.Marshal(escrow)
 	if err != nil {
 		return fmt.Errorf("failed to marshal escrow: %w", err)
@@ -71,7 +71,7 @@ func (k Keeper) DeleteEscrow(ctx sdk.Context, id string) {
 //go:noinline
 func (k Keeper) setEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
-	key := types.GetEscrowByRequesterKey(escrow.Requester, escrow.ID)
+	key := types.GetEscrowByRequesterKey(escrow.Requester, escrow.Id)
 	store.Set(key, []byte{1})
 }
 
@@ -80,7 +80,7 @@ func (k Keeper) setEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 //go:noinline
 func (k Keeper) deleteEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
-	key := types.GetEscrowByRequesterKey(escrow.Requester, escrow.ID)
+	key := types.GetEscrowByRequesterKey(escrow.Requester, escrow.Id)
 	store.Delete(key)
 }
 
@@ -89,7 +89,7 @@ func (k Keeper) deleteEscrowByRequester(ctx sdk.Context, escrow types.Escrow) {
 //go:noinline
 func (k Keeper) setEscrowByProvider(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
-	key := types.GetEscrowByProviderKey(escrow.Provider, escrow.ID)
+	key := types.GetEscrowByProviderKey(escrow.Provider, escrow.Id)
 	store.Set(key, []byte{1})
 }
 
@@ -98,7 +98,7 @@ func (k Keeper) setEscrowByProvider(ctx sdk.Context, escrow types.Escrow) {
 //go:noinline
 func (k Keeper) deleteEscrowByProvider(ctx sdk.Context, escrow types.Escrow) {
 	store := ctx.KVStore(k.storeKey)
-	key := types.GetEscrowByProviderKey(escrow.Provider, escrow.ID)
+	key := types.GetEscrowByProviderKey(escrow.Provider, escrow.Id)
 	store.Delete(key)
 }
 
@@ -218,7 +218,7 @@ func (k Keeper) Release(ctx sdk.Context, escrowID string) error {
 	}
 
 	// Update status
-	escrow.Status = types.EscrowStatusCompleted
+	escrow.Status = types.EscrowStatus_ESCROW_STATUS_COMPLETED
 	escrow.CompletedAt = ctx.BlockTime().Unix()
 	if err := k.SetEscrow(ctx, escrow); err != nil {
 		return err
@@ -230,7 +230,7 @@ func (k Keeper) Release(ctx sdk.Context, escrowID string) error {
 			types.EventTypeRelease,
 			sdk.NewAttribute(types.AttributeKeyEscrowID, escrowID),
 			sdk.NewAttribute(types.AttributeKeyProvider, escrow.Provider),
-			sdk.NewAttribute(types.AttributeKeyAmount, escrow.Amount.String()),
+			sdk.NewAttribute(types.AttributeKeyAmount, sdk.Coins(escrow.Amount).String()),
 		),
 	)
 
@@ -249,7 +249,7 @@ func (k Keeper) Refund(ctx sdk.Context, escrowID string) error {
 	}
 
 	// Update status
-	escrow.Status = types.EscrowStatusRefunded
+	escrow.Status = types.EscrowStatus_ESCROW_STATUS_REFUNDED
 	if err := k.SetEscrow(ctx, escrow); err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func (k Keeper) Refund(ctx sdk.Context, escrowID string) error {
 			types.EventTypeRefund,
 			sdk.NewAttribute(types.AttributeKeyEscrowID, escrowID),
 			sdk.NewAttribute(types.AttributeKeyRequester, escrow.Requester),
-			sdk.NewAttribute(types.AttributeKeyAmount, escrow.Amount.String()),
+			sdk.NewAttribute(types.AttributeKeyAmount, sdk.Coins(escrow.Amount).String()),
 		),
 	)
 
@@ -279,7 +279,7 @@ func (k Keeper) Dispute(ctx sdk.Context, escrowID string) error {
 	}
 
 	// Update status
-	escrow.Status = types.EscrowStatusDisputed
+	escrow.Status = types.EscrowStatus_ESCROW_STATUS_DISPUTED
 	if err := k.SetEscrow(ctx, escrow); err != nil {
 		return err
 	}
@@ -304,17 +304,17 @@ func (k Keeper) ResolveDispute(ctx sdk.Context, escrowID string, allocation type
 		return types.ErrEscrowNotFound
 	}
 
-	if escrow.Status != types.EscrowStatusDisputed {
+	if escrow.Status != types.EscrowStatus_ESCROW_STATUS_DISPUTED {
 		return types.ErrInvalidStatus
 	}
 
-	// Validate allocation
-	if err := allocation.Validate(escrow.Amount); err != nil {
+	// Validate allocation - check that amounts sum to escrow amount
+	if err := validateFundAllocation(allocation, sdk.Coins(escrow.Amount)); err != nil {
 		return err
 	}
 
 	// Update escrow
-	escrow.Status = types.EscrowStatusCompleted
+	escrow.Status = types.EscrowStatus_ESCROW_STATUS_COMPLETED
 	escrow.CompletedAt = ctx.BlockTime().Unix()
 	if err := k.SetEscrow(ctx, escrow); err != nil {
 		return err
@@ -325,10 +325,33 @@ func (k Keeper) ResolveDispute(ctx sdk.Context, escrowID string, allocation type
 		sdk.NewEvent(
 			types.EventTypeResolve,
 			sdk.NewAttribute(types.AttributeKeyEscrowID, escrowID),
-			sdk.NewAttribute(types.AttributeKeyRequesterAmount, allocation.RequesterAmount.String()),
-			sdk.NewAttribute(types.AttributeKeyProviderAmount, allocation.ProviderAmount.String()),
+			sdk.NewAttribute(types.AttributeKeyRequesterAmount, sdk.Coins(allocation.RequesterAmount).String()),
+			sdk.NewAttribute(types.AttributeKeyProviderAmount, sdk.Coins(allocation.ProviderAmount).String()),
 		),
 	)
+
+	return nil
+}
+
+// validateFundAllocation validates that the allocation sums to the escrow amount
+func validateFundAllocation(allocation types.FundAllocation, escrowAmount sdk.Coins) error {
+	// Sum the allocation amounts
+	total := sdk.NewCoins()
+	total = total.Add(sdk.Coins(allocation.RequesterAmount)...)
+	total = total.Add(sdk.Coins(allocation.ProviderAmount)...)
+
+	// Validate each amount is non-negative
+	if err := sdk.Coins(allocation.RequesterAmount).Validate(); err != nil {
+		return types.ErrInvalidAllocation.Wrap("invalid requester amount: " + err.Error())
+	}
+	if err := sdk.Coins(allocation.ProviderAmount).Validate(); err != nil {
+		return types.ErrInvalidAllocation.Wrap("invalid provider amount: " + err.Error())
+	}
+
+	// Check that total equals escrow amount
+	if !total.IsEqual(escrowAmount) {
+		return types.ErrInvalidAllocation.Wrap("allocation does not equal escrow amount")
+	}
 
 	return nil
 }

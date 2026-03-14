@@ -3,7 +3,6 @@ package types_test
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
 	"sharetoken/x/dispute/types"
@@ -13,8 +12,8 @@ func TestNewDispute(t *testing.T) {
 	dispute := types.NewDispute("dispute-1", "escrow-1", "requester-1", "provider-1", "service not delivered")
 
 	require.NotNil(t, dispute)
-	require.Equal(t, "dispute-1", dispute.ID)
-	require.Equal(t, "escrow-1", dispute.EscrowID)
+	require.Equal(t, "dispute-1", dispute.Id)
+	require.Equal(t, "escrow-1", dispute.EscrowId)
 	require.Equal(t, "requester-1", dispute.Requester)
 	require.Equal(t, "provider-1", dispute.Provider)
 	require.Equal(t, types.DisputeStatusOpen, dispute.Status)
@@ -32,7 +31,7 @@ func TestDispute_AddEvidence(t *testing.T) {
 
 	evidence := types.Evidence{
 		SubmittedBy: "requester-1",
-		Type:        "document",
+		EvidenceType: "document",
 		Content:     "proof of payment",
 		Timestamp:   1234567890,
 	}
@@ -44,7 +43,7 @@ func TestDispute_AddEvidence(t *testing.T) {
 	// Add more evidence
 	evidence2 := types.Evidence{
 		SubmittedBy: "provider-1",
-		Type:        "image",
+		EvidenceType: "image",
 		Content:     "delivery confirmation",
 		Timestamp:   1234567891,
 	}
@@ -59,7 +58,7 @@ func TestDispute_AddVote(t *testing.T) {
 
 	vote := types.Vote{
 		Voter:     "voter-1",
-		Weight:    sdk.NewDec(1),
+		Weight:    "1",
 		Decision:  "requester",
 		Timestamp: 1234567890,
 	}
@@ -71,7 +70,7 @@ func TestDispute_AddVote(t *testing.T) {
 	// Add more votes
 	vote2 := types.Vote{
 		Voter:     "voter-2",
-		Weight:    sdk.NewDec(2),
+		Weight:    "2",
 		Decision:  "provider",
 		Timestamp: 1234567891,
 	}
@@ -93,35 +92,35 @@ func TestDispute_CalculateResult(t *testing.T) {
 		{
 			name: "requester wins",
 			votes: []types.Vote{
-				{Voter: "v1", Weight: sdk.NewDec(3), Decision: "requester"},
-				{Voter: "v2", Weight: sdk.NewDec(2), Decision: "provider"},
-				{Voter: "v3", Weight: sdk.NewDec(1), Decision: "split"},
+				{Voter: "v1", Weight: "3", Decision: "requester"},
+				{Voter: "v2", Weight: "2", Decision: "provider"},
+				{Voter: "v3", Weight: "1", Decision: "split"},
 			},
 			expectedWinner: "requester",
 		},
 		{
 			name: "provider wins",
 			votes: []types.Vote{
-				{Voter: "v1", Weight: sdk.NewDec(2), Decision: "requester"},
-				{Voter: "v2", Weight: sdk.NewDec(4), Decision: "provider"},
-				{Voter: "v3", Weight: sdk.NewDec(1), Decision: "split"},
+				{Voter: "v1", Weight: "2", Decision: "requester"},
+				{Voter: "v2", Weight: "4", Decision: "provider"},
+				{Voter: "v3", Weight: "1", Decision: "split"},
 			},
 			expectedWinner: "provider",
 		},
 		{
 			name: "split wins",
 			votes: []types.Vote{
-				{Voter: "v1", Weight: sdk.NewDec(2), Decision: "requester"},
-				{Voter: "v2", Weight: sdk.NewDec(2), Decision: "provider"},
-				{Voter: "v3", Weight: sdk.NewDec(5), Decision: "split"},
+				{Voter: "v1", Weight: "2", Decision: "requester"},
+				{Voter: "v2", Weight: "2", Decision: "provider"},
+				{Voter: "v3", Weight: "5", Decision: "split"},
 			},
 			expectedWinner: "split",
 		},
 		{
 			name: "tie goes to split",
 			votes: []types.Vote{
-				{Voter: "v1", Weight: sdk.NewDec(2), Decision: "requester"},
-				{Voter: "v2", Weight: sdk.NewDec(2), Decision: "provider"},
+				{Voter: "v1", Weight: "2", Decision: "requester"},
+				{Voter: "v2", Weight: "2", Decision: "provider"},
 			},
 			expectedWinner: "split",
 		},
@@ -151,7 +150,7 @@ func TestDispute_String(t *testing.T) {
 // Genesis Tests
 
 func TestDefaultDisputeGenesis(t *testing.T) {
-	genesis := types.DefaultDisputeGenesis()
+	genesis := types.DefaultGenesis()
 
 	require.NotNil(t, genesis)
 	require.NotNil(t, genesis.Disputes)
@@ -183,8 +182,8 @@ func TestValidateGenesis(t *testing.T) {
 			name: "valid genesis with disputes",
 			data: types.GenesisState{
 				Disputes: []types.Dispute{
-					{ID: "dispute-1", EscrowID: "escrow-1", Requester: "requester-1", Provider: "provider-1"},
-					{ID: "dispute-2", EscrowID: "escrow-2", Requester: "requester-2", Provider: "provider-2"},
+					{Id: "dispute-1", EscrowId: "escrow-1", Requester: "requester-1", Provider: "provider-1"},
+					{Id: "dispute-2", EscrowId: "escrow-2", Requester: "requester-2", Provider: "provider-2"},
 				},
 			},
 			wantErr: false,
@@ -193,8 +192,8 @@ func TestValidateGenesis(t *testing.T) {
 			name: "invalid - duplicate dispute IDs",
 			data: types.GenesisState{
 				Disputes: []types.Dispute{
-					{ID: "dispute-1", EscrowID: "escrow-1", Requester: "requester-1", Provider: "provider-1"},
-					{ID: "dispute-1", EscrowID: "escrow-2", Requester: "requester-2", Provider: "provider-2"},
+					{Id: "dispute-1", EscrowId: "escrow-1", Requester: "requester-1", Provider: "provider-1"},
+					{Id: "dispute-1", EscrowId: "escrow-2", Requester: "requester-2", Provider: "provider-2"},
 				},
 			},
 			wantErr: true,
@@ -203,7 +202,7 @@ func TestValidateGenesis(t *testing.T) {
 			name: "invalid - empty dispute ID",
 			data: types.GenesisState{
 				Disputes: []types.Dispute{
-					{ID: "", EscrowID: "escrow-1", Requester: "requester-1", Provider: "provider-1"},
+					{Id: "", EscrowId: "escrow-1", Requester: "requester-1", Provider: "provider-1"},
 				},
 			},
 			wantErr: true,
@@ -212,7 +211,7 @@ func TestValidateGenesis(t *testing.T) {
 			name: "invalid - empty escrow ID",
 			data: types.GenesisState{
 				Disputes: []types.Dispute{
-					{ID: "dispute-1", EscrowID: "", Requester: "requester-1", Provider: "provider-1"},
+					{Id: "dispute-1", EscrowId: "", Requester: "requester-1", Provider: "provider-1"},
 				},
 			},
 			wantErr: true,
@@ -221,7 +220,7 @@ func TestValidateGenesis(t *testing.T) {
 			name: "invalid - empty requester",
 			data: types.GenesisState{
 				Disputes: []types.Dispute{
-					{ID: "dispute-1", EscrowID: "escrow-1", Requester: "", Provider: "provider-1"},
+					{Id: "dispute-1", EscrowId: "escrow-1", Requester: "", Provider: "provider-1"},
 				},
 			},
 			wantErr: true,
@@ -230,7 +229,7 @@ func TestValidateGenesis(t *testing.T) {
 			name: "invalid - empty provider",
 			data: types.GenesisState{
 				Disputes: []types.Dispute{
-					{ID: "dispute-1", EscrowID: "escrow-1", Requester: "requester-1", Provider: ""},
+					{Id: "dispute-1", EscrowId: "escrow-1", Requester: "requester-1", Provider: ""},
 				},
 			},
 			wantErr: true,

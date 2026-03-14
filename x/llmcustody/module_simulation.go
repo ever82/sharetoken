@@ -32,7 +32,7 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 		accs[i] = acc.Address.String()
 	}
 	llmcustodyGenesis := types.GenesisState{
-		APIKeys:       []types.APIKey{},
+		ApiKeys:       []types.APIKey{},
 		EncryptionKey: nil,
 		// this line is used by starport scaffolding # simapp/module/genesisState
 	}

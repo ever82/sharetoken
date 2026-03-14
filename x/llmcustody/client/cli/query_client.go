@@ -82,7 +82,7 @@ func (qc *QueryClient) APIKey(ctx context.Context, id string) (*APIKeyResponse, 
 
 	return &APIKeyResponse{
 		APIKey: types.APIKey{
-			ID:       id,
+			Id:       id,
 			Provider: types.ProviderOpenAI,
 			Owner:    "",
 			Active:   true,
@@ -137,7 +137,7 @@ func (qc *QueryClient) ServiceUsage(ctx context.Context, serviceID, apiKeyID str
 
 	return &ServiceUsageResponse{
 		Stats: types.ServiceUsageStats{
-			ServiceID: serviceID,
+			ServiceId: serviceID,
 		},
 	}, nil
 }

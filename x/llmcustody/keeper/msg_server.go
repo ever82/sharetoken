@@ -26,7 +26,7 @@ func (k msgServer) RegisterAPIKey(ctx context.Context, msg *types.MsgRegisterAPI
 
 	// Generate API key ID
 	apiKeyID := types.GenerateAPIKeyID()
-	provider := types.Provider(msg.Provider)
+	provider := types.ProviderFromString(msg.Provider)
 
 	// Create API key
 	apiKey := types.NewAPIKey(apiKeyID, provider, msg.EncryptedKey, msg.Owner)
@@ -41,7 +41,7 @@ func (k msgServer) RegisterAPIKey(ctx context.Context, msg *types.MsgRegisterAPI
 	k.SetAPIKey(sdkCtx, *apiKey)
 
 	return &types.MsgRegisterAPIKeyResponse{
-		APIKeyID: apiKeyID,
+		ApiKeyId: apiKeyID,
 	}, nil
 }
 
@@ -50,7 +50,7 @@ func (k msgServer) UpdateAPIKey(ctx context.Context, msg *types.MsgUpdateAPIKey)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Get existing API key
-	apiKey, found := k.GetAPIKey(sdkCtx, msg.APIKeyID)
+	apiKey, found := k.GetAPIKey(sdkCtx, msg.ApiKeyId)
 	if !found {
 		return nil, types.ErrAPIKeyNotFound
 	}
@@ -77,7 +77,7 @@ func (k msgServer) RevokeAPIKey(ctx context.Context, msg *types.MsgRevokeAPIKey)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Get existing API key
-	apiKey, found := k.GetAPIKey(sdkCtx, msg.APIKeyID)
+	apiKey, found := k.GetAPIKey(sdkCtx, msg.ApiKeyId)
 	if !found {
 		return nil, types.ErrAPIKeyNotFound
 	}
@@ -88,7 +88,7 @@ func (k msgServer) RevokeAPIKey(ctx context.Context, msg *types.MsgRevokeAPIKey)
 	}
 
 	// Delete
-	k.DeleteAPIKey(sdkCtx, msg.APIKeyID)
+	k.DeleteAPIKey(sdkCtx, msg.ApiKeyId)
 
 	return &types.MsgRevokeAPIKeyResponse{}, nil
 }
@@ -98,7 +98,7 @@ func (k msgServer) RecordUsage(ctx context.Context, msg *types.MsgRecordUsage) (
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Verify access
-	apiKey, err := k.VerifyAPIKeyAccess(sdkCtx, msg.APIKeyID, msg.ServiceID)
+	apiKey, err := k.VerifyAPIKeyAccess(sdkCtx, msg.ApiKeyId, msg.ServiceId)
 	if err != nil {
 		return nil, err
 	}
@@ -116,12 +116,12 @@ func (k msgServer) RotateAPIKey(ctx context.Context, msg *types.MsgRotateAPIKey)
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
 	// Rotate the API key
-	newAPIKeyID, err := k.Keeper.RotateAPIKey(sdkCtx, msg.Owner, msg.APIKeyID, msg.NewEncryptedKey, msg.Reason)
+	newAPIKeyID, err := k.Keeper.RotateAPIKey(sdkCtx, msg.Owner, msg.ApiKeyId, msg.NewEncryptedKey, msg.Reason)
 	if err != nil {
 		return nil, err
 	}
 
 	return &types.MsgRotateAPIKeyResponse{
-		NewAPIKeyID: newAPIKeyID,
+		NewApiKeyId: newAPIKeyID,
 	}, nil
 }

@@ -85,7 +85,7 @@ func (k Keeper) getStore(ctx sdk.Context) sdk.KVStore {
 // SetTask stores a task in the KVStore
 func (k Keeper) SetTask(ctx sdk.Context, task types.Task) {
 	store := k.getStore(ctx)
-	key := types.GetTaskKey(task.ID)
+	key := types.GetTaskKey(task.Id)
 	value, err := k.cdc.Marshal(task)
 	if err != nil {
 		panic(fmt.Errorf("failed to marshal task: %w", err))
@@ -154,8 +154,8 @@ func (k Keeper) GetAllTasks(ctx sdk.Context) []types.Task {
 
 // CreateTask creates a new task (SDK version)
 func (k Keeper) CreateTask(ctx sdk.Context, task types.Task) error {
-	if k.HasTask(ctx, task.ID) {
-		return fmt.Errorf("task already exists: %s", task.ID)
+	if k.HasTask(ctx, task.Id) {
+		return fmt.Errorf("task already exists: %s", task.Id)
 	}
 
 	if err := task.Validate(); err != nil {
@@ -174,12 +174,12 @@ func (k Keeper) CreateTask(ctx sdk.Context, task types.Task) error {
 
 // UpdateTask updates a task in the store
 func (k Keeper) UpdateTask(ctx sdk.Context, task types.Task) error {
-	if !k.HasTask(ctx, task.ID) {
-		return fmt.Errorf("task not found: %s", task.ID)
+	if !k.HasTask(ctx, task.Id) {
+		return fmt.Errorf("task not found: %s", task.Id)
 	}
 
 	// Delete old indexes
-	oldTask, _ := k.GetTask(ctx, task.ID)
+	oldTask, _ := k.GetTask(ctx, task.Id)
 	k.deleteTaskIndexes(ctx, oldTask)
 
 	// Set new task with updated indexes
@@ -190,46 +190,46 @@ func (k Keeper) UpdateTask(ctx sdk.Context, task types.Task) error {
 // Index management functions
 
 func (k Keeper) setTaskByRequester(ctx sdk.Context, task types.Task) {
-	if task.RequesterID == "" {
+	if task.RequesterId == "" {
 		return
 	}
 	store := k.getStore(ctx)
-	key := types.GetTaskByRequesterKey(task.RequesterID, task.ID)
-	store.Set(key, []byte(task.ID))
+	key := types.GetTaskByRequesterKey(task.RequesterId, task.Id)
+	store.Set(key, []byte(task.Id))
 }
 
 func (k Keeper) setTaskByWorker(ctx sdk.Context, task types.Task) {
-	if task.WorkerID == "" {
+	if task.WorkerId == "" {
 		return
 	}
 	store := k.getStore(ctx)
-	key := types.GetTaskByWorkerKey(task.WorkerID, task.ID)
-	store.Set(key, []byte(task.ID))
+	key := types.GetTaskByWorkerKey(task.WorkerId, task.Id)
+	store.Set(key, []byte(task.Id))
 }
 
 func (k Keeper) setTaskByStatus(ctx sdk.Context, task types.Task) {
 	store := k.getStore(ctx)
-	key := types.GetTaskByStatusKey(string(task.Status), task.ID)
-	store.Set(key, []byte(task.ID))
+	key := types.GetTaskByStatusKey(string(task.Status), task.Id)
+	store.Set(key, []byte(task.Id))
 }
 
 func (k Keeper) deleteTaskIndexes(ctx sdk.Context, task types.Task) {
 	store := k.getStore(ctx)
 
 	// Delete requester index
-	if task.RequesterID != "" {
-		key := types.GetTaskByRequesterKey(task.RequesterID, task.ID)
+	if task.RequesterId != "" {
+		key := types.GetTaskByRequesterKey(task.RequesterId, task.Id)
 		store.Delete(key)
 	}
 
 	// Delete worker index
-	if task.WorkerID != "" {
-		key := types.GetTaskByWorkerKey(task.WorkerID, task.ID)
+	if task.WorkerId != "" {
+		key := types.GetTaskByWorkerKey(task.WorkerId, task.Id)
 		store.Delete(key)
 	}
 
 	// Delete status index
-	key := types.GetTaskByStatusKey(string(task.Status), task.ID)
+	key := types.GetTaskByStatusKey(string(task.Status), task.Id)
 	store.Delete(key)
 }
 
@@ -367,7 +367,7 @@ func (k Keeper) RejectMilestone(ctx sdk.Context, taskID, milestoneID, reason str
 // SetApplication stores an application in the KVStore
 func (k Keeper) SetApplication(ctx sdk.Context, app types.Application) {
 	store := k.getStore(ctx)
-	key := types.GetApplicationKey(app.ID)
+	key := types.GetApplicationKey(app.Id)
 	value, err := k.cdc.Marshal(app)
 	if err != nil {
 		panic(fmt.Errorf("failed to marshal application: %w", err))
@@ -413,8 +413,8 @@ func (k Keeper) GetAllApplications(ctx sdk.Context) []types.Application {
 
 func (k Keeper) setApplicationByTask(ctx sdk.Context, app types.Application) {
 	store := k.getStore(ctx)
-	key := types.GetApplicationByTaskKey(app.TaskID, app.ID)
-	store.Set(key, []byte(app.ID))
+	key := types.GetApplicationByTaskKey(app.TaskId, app.Id)
+	store.Set(key, []byte(app.Id))
 }
 
 // GetApplicationsByTask returns applications by task using composite index
@@ -440,7 +440,7 @@ func (k Keeper) GetApplicationsByTask(ctx sdk.Context, taskID string) []types.Ap
 // SetAuction stores an auction in the KVStore
 func (k Keeper) SetAuction(ctx sdk.Context, auction types.Auction) {
 	store := k.getStore(ctx)
-	key := types.GetAuctionKey(auction.TaskID)
+	key := types.GetAuctionKey(auction.TaskId)
 	value, err := k.cdc.Marshal(auction)
 	if err != nil {
 		panic(fmt.Errorf("failed to marshal auction: %w", err))
@@ -486,7 +486,7 @@ func (k Keeper) GetAllAuctions(ctx sdk.Context) []types.Auction {
 // SetBid stores a bid in the KVStore
 func (k Keeper) SetBid(ctx sdk.Context, bid types.Bid) {
 	store := k.getStore(ctx)
-	key := types.GetBidKey(bid.ID)
+	key := types.GetBidKey(bid.Id)
 	value, err := k.cdc.Marshal(bid)
 	if err != nil {
 		panic(fmt.Errorf("failed to marshal bid: %w", err))
@@ -532,8 +532,8 @@ func (k Keeper) GetAllBids(ctx sdk.Context) []types.Bid {
 
 func (k Keeper) setBidByTask(ctx sdk.Context, bid types.Bid) {
 	store := k.getStore(ctx)
-	key := types.GetBidByTaskKey(bid.TaskID, bid.ID)
-	store.Set(key, []byte(bid.ID))
+	key := types.GetBidByTaskKey(bid.TaskId, bid.Id)
+	store.Set(key, []byte(bid.Id))
 }
 
 // GetBidsByTask returns bids by task using composite index
@@ -559,7 +559,7 @@ func (k Keeper) GetBidsByTask(ctx sdk.Context, taskID string) []types.Bid {
 // SetRating stores a rating in the KVStore
 func (k Keeper) SetRating(ctx sdk.Context, rating types.Rating) {
 	store := k.getStore(ctx)
-	key := types.GetRatingKey(rating.ID)
+	key := types.GetRatingKey(rating.Id)
 	value, err := k.cdc.Marshal(rating)
 	if err != nil {
 		panic(fmt.Errorf("failed to marshal rating: %w", err))
@@ -606,14 +606,14 @@ func (k Keeper) GetAllRatings(ctx sdk.Context) []types.Rating {
 
 func (k Keeper) setRatingByTask(ctx sdk.Context, rating types.Rating) {
 	store := k.getStore(ctx)
-	key := types.GetRatingByTaskKey(rating.TaskID, rating.ID)
-	store.Set(key, []byte(rating.ID))
+	key := types.GetRatingByTaskKey(rating.TaskId, rating.Id)
+	store.Set(key, []byte(rating.Id))
 }
 
 func (k Keeper) setRatingByRatedUser(ctx sdk.Context, rating types.Rating) {
 	store := k.getStore(ctx)
-	key := types.GetRatingByRatedUserKey(rating.RatedID, rating.ID)
-	store.Set(key, []byte(rating.ID))
+	key := types.GetRatingByRatedUserKey(rating.RatedId, rating.Id)
+	store.Set(key, []byte(rating.Id))
 }
 
 // GetRatingsByTask returns ratings by task using composite index
@@ -657,7 +657,7 @@ func (k Keeper) GetRatingsByRatedUser(ctx sdk.Context, ratedID string) []types.R
 // SetReputation stores a reputation in the KVStore
 func (k Keeper) SetReputation(ctx sdk.Context, rep types.Reputation) {
 	store := k.getStore(ctx)
-	key := types.GetReputationKey(rep.UserID)
+	key := types.GetReputationKey(rep.UserId)
 	value, err := k.cdc.Marshal(rep)
 	if err != nil {
 		panic(fmt.Errorf("failed to marshal reputation: %w", err))

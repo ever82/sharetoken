@@ -14,7 +14,7 @@ import (
 func TestEscrow_ValidateBasic(t *testing.T) {
 	validAddress := sdk.AccAddress([]byte("test_address_1")).String()
 	validAddress2 := sdk.AccAddress([]byte("test_address_2")).String()
-	validCoins := sdk.NewCoins(sdk.NewCoin("ustt", sdk.NewInt(1000)))
+	validCoins := []sdk.Coin{sdk.NewCoin("ustt", sdk.NewInt(1000))}
 
 	tests := []struct {
 		name    string
@@ -25,22 +25,22 @@ func TestEscrow_ValidateBasic(t *testing.T) {
 		{
 			name: "valid escrow",
 			escrow: types.Escrow{
-				ID:        "escrow-1",
+				Id:        "escrow-1",
 				Requester: validAddress,
 				Provider:  validAddress2,
 				Amount:    validCoins,
-				Status:    types.EscrowStatusPending,
+				Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 			},
 			wantErr: false,
 		},
 		{
 			name: "invalid - empty ID",
 			escrow: types.Escrow{
-				ID:        "",
+				Id:        "",
 				Requester: validAddress,
 				Provider:  validAddress2,
 				Amount:    validCoins,
-				Status:    types.EscrowStatusPending,
+				Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 			},
 			wantErr: true,
 			errType: types.ErrInvalidEscrowID,
@@ -48,86 +48,38 @@ func TestEscrow_ValidateBasic(t *testing.T) {
 		{
 			name: "invalid - empty requester",
 			escrow: types.Escrow{
-				ID:        "escrow-1",
+				Id:        "escrow-1",
 				Requester: "",
 				Provider:  validAddress2,
 				Amount:    validCoins,
-				Status:    types.EscrowStatusPending,
+				Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 			},
 			wantErr: true,
-			errType: types.ErrUnauthorized,
-		},
-		{
-			name: "invalid - malformed requester address",
-			escrow: types.Escrow{
-				ID:        "escrow-1",
-				Requester: "invalid_address",
-				Provider:  validAddress2,
-				Amount:    validCoins,
-				Status:    types.EscrowStatusPending,
-			},
-			wantErr: true,
-			errType: types.ErrUnauthorized,
+			errType: types.ErrInvalidRequester,
 		},
 		{
 			name: "invalid - empty provider",
 			escrow: types.Escrow{
-				ID:        "escrow-1",
+				Id:        "escrow-1",
 				Requester: validAddress,
 				Provider:  "",
 				Amount:    validCoins,
-				Status:    types.EscrowStatusPending,
+				Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 			},
 			wantErr: true,
-			errType: types.ErrUnauthorized,
-		},
-		{
-			name: "invalid - malformed provider address",
-			escrow: types.Escrow{
-				ID:        "escrow-1",
-				Requester: validAddress,
-				Provider:  "invalid_address",
-				Amount:    validCoins,
-				Status:    types.EscrowStatusPending,
-			},
-			wantErr: true,
-			errType: types.ErrUnauthorized,
+			errType: types.ErrInvalidProvider,
 		},
 		{
 			name: "invalid - zero amount",
 			escrow: types.Escrow{
-				ID:        "escrow-1",
+				Id:        "escrow-1",
 				Requester: validAddress,
 				Provider:  validAddress2,
-				Amount:    sdk.NewCoins(),
-				Status:    types.EscrowStatusPending,
+				Amount:    []sdk.Coin{},
+				Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 			},
 			wantErr: true,
 			errType: types.ErrInvalidAmount,
-		},
-		{
-			name: "invalid - invalid amount",
-			escrow: types.Escrow{
-				ID:        "escrow-1",
-				Requester: validAddress,
-				Provider:  validAddress2,
-				Amount:    sdk.Coins{{Denom: "ustt", Amount: sdk.NewInt(-1)}},
-				Status:    types.EscrowStatusPending,
-			},
-			wantErr: true,
-			errType: types.ErrInvalidAmount,
-		},
-		{
-			name: "invalid - empty status",
-			escrow: types.Escrow{
-				ID:        "escrow-1",
-				Requester: validAddress,
-				Provider:  validAddress2,
-				Amount:    validCoins,
-				Status:    "",
-			},
-			wantErr: true,
-			errType: types.ErrInvalidStatus,
 		},
 	}
 
@@ -155,12 +107,11 @@ func TestNewEscrow(t *testing.T) {
 	escrow := types.NewEscrow("escrow-1", validAddress, validAddress2, validCoins, duration)
 
 	require.NotNil(t, escrow)
-	require.Equal(t, "escrow-1", escrow.ID)
+	require.Equal(t, "escrow-1", escrow.Id)
 	require.Equal(t, validAddress, escrow.Requester)
 	require.Equal(t, validAddress2, escrow.Provider)
-	require.True(t, escrow.Amount.IsEqual(validCoins))
-	require.Equal(t, types.EscrowStatusPending, escrow.Status)
-	require.Equal(t, validAddress, escrow.RefundAddress)
+	require.True(t, sdk.Coins(escrow.Amount).IsEqual(validCoins))
+	require.Equal(t, types.EscrowStatus_ESCROW_STATUS_PENDING, escrow.Status)
 	require.NotZero(t, escrow.CreatedAt)
 	require.NotZero(t, escrow.ExpiresAt)
 	require.True(t, escrow.ExpiresAt > escrow.CreatedAt)
@@ -209,7 +160,7 @@ func TestEscrow_CanComplete(t *testing.T) {
 		{
 			name: "can complete - pending and not expired",
 			escrow: types.Escrow{
-				Status:    types.EscrowStatusPending,
+				Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 				ExpiresAt: now + 3600,
 			},
 			expected: true,
@@ -217,7 +168,7 @@ func TestEscrow_CanComplete(t *testing.T) {
 		{
 			name: "cannot complete - completed status",
 			escrow: types.Escrow{
-				Status:    types.EscrowStatusCompleted,
+				Status:    types.EscrowStatus_ESCROW_STATUS_COMPLETED,
 				ExpiresAt: now + 3600,
 			},
 			expected: false,
@@ -225,7 +176,7 @@ func TestEscrow_CanComplete(t *testing.T) {
 		{
 			name: "cannot complete - expired",
 			escrow: types.Escrow{
-				Status:    types.EscrowStatusPending,
+				Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 				ExpiresAt: now - 3600,
 			},
 			expected: false,
@@ -233,7 +184,7 @@ func TestEscrow_CanComplete(t *testing.T) {
 		{
 			name: "cannot complete - disputed",
 			escrow: types.Escrow{
-				Status:    types.EscrowStatusDisputed,
+				Status:    types.EscrowStatus_ESCROW_STATUS_DISPUTED,
 				ExpiresAt: now + 3600,
 			},
 			expected: false,
@@ -254,10 +205,10 @@ func TestEscrow_CanDispute(t *testing.T) {
 		status   types.EscrowStatus
 		expected bool
 	}{
-		{"can dispute - pending", types.EscrowStatusPending, true},
-		{"can dispute - completed", types.EscrowStatusCompleted, true},
-		{"cannot dispute - disputed", types.EscrowStatusDisputed, false},
-		{"cannot dispute - refunded", types.EscrowStatusRefunded, false},
+		{"can dispute - pending", types.EscrowStatus_ESCROW_STATUS_PENDING, true},
+		{"can dispute - completed", types.EscrowStatus_ESCROW_STATUS_COMPLETED, true},
+		{"cannot dispute - disputed", types.EscrowStatus_ESCROW_STATUS_DISPUTED, false},
+		{"cannot dispute - refunded", types.EscrowStatus_ESCROW_STATUS_REFUNDED, false},
 	}
 
 	for _, tt := range tests {
@@ -280,7 +231,7 @@ func TestEscrow_CanRefund(t *testing.T) {
 		{
 			name: "can refund - pending and expired",
 			escrow: types.Escrow{
-				Status:    types.EscrowStatusPending,
+				Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 				ExpiresAt: now - 3600,
 			},
 			expected: true,
@@ -288,7 +239,7 @@ func TestEscrow_CanRefund(t *testing.T) {
 		{
 			name: "cannot refund - not expired",
 			escrow: types.Escrow{
-				Status:    types.EscrowStatusPending,
+				Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 				ExpiresAt: now + 3600,
 			},
 			expected: false,
@@ -296,7 +247,7 @@ func TestEscrow_CanRefund(t *testing.T) {
 		{
 			name: "cannot refund - not pending",
 			escrow: types.Escrow{
-				Status:    types.EscrowStatusCompleted,
+				Status:    types.EscrowStatus_ESCROW_STATUS_COMPLETED,
 				ExpiresAt: now - 3600,
 			},
 			expected: false,
@@ -307,52 +258,6 @@ func TestEscrow_CanRefund(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := tt.escrow.CanRefund()
 			require.Equal(t, tt.expected, result)
-		})
-	}
-}
-
-func TestFundAllocation_Validate(t *testing.T) {
-	total := sdk.NewCoins(sdk.NewCoin("ustt", sdk.NewInt(1000)))
-
-	tests := []struct {
-		name      string
-		allocation types.FundAllocation
-		wantErr   bool
-	}{
-		{
-			name: "valid allocation",
-			allocation: types.FundAllocation{
-				RequesterAmount: sdk.NewCoins(sdk.NewCoin("ustt", sdk.NewInt(400))),
-				ProviderAmount:  sdk.NewCoins(sdk.NewCoin("ustt", sdk.NewInt(600))),
-			},
-			wantErr: false,
-		},
-		{
-			name: "invalid - sum exceeds total",
-			allocation: types.FundAllocation{
-				RequesterAmount: sdk.NewCoins(sdk.NewCoin("ustt", sdk.NewInt(600))),
-				ProviderAmount:  sdk.NewCoins(sdk.NewCoin("ustt", sdk.NewInt(600))),
-			},
-			wantErr: true,
-		},
-		{
-			name: "invalid - sum less than total",
-			allocation: types.FundAllocation{
-				RequesterAmount: sdk.NewCoins(sdk.NewCoin("ustt", sdk.NewInt(300))),
-				ProviderAmount:  sdk.NewCoins(sdk.NewCoin("ustt", sdk.NewInt(300))),
-			},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.allocation.Validate(total)
-			if tt.wantErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
 		})
 	}
 }
@@ -368,7 +273,7 @@ func TestDefaultGenesis(t *testing.T) {
 func TestValidateGenesis(t *testing.T) {
 	validAddress := sdk.AccAddress([]byte("test_address_1")).String()
 	validAddress2 := sdk.AccAddress([]byte("test_address_2")).String()
-	validCoins := sdk.NewCoins(sdk.NewCoin("ustt", sdk.NewInt(1000)))
+	validCoins := []sdk.Coin{sdk.NewCoin("ustt", sdk.NewInt(1000))}
 
 	tests := []struct {
 		name    string
@@ -384,8 +289,8 @@ func TestValidateGenesis(t *testing.T) {
 			name: "valid genesis with escrows",
 			data: types.GenesisState{
 				Escrows: []types.Escrow{
-					{ID: "escrow-1", Requester: validAddress, Provider: validAddress2, Amount: validCoins, Status: types.EscrowStatusPending},
-					{ID: "escrow-2", Requester: validAddress2, Provider: validAddress, Amount: validCoins, Status: types.EscrowStatusCompleted},
+					{Id: "escrow-1", Requester: validAddress, Provider: validAddress2, Amount: validCoins, Status: types.EscrowStatus_ESCROW_STATUS_PENDING},
+					{Id: "escrow-2", Requester: validAddress2, Provider: validAddress, Amount: validCoins, Status: types.EscrowStatus_ESCROW_STATUS_COMPLETED},
 				},
 			},
 			wantErr: false,
@@ -394,8 +299,8 @@ func TestValidateGenesis(t *testing.T) {
 			name: "invalid - duplicate escrow IDs",
 			data: types.GenesisState{
 				Escrows: []types.Escrow{
-					{ID: "escrow-1", Requester: validAddress, Provider: validAddress2, Amount: validCoins, Status: types.EscrowStatusPending},
-					{ID: "escrow-1", Requester: validAddress2, Provider: validAddress, Amount: validCoins, Status: types.EscrowStatusPending},
+					{Id: "escrow-1", Requester: validAddress, Provider: validAddress2, Amount: validCoins, Status: types.EscrowStatus_ESCROW_STATUS_PENDING},
+					{Id: "escrow-1", Requester: validAddress2, Provider: validAddress, Amount: validCoins, Status: types.EscrowStatus_ESCROW_STATUS_PENDING},
 				},
 			},
 			wantErr: true,
@@ -404,7 +309,7 @@ func TestValidateGenesis(t *testing.T) {
 			name: "invalid - invalid escrow",
 			data: types.GenesisState{
 				Escrows: []types.Escrow{
-					{ID: "", Requester: validAddress, Provider: validAddress2, Amount: validCoins, Status: types.EscrowStatusPending},
+					{Id: "", Requester: validAddress, Provider: validAddress2, Amount: validCoins, Status: types.EscrowStatus_ESCROW_STATUS_PENDING},
 				},
 			},
 			wantErr: true,

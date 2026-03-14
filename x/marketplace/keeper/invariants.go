@@ -28,20 +28,20 @@ func (k Keeper) ServiceStatusInvariant() sdk.Invariant {
 			// Active services should have valid pricing
 			if service.Active {
 				if !service.Price.IsValid() {
-					invalidStatuses = append(invalidStatuses, fmt.Sprintf("%s:active with invalid price", service.ID))
+					invalidStatuses = append(invalidStatuses, fmt.Sprintf("%s:active with invalid price", service.Id))
 				}
 				if service.Provider == "" {
-					invalidStatuses = append(invalidStatuses, fmt.Sprintf("%s:active with no provider", service.ID))
+					invalidStatuses = append(invalidStatuses, fmt.Sprintf("%s:active with no provider", service.Id))
 				}
 			}
 
 			// Service should have a valid name
 			if service.Name == "" {
-				invalidStatuses = append(invalidStatuses, fmt.Sprintf("%s:empty name", service.ID))
+				invalidStatuses = append(invalidStatuses, fmt.Sprintf("%s:empty name", service.Id))
 			}
 
 			// Service should have a valid ID
-			if service.ID == "" {
+			if service.Id == "" {
 				invalidStatuses = append(invalidStatuses, "service with empty ID")
 			}
 		}
@@ -71,18 +71,18 @@ func (k Keeper) ServicePricingInvariant() sdk.Invariant {
 		for _, service := range services {
 			// Check pricing mode validity
 			switch service.PricingMode {
-			case types.PricingModeFixed,
-				types.PricingModeDynamic,
-				types.PricingModeAuction:
+			case types.PricingMode_PRICING_MODE_FIXED,
+				types.PricingMode_PRICING_MODE_DYNAMIC,
+				types.PricingMode_PRICING_MODE_AUCTION:
 				// Valid pricing mode
 			default:
-				invalidPricing = append(invalidPricing, fmt.Sprintf("%s:invalid pricing mode %d", service.ID, service.PricingMode))
+				invalidPricing = append(invalidPricing, fmt.Sprintf("%s:invalid pricing mode %d", service.Id, service.PricingMode))
 				continue
 			}
 
 			// Price should be valid (not empty for active services)
 			if service.Active && (service.Price.IsZero() || !service.Price.IsValid()) {
-				invalidPricing = append(invalidPricing, fmt.Sprintf("%s:invalid price %s", service.ID, service.Price.String()))
+				invalidPricing = append(invalidPricing, fmt.Sprintf("%s:invalid price %s", service.Id, service.Price.String()))
 			}
 		}
 
@@ -111,12 +111,12 @@ func (k Keeper) ServiceLevelValidityInvariant() sdk.Invariant {
 		for _, service := range services {
 			// Service level should be one of the valid levels
 			switch service.Level {
-			case types.ServiceLevelLLM,
-				types.ServiceLevelAgent,
-				types.ServiceLevelWorkflow:
+			case types.ServiceLevel_SERVICE_LEVEL_LLM,
+				types.ServiceLevel_SERVICE_LEVEL_AGENT,
+				types.ServiceLevel_SERVICE_LEVEL_WORKFLOW:
 				// Valid level
 			default:
-				invalidLevels = append(invalidLevels, fmt.Sprintf("%s:invalid level %d", service.ID, service.Level))
+				invalidLevels = append(invalidLevels, fmt.Sprintf("%s:invalid level %d", service.Id, service.Level))
 			}
 		}
 

@@ -32,7 +32,7 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 		accs[i] = acc.Address.String()
 	}
 	trustGenesis := types.GenesisState{
-		MQScores: []types.MQScore{},
+		MqScores: []types.MQScore{},
 		// this line is used by starport scaffolding # simapp/module/genesisState
 	}
 	// Use standard JSON marshaling since GenesisState is not a protobuf type
