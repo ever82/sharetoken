@@ -51,13 +51,13 @@ func createEncryptedKey() []byte {
 func createAccessRules() []types.AccessRule {
 	return []types.AccessRule{
 		{
-			ServiceID:   "service-1",
+			ServiceId:   "service-1",
 			RateLimit:   identitytypes.DefaultRateLimit,
 			MaxRequests: identitytypes.DefaultMaxRequests,
 			PricePerReq: 10,
 		},
 		{
-			ServiceID:   "service-2",
+			ServiceId:   "service-2",
 			RateLimit:   200,
 			MaxRequests: 2000,
 			PricePerReq: 20,
@@ -89,7 +89,7 @@ func TestMsgServer_RegisterAPIKey_Success(t *testing.T) {
 	resp, err := msgServer.RegisterAPIKey(sdk.WrapSDKContext(ctx), msg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
-	require.NotEmpty(t, resp.APIKeyID)
+	require.NotEmpty(t, resp.ApiKeyId)
 }
 
 func TestMsgServer_RegisterAPIKey_MultipleProviders(t *testing.T) {
@@ -110,7 +110,7 @@ func TestMsgServer_RegisterAPIKey_MultipleProviders(t *testing.T) {
 		resp, err := msgServer.RegisterAPIKey(sdk.WrapSDKContext(ctx), msg)
 		require.NoError(t, err)
 		require.NotNil(t, resp)
-		require.NotEmpty(t, resp.APIKeyID)
+		require.NotEmpty(t, resp.ApiKeyId)
 	}
 }
 
@@ -178,7 +178,7 @@ func TestMsgServer_RegisterAPIKey_NoAccessRules(t *testing.T) {
 	resp, err := msgServer.RegisterAPIKey(sdk.WrapSDKContext(ctx), msg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
-	require.NotEmpty(t, resp.APIKeyID)
+	require.NotEmpty(t, resp.ApiKeyId)
 }
 
 func TestMsgServer_RegisterAPIKey_GeneratesUniqueIDs(t *testing.T) {
@@ -199,11 +199,11 @@ func TestMsgServer_RegisterAPIKey_GeneratesUniqueIDs(t *testing.T) {
 		resp, err := msgServer.RegisterAPIKey(sdk.WrapSDKContext(ctx), msg)
 		require.NoError(t, err)
 		require.NotNil(t, resp)
-		require.NotEmpty(t, resp.APIKeyID)
+		require.NotEmpty(t, resp.ApiKeyId)
 
 		// Check ID is unique
-		require.False(t, ids[resp.APIKeyID], "API Key ID should be unique")
-		ids[resp.APIKeyID] = true
+		require.False(t, ids[resp.ApiKeyId], "API Key ID should be unique")
+		ids[resp.ApiKeyId] = true
 	}
 }
 
@@ -227,7 +227,7 @@ func TestMsgServer_UpdateAPIKey_Success(t *testing.T) {
 	// Now update the API key
 	newAccessRules := []types.AccessRule{
 		{
-			ServiceID:   "service-3",
+			ServiceId:   "service-3",
 			RateLimit:   300,
 			MaxRequests: 3000,
 			PricePerReq: 30,
@@ -236,7 +236,7 @@ func TestMsgServer_UpdateAPIKey_Success(t *testing.T) {
 
 	updateMsg := &types.MsgUpdateAPIKey{
 		Owner:       owner,
-		APIKeyID:    registerResp.APIKeyID,
+		ApiKeyId:    registerResp.ApiKeyId,
 		AccessRules: newAccessRules,
 		Active:      false, // Deactivate
 	}
@@ -252,7 +252,7 @@ func TestMsgServer_UpdateAPIKey_NotFound(t *testing.T) {
 
 	updateMsg := &types.MsgUpdateAPIKey{
 		Owner:       owner,
-		APIKeyID:    "non-existent-key",
+		ApiKeyId:    "non-existent-key",
 		AccessRules: createAccessRules(),
 		Active:      true,
 	}
@@ -282,7 +282,7 @@ func TestMsgServer_UpdateAPIKey_Unauthorized(t *testing.T) {
 	// Try to update with different owner
 	updateMsg := &types.MsgUpdateAPIKey{
 		Owner:       otherOwner,
-		APIKeyID:    registerResp.APIKeyID,
+		ApiKeyId:    registerResp.ApiKeyId,
 		AccessRules: createAccessRules(),
 		Active:      true,
 	}
@@ -311,7 +311,7 @@ func TestMsgServer_UpdateAPIKey_EmptyAccessRules(t *testing.T) {
 	// Update with empty access rules (should still work, just keeps existing)
 	updateMsg := &types.MsgUpdateAPIKey{
 		Owner:       owner,
-		APIKeyID:    registerResp.APIKeyID,
+		ApiKeyId:    registerResp.ApiKeyId,
 		AccessRules: []types.AccessRule{},
 		Active:      true,
 	}
@@ -340,7 +340,7 @@ func TestMsgServer_RevokeAPIKey_Success(t *testing.T) {
 	// Revoke the API key
 	revokeMsg := &types.MsgRevokeAPIKey{
 		Owner:    owner,
-		APIKeyID: registerResp.APIKeyID,
+		ApiKeyId: registerResp.ApiKeyId,
 	}
 
 	resp, err := msgServer.RevokeAPIKey(sdk.WrapSDKContext(ctx), revokeMsg)
@@ -354,7 +354,7 @@ func TestMsgServer_RevokeAPIKey_NotFound(t *testing.T) {
 
 	revokeMsg := &types.MsgRevokeAPIKey{
 		Owner:    owner,
-		APIKeyID: "non-existent-key",
+		ApiKeyId: "non-existent-key",
 	}
 
 	resp, err := msgServer.RevokeAPIKey(sdk.WrapSDKContext(ctx), revokeMsg)
@@ -382,7 +382,7 @@ func TestMsgServer_RevokeAPIKey_Unauthorized(t *testing.T) {
 	// Try to revoke with different owner
 	revokeMsg := &types.MsgRevokeAPIKey{
 		Owner:    otherOwner,
-		APIKeyID: registerResp.APIKeyID,
+		ApiKeyId: registerResp.ApiKeyId,
 	}
 
 	resp, err := msgServer.RevokeAPIKey(sdk.WrapSDKContext(ctx), revokeMsg)
@@ -398,7 +398,7 @@ func TestMsgServer_RecordUsage_Success(t *testing.T) {
 	encryptedKey := createEncryptedKey()
 	accessRules := []types.AccessRule{
 		{
-			ServiceID:   "service-1",
+			ServiceId:   "service-1",
 			RateLimit:   identitytypes.DefaultRateLimit,
 			MaxRequests: identitytypes.DefaultMaxRequests,
 			PricePerReq: 10,
@@ -417,8 +417,8 @@ func TestMsgServer_RecordUsage_Success(t *testing.T) {
 
 	// Record usage
 	usageMsg := &types.MsgRecordUsage{
-		APIKeyID:     registerResp.APIKeyID,
-		ServiceID:    "service-1",
+		ApiKeyId:     registerResp.ApiKeyId,
+		ServiceId:    "service-1",
 		RequestCount: 1,
 		TokenCount:   100,
 		Cost:         10,
@@ -435,7 +435,7 @@ func TestMsgServer_RecordUsage_InvalidService(t *testing.T) {
 	encryptedKey := createEncryptedKey()
 	accessRules := []types.AccessRule{
 		{
-			ServiceID:   "service-1",
+			ServiceId:   "service-1",
 			RateLimit:   identitytypes.DefaultRateLimit,
 			MaxRequests: identitytypes.DefaultMaxRequests,
 			PricePerReq: 10,
@@ -454,8 +454,8 @@ func TestMsgServer_RecordUsage_InvalidService(t *testing.T) {
 
 	// Try to record usage for invalid service
 	usageMsg := &types.MsgRecordUsage{
-		APIKeyID:     registerResp.APIKeyID,
-		ServiceID:    "invalid-service",
+		ApiKeyId:     registerResp.ApiKeyId,
+		ServiceId:    "invalid-service",
 		RequestCount: 1,
 		TokenCount:   100,
 		Cost:         10,
@@ -470,8 +470,8 @@ func TestMsgServer_RecordUsage_KeyNotFound(t *testing.T) {
 	msgServer, ctx := setupMsgServer(t)
 
 	usageMsg := &types.MsgRecordUsage{
-		APIKeyID:     "non-existent-key",
-		ServiceID:    "service-1",
+		ApiKeyId:     "non-existent-key",
+		ServiceId:    "service-1",
 		RequestCount: 1,
 		TokenCount:   100,
 		Cost:         10,
@@ -488,7 +488,7 @@ func TestMsgServer_RecordUsage_InactiveKey(t *testing.T) {
 	encryptedKey := createEncryptedKey()
 	accessRules := []types.AccessRule{
 		{
-			ServiceID:   "service-1",
+			ServiceId:   "service-1",
 			RateLimit:   identitytypes.DefaultRateLimit,
 			MaxRequests: identitytypes.DefaultMaxRequests,
 			PricePerReq: 10,
@@ -508,7 +508,7 @@ func TestMsgServer_RecordUsage_InactiveKey(t *testing.T) {
 	// Deactivate the key
 	updateMsg := &types.MsgUpdateAPIKey{
 		Owner:       owner,
-		APIKeyID:    registerResp.APIKeyID,
+		ApiKeyId:    registerResp.ApiKeyId,
 		AccessRules: accessRules,
 		Active:      false,
 	}
@@ -517,8 +517,8 @@ func TestMsgServer_RecordUsage_InactiveKey(t *testing.T) {
 
 	// Try to record usage
 	usageMsg := &types.MsgRecordUsage{
-		APIKeyID:     registerResp.APIKeyID,
-		ServiceID:    "service-1",
+		ApiKeyId:     registerResp.ApiKeyId,
+		ServiceId:    "service-1",
 		RequestCount: 1,
 		TokenCount:   100,
 		Cost:         10,
@@ -545,12 +545,12 @@ func TestMsgServer_FullAPIKeyLifecycle(t *testing.T) {
 	registerResp, err := msgServer.RegisterAPIKey(sdk.WrapSDKContext(ctx), registerMsg)
 	require.NoError(t, err)
 	require.NotNil(t, registerResp)
-	apiKeyID := registerResp.APIKeyID
+	apiKeyID := registerResp.ApiKeyId
 
 	// 2. Record some usage
 	usageMsg := &types.MsgRecordUsage{
-		APIKeyID:     apiKeyID,
-		ServiceID:    "service-1",
+		ApiKeyId:     apiKeyID,
+		ServiceId:    "service-1",
 		RequestCount: 5,
 		TokenCount:   500,
 		Cost:         50,
@@ -561,7 +561,7 @@ func TestMsgServer_FullAPIKeyLifecycle(t *testing.T) {
 	// 3. Update API key (change access rules and deactivate)
 	newAccessRules := []types.AccessRule{
 		{
-			ServiceID:   "service-3",
+			ServiceId:   "service-3",
 			RateLimit:   500,
 			MaxRequests: 5000,
 			PricePerReq: 50,
@@ -569,7 +569,7 @@ func TestMsgServer_FullAPIKeyLifecycle(t *testing.T) {
 	}
 	updateMsg := &types.MsgUpdateAPIKey{
 		Owner:       owner,
-		APIKeyID:    apiKeyID,
+		ApiKeyId:    apiKeyID,
 		AccessRules: newAccessRules,
 		Active:      false,
 	}
@@ -579,7 +579,7 @@ func TestMsgServer_FullAPIKeyLifecycle(t *testing.T) {
 	// 4. Reactivate the key
 	updateMsg2 := &types.MsgUpdateAPIKey{
 		Owner:       owner,
-		APIKeyID:    apiKeyID,
+		ApiKeyId:    apiKeyID,
 		AccessRules: newAccessRules,
 		Active:      true,
 	}
@@ -588,8 +588,8 @@ func TestMsgServer_FullAPIKeyLifecycle(t *testing.T) {
 
 	// 5. Record usage for new service
 	usageMsg2 := &types.MsgRecordUsage{
-		APIKeyID:     apiKeyID,
-		ServiceID:    "service-3",
+		ApiKeyId:     apiKeyID,
+		ServiceId:    "service-3",
 		RequestCount: 10,
 		TokenCount:   1000,
 		Cost:         100,
@@ -600,15 +600,15 @@ func TestMsgServer_FullAPIKeyLifecycle(t *testing.T) {
 	// 6. Revoke the API key
 	revokeMsg := &types.MsgRevokeAPIKey{
 		Owner:    owner,
-		APIKeyID: apiKeyID,
+		ApiKeyId: apiKeyID,
 	}
 	_, err = msgServer.RevokeAPIKey(sdk.WrapSDKContext(ctx), revokeMsg)
 	require.NoError(t, err)
 
 	// 7. Try to record usage after revocation (should fail)
 	usageMsg3 := &types.MsgRecordUsage{
-		APIKeyID:     apiKeyID,
-		ServiceID:    "service-3",
+		ApiKeyId:     apiKeyID,
+		ServiceId:    "service-3",
 		RequestCount: 1,
 		TokenCount:   100,
 		Cost:         10,
@@ -644,12 +644,12 @@ func TestMsgServer_MultipleOwners(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify IDs are different
-	require.NotEqual(t, resp1.APIKeyID, resp2.APIKeyID)
+	require.NotEqual(t, resp1.ApiKeyId, resp2.ApiKeyId)
 
 	// Owner 1 cannot update owner 2's key
 	updateMsg := &types.MsgUpdateAPIKey{
 		Owner:       owner1,
-		APIKeyID:    resp2.APIKeyID,
+		ApiKeyId:    resp2.ApiKeyId,
 		AccessRules: createAccessRules(),
 		Active:      false,
 	}
@@ -660,7 +660,7 @@ func TestMsgServer_MultipleOwners(t *testing.T) {
 	// Owner 2 cannot revoke owner 1's key
 	revokeMsg := &types.MsgRevokeAPIKey{
 		Owner:    owner2,
-		APIKeyID: resp1.APIKeyID,
+		ApiKeyId: resp1.ApiKeyId,
 	}
 	_, err = msgServer.RevokeAPIKey(sdk.WrapSDKContext(ctx), revokeMsg)
 	require.Error(t, err)

@@ -13,7 +13,7 @@ func InitGenesis(ctx sdk.Context, k *keeper.MQKeeper, genState types.GenesisStat
 	// In the future, this should be migrated to use KVStore
 
 	// Initialize MQ scores
-	for _, mqScore := range genState.MQScores {
+	for _, mqScore := range genState.MqScores {
 		// Initialize score for each address
 		k.InitializeScore(mqScore.Address)
 		// Note: Full restoration of MQ scores would require additional methods in the keeper
@@ -29,7 +29,7 @@ func ExportGenesis(ctx sdk.Context, k *keeper.MQKeeper) *types.GenesisState {
 	allScores := k.GetAllScores()
 	for _, score := range allScores {
 		if score != nil {
-			genesis.MQScores = append(genesis.MQScores, *score)
+			genesis.MqScores = append(genesis.MqScores, *score)
 		}
 	}
 

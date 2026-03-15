@@ -12,6 +12,9 @@ const (
 
 	// MemStoreKey defines the in-memory store key
 	MemStoreKey = "mem_sharetoken"
+
+	// DefaultPacketTimeoutMinutes is the default IBC packet timeout in minutes
+	DefaultPacketTimeoutMinutes = 10
 )
 
 func KeyPrefix(p string) []byte {

@@ -27,7 +27,7 @@ func NewKeeper(cdc codec.BinaryCodec, storeKey storetypes.StoreKey) *Keeper {
 // SetAPIKey sets an API key in the store
 func (k Keeper) SetAPIKey(ctx sdk.Context, apiKey types.APIKey) error {
 	store := ctx.KVStore(k.storeKey)
-	key := types.GetAPIKeyKey(apiKey.ID)
+	key := types.GetAPIKeyKey(apiKey.Id)
 	value, err := k.cdc.Marshal(&apiKey)
 	if err != nil {
 		return fmt.Errorf("failed to marshal API key: %w", err)

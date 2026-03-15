@@ -20,16 +20,18 @@ func NewMsgServerImpl(keeper *Keeper) types.MsgServer {
 }
 
 // CreateTask handles MsgCreateTask
-func (m msgServer) CreateTask(ctx sdk.Context, msg *types.MsgCreateTask) (*types.MsgCreateTaskResponse, error) {
+func (m msgServer) CreateTask(ctx context.Context, msg *types.MsgCreateTask) (*types.MsgCreateTaskResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
 	// Generate task ID (in production, use proper ID generation)
-	taskID := fmt.Sprintf("task-%d", ctx.BlockHeight())
+	taskID := fmt.Sprintf("task-%d", sdkCtx.BlockHeight())
 
 	task := types.NewTask(
 		taskID,
 		msg.Title,
 		msg.Description,
 		msg.Creator,
-		msg.TaskTypeVal,
+		msg.TaskType,
 		msg.Budget,
 	)
 
@@ -44,32 +46,34 @@ func (m msgServer) CreateTask(ctx sdk.Context, msg *types.MsgCreateTask) (*types
 		return nil, err
 	}
 
-	if err := m.K.CreateTask(ctx, *task); err != nil {
+	if err := m.K.CreateTask(sdkCtx, *task); err != nil {
 		return nil, err
 	}
 
 	// Emit event
-	ctx.EventManager().EmitEvent(
+	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeCreateTask,
 			sdk.NewAttribute(types.AttributeKeyTaskID, taskID),
 			sdk.NewAttribute(types.AttributeKeyCreator, msg.Creator),
-			sdk.NewAttribute(types.AttributeKeyTaskType, string(msg.TaskTypeVal)),
+			sdk.NewAttribute(types.AttributeKeyTaskType, msg.TaskType.String()),
 		),
 	)
 
-	return &types.MsgCreateTaskResponse{TaskID: taskID}, nil
+	return &types.MsgCreateTaskResponse{TaskId: taskID}, nil
 }
 
 // UpdateTask handles MsgUpdateTask
-func (m msgServer) UpdateTask(ctx sdk.Context, msg *types.MsgUpdateTask) (*types.MsgUpdateTaskResponse, error) {
-	task, found := m.K.GetTask(ctx, msg.TaskID)
+func (m msgServer) UpdateTask(ctx context.Context, msg *types.MsgUpdateTask) (*types.MsgUpdateTaskResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	task, found := m.K.GetTask(sdkCtx, msg.TaskId)
 	if !found {
 		return nil, types.ErrTaskNotFound
 	}
 
 	// Verify ownership
-	if task.RequesterID != msg.Creator {
+	if task.RequesterId != msg.Creator {
 		return nil, types.ErrUnauthorized
 	}
 
@@ -100,7 +104,7 @@ func (m msgServer) UpdateTask(ctx sdk.Context, msg *types.MsgUpdateTask) (*types
 		task.Milestones = msg.Milestones
 	}
 
-	if err := m.K.UpdateTask(ctx, task); err != nil {
+	if err := m.K.UpdateTask(sdkCtx, task); err != nil {
 		return nil, err
 	}
 
@@ -108,14 +112,16 @@ func (m msgServer) UpdateTask(ctx sdk.Context, msg *types.MsgUpdateTask) (*types
 }
 
 // PublishTask handles MsgPublishTask
-func (m msgServer) PublishTask(ctx sdk.Context, msg *types.MsgPublishTask) (*types.MsgPublishTaskResponse, error) {
-	task, found := m.K.GetTask(ctx, msg.TaskID)
+func (m msgServer) PublishTask(ctx context.Context, msg *types.MsgPublishTask) (*types.MsgPublishTaskResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	task, found := m.K.GetTask(sdkCtx, msg.TaskId)
 	if !found {
 		return nil, types.ErrTaskNotFound
 	}
 
 	// Verify ownership
-	if task.RequesterID != msg.Creator {
+	if task.RequesterId != msg.Creator {
 		return nil, types.ErrUnauthorized
 	}
 
@@ -126,21 +132,21 @@ func (m msgServer) PublishTask(ctx sdk.Context, msg *types.MsgPublishTask) (*typ
 	task.Publish()
 
 	// Create auction if auction type
-	if task.Type == types.TaskTypeAuction {
-		_, err := m.K.CreateAuction(ctx, task.ID, task.Budget, task.Budget/2, 7*24*60*60) // 7 days
+	if task.TaskType == types.TaskTypeAuction {
+		_, err := m.K.CreateAuction(sdkCtx, task.Id, task.Budget, task.Budget/2, 7*24*60*60) // 7 days
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if err := m.K.UpdateTask(ctx, task); err != nil {
+	if err := m.K.UpdateTask(sdkCtx, task); err != nil {
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvent(
+	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypePublishTask,
-			sdk.NewAttribute(types.AttributeKeyTaskID, msg.TaskID),
+			sdk.NewAttribute(types.AttributeKeyTaskID, msg.TaskId),
 		),
 	)
 
@@ -148,14 +154,16 @@ func (m msgServer) PublishTask(ctx sdk.Context, msg *types.MsgPublishTask) (*typ
 }
 
 // CancelTask handles MsgCancelTask
-func (m msgServer) CancelTask(ctx sdk.Context, msg *types.MsgCancelTask) (*types.MsgCancelTaskResponse, error) {
-	task, found := m.K.GetTask(ctx, msg.TaskID)
+func (m msgServer) CancelTask(ctx context.Context, msg *types.MsgCancelTask) (*types.MsgCancelTaskResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	task, found := m.K.GetTask(sdkCtx, msg.TaskId)
 	if !found {
 		return nil, types.ErrTaskNotFound
 	}
 
 	// Verify ownership
-	if task.RequesterID != msg.Creator {
+	if task.RequesterId != msg.Creator {
 		return nil, types.ErrUnauthorized
 	}
 
@@ -165,7 +173,7 @@ func (m msgServer) CancelTask(ctx sdk.Context, msg *types.MsgCancelTask) (*types
 
 	task.Cancel()
 
-	if err := m.K.UpdateTask(ctx, task); err != nil {
+	if err := m.K.UpdateTask(sdkCtx, task); err != nil {
 		return nil, err
 	}
 
@@ -173,13 +181,15 @@ func (m msgServer) CancelTask(ctx sdk.Context, msg *types.MsgCancelTask) (*types
 }
 
 // SubmitApplication handles MsgSubmitApplication
-func (m msgServer) SubmitApplication(ctx sdk.Context, msg *types.MsgSubmitApplication) (*types.MsgSubmitApplicationResponse, error) {
-	appID := fmt.Sprintf("app-%d", ctx.BlockHeight())
+func (m msgServer) SubmitApplication(ctx context.Context, msg *types.MsgSubmitApplication) (*types.MsgSubmitApplicationResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	appID := fmt.Sprintf("app-%d", sdkCtx.BlockHeight())
 
 	app := types.NewApplication(
 		appID,
-		msg.TaskID,
-		msg.WorkerID,
+		msg.TaskId,
+		msg.WorkerId,
 		msg.ProposedPrice,
 	)
 
@@ -188,32 +198,34 @@ func (m msgServer) SubmitApplication(ctx sdk.Context, msg *types.MsgSubmitApplic
 	app.PortfolioLinks = msg.PortfolioLinks
 	app.EstimatedDuration = msg.EstimatedDuration
 
-	if err := m.K.SubmitApplication(ctx, *app); err != nil {
+	if err := m.K.SubmitApplication(sdkCtx, *app); err != nil {
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvent(
+	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeSubmitApplication,
 			sdk.NewAttribute(types.AttributeKeyApplicationID, appID),
-			sdk.NewAttribute(types.AttributeKeyTaskID, msg.TaskID),
-			sdk.NewAttribute(types.AttributeKeyWorkerID, msg.WorkerID),
+			sdk.NewAttribute(types.AttributeKeyTaskID, msg.TaskId),
+			sdk.NewAttribute(types.AttributeKeyWorkerID, msg.WorkerId),
 		),
 	)
 
-	return &types.MsgSubmitApplicationResponse{ApplicationID: appID}, nil
+	return &types.MsgSubmitApplicationResponse{ApplicationId: appID}, nil
 }
 
 // AcceptApplication handles MsgAcceptApplication
-func (m msgServer) AcceptApplication(ctx sdk.Context, msg *types.MsgAcceptApplication) (*types.MsgAcceptApplicationResponse, error) {
-	if err := m.K.AcceptApplication(ctx, msg.ApplicationID); err != nil {
+func (m msgServer) AcceptApplication(ctx context.Context, msg *types.MsgAcceptApplication) (*types.MsgAcceptApplicationResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	if err := m.K.AcceptApplication(sdkCtx, msg.ApplicationId); err != nil {
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvent(
+	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeAcceptApplication,
-			sdk.NewAttribute(types.AttributeKeyApplicationID, msg.ApplicationID),
+			sdk.NewAttribute(types.AttributeKeyApplicationID, msg.ApplicationId),
 		),
 	)
 
@@ -221,8 +233,10 @@ func (m msgServer) AcceptApplication(ctx sdk.Context, msg *types.MsgAcceptApplic
 }
 
 // RejectApplication handles MsgRejectApplication
-func (m msgServer) RejectApplication(ctx sdk.Context, msg *types.MsgRejectApplication) (*types.MsgRejectApplicationResponse, error) {
-	if err := m.K.RejectApplication(ctx, msg.ApplicationID); err != nil {
+func (m msgServer) RejectApplication(ctx context.Context, msg *types.MsgRejectApplication) (*types.MsgRejectApplicationResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	if err := m.K.RejectApplication(sdkCtx, msg.ApplicationId); err != nil {
 		return nil, err
 	}
 
@@ -230,66 +244,71 @@ func (m msgServer) RejectApplication(ctx sdk.Context, msg *types.MsgRejectApplic
 }
 
 // SubmitBid handles MsgSubmitBid
-func (m msgServer) SubmitBid(ctx sdk.Context, msg *types.MsgSubmitBid) (*types.MsgSubmitBidResponse, error) {
-	bidID := fmt.Sprintf("bid-%d", ctx.BlockHeight())
+func (m msgServer) SubmitBid(ctx context.Context, msg *types.MsgSubmitBid) (*types.MsgSubmitBidResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	bidID := fmt.Sprintf("bid-%d", sdkCtx.BlockHeight())
 
 	bid := types.NewBid(
 		bidID,
-		msg.TaskID,
-		msg.WorkerID,
+		msg.TaskId,
+		msg.WorkerId,
 		msg.Amount,
 	)
 
 	bid.Message = msg.Message
 	bid.Portfolio = msg.Portfolio
 
-	if err := m.K.SubmitBid(ctx, *bid); err != nil {
+	if err := m.K.SubmitBid(sdkCtx, *bid); err != nil {
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvent(
+	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeSubmitBid,
 			sdk.NewAttribute(types.AttributeKeyBidID, bidID),
-			sdk.NewAttribute(types.AttributeKeyTaskID, msg.TaskID),
-			sdk.NewAttribute(types.AttributeKeyWorkerID, msg.WorkerID),
+			sdk.NewAttribute(types.AttributeKeyTaskID, msg.TaskId),
+			sdk.NewAttribute(types.AttributeKeyWorkerID, msg.WorkerId),
 		),
 	)
 
-	return &types.MsgSubmitBidResponse{BidID: bidID}, nil
+	return &types.MsgSubmitBidResponse{BidId: bidID}, nil
 }
 
 // CloseAuction handles MsgCloseAuction
-func (m msgServer) CloseAuction(ctx sdk.Context, msg *types.MsgCloseAuction) (*types.MsgCloseAuctionResponse, error) {
-	if err := m.K.CloseAuction(ctx, msg.TaskID); err != nil {
+func (m msgServer) CloseAuction(ctx context.Context, msg *types.MsgCloseAuction) (*types.MsgCloseAuctionResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	if err := m.K.CloseAuction(sdkCtx, msg.TaskId); err != nil {
 		return nil, err
 	}
 
-	auction, found := m.K.GetAuction(ctx, msg.TaskID)
+	auction, found := m.K.GetAuction(sdkCtx, msg.TaskId)
 	var winnerID string
-	if found && auction.WinningBidID != "" {
-		for _, bid := range auction.Bids {
-			if bid.ID == auction.WinningBidID {
-				winnerID = bid.WorkerID
-				break
-			}
+	if found && auction.WinningBidId != "" {
+		// Get the winning bid directly from storage
+		winnerBid, bidFound := m.K.GetBid(sdkCtx, auction.WinningBidId)
+		if bidFound {
+			winnerID = winnerBid.WorkerId
 		}
 	}
 
-	ctx.EventManager().EmitEvent(
+	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeCloseAuction,
-			sdk.NewAttribute(types.AttributeKeyTaskID, msg.TaskID),
+			sdk.NewAttribute(types.AttributeKeyTaskID, msg.TaskId),
 			sdk.NewAttribute(types.AttributeKeyWinnerID, winnerID),
 		),
 	)
 
-	return &types.MsgCloseAuctionResponse{WinnerID: winnerID}, nil
+	return &types.MsgCloseAuctionResponse{WinnerId: winnerID}, nil
 }
 
 // StartTask handles MsgStartTask
-func (m msgServer) StartTask(ctx sdk.Context, msg *types.MsgStartTask) (*types.MsgStartTaskResponse, error) {
-	if err := m.K.StartTask(ctx, msg.TaskID); err != nil {
+func (m msgServer) StartTask(ctx context.Context, msg *types.MsgStartTask) (*types.MsgStartTaskResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	if err := m.K.StartTask(sdkCtx, msg.TaskId); err != nil {
 		return nil, err
 	}
 
@@ -297,8 +316,10 @@ func (m msgServer) StartTask(ctx sdk.Context, msg *types.MsgStartTask) (*types.M
 }
 
 // SubmitMilestone handles MsgSubmitMilestone
-func (m msgServer) SubmitMilestone(ctx sdk.Context, msg *types.MsgSubmitMilestone) (*types.MsgSubmitMilestoneResponse, error) {
-	if err := m.K.SubmitMilestone(ctx, msg.TaskID, msg.MilestoneID, msg.Deliverables); err != nil {
+func (m msgServer) SubmitMilestone(ctx context.Context, msg *types.MsgSubmitMilestone) (*types.MsgSubmitMilestoneResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	if err := m.K.SubmitMilestone(sdkCtx, msg.TaskId, msg.MilestoneId, msg.Deliverables); err != nil {
 		return nil, err
 	}
 
@@ -306,8 +327,10 @@ func (m msgServer) SubmitMilestone(ctx sdk.Context, msg *types.MsgSubmitMileston
 }
 
 // ApproveMilestone handles MsgApproveMilestone
-func (m msgServer) ApproveMilestone(ctx sdk.Context, msg *types.MsgApproveMilestone) (*types.MsgApproveMilestoneResponse, error) {
-	if err := m.K.ApproveMilestone(ctx, msg.TaskID, msg.MilestoneID); err != nil {
+func (m msgServer) ApproveMilestone(ctx context.Context, msg *types.MsgApproveMilestone) (*types.MsgApproveMilestoneResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	if err := m.K.ApproveMilestone(sdkCtx, msg.TaskId, msg.MilestoneId); err != nil {
 		return nil, err
 	}
 
@@ -315,8 +338,10 @@ func (m msgServer) ApproveMilestone(ctx sdk.Context, msg *types.MsgApproveMilest
 }
 
 // RejectMilestone handles MsgRejectMilestone
-func (m msgServer) RejectMilestone(ctx sdk.Context, msg *types.MsgRejectMilestone) (*types.MsgRejectMilestoneResponse, error) {
-	if err := m.K.RejectMilestone(ctx, msg.TaskID, msg.MilestoneID, msg.Reason); err != nil {
+func (m msgServer) RejectMilestone(ctx context.Context, msg *types.MsgRejectMilestone) (*types.MsgRejectMilestoneResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	if err := m.K.RejectMilestone(sdkCtx, msg.TaskId, msg.MilestoneId, msg.Reason); err != nil {
 		return nil, err
 	}
 
@@ -324,39 +349,37 @@ func (m msgServer) RejectMilestone(ctx sdk.Context, msg *types.MsgRejectMileston
 }
 
 // SubmitRating handles MsgSubmitRating
-func (m msgServer) SubmitRating(ctx sdk.Context, msg *types.MsgSubmitRating) (*types.MsgSubmitRatingResponse, error) {
-	ratingID := fmt.Sprintf("rating-%d", ctx.BlockHeight())
+func (m msgServer) SubmitRating(ctx context.Context, msg *types.MsgSubmitRating) (*types.MsgSubmitRatingResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
+	ratingID := fmt.Sprintf("rating-%d", sdkCtx.BlockHeight())
 
 	rating := types.NewRating(
 		ratingID,
-		msg.TaskID,
-		msg.RaterID,
-		msg.RatedID,
+		msg.TaskId,
+		msg.RaterId,
+		msg.RatedId,
 	)
 
 	for dimStr, val := range msg.Ratings {
-		dim := types.RatingDimension(dimStr)
-		if err := rating.SetRating(dim, val); err != nil {
+		if err := rating.SetRating(dimStr, val); err != nil {
 			return nil, err
 		}
 	}
 	rating.Comment = msg.Comment
 
-	if err := m.K.SubmitRating(ctx, *rating); err != nil {
+	if err := m.K.SubmitRating(sdkCtx, *rating); err != nil {
 		return nil, err
 	}
 
-	ctx.EventManager().EmitEvent(
+	sdkCtx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			types.EventTypeSubmitRating,
 			sdk.NewAttribute(types.AttributeKeyRatingID, ratingID),
-			sdk.NewAttribute(types.AttributeKeyTaskID, msg.TaskID),
-			sdk.NewAttribute(types.AttributeKeyRatedID, msg.RatedID),
+			sdk.NewAttribute(types.AttributeKeyTaskID, msg.TaskId),
+			sdk.NewAttribute(types.AttributeKeyRatedID, msg.RatedId),
 		),
 	)
 
-	return &types.MsgSubmitRatingResponse{RatingID: ratingID}, nil
+	return &types.MsgSubmitRatingResponse{RatingId: ratingID}, nil
 }
-
-// Unused context param versions for interface compatibility
-var _ = context.Background()

@@ -2,7 +2,17 @@ package types
 
 import (
 	"fmt"
+	"time"
 )
+
+// KeyRotationHistory represents the history of API key rotations
+type KeyRotationHistory struct {
+	APIKeyID        string `json:"api_key_id"`
+	PreviousKeyHash string `json:"previous_key_hash"`
+	NewKeyID        string `json:"new_key_id"`
+	Reason          string `json:"reason"`
+	RotatedAt       int64  `json:"rotated_at"`
+}
 
 // UsageRecord represents a single API usage record
 // Note: This is kept for backward compatibility - query.pb.go has similar types
@@ -19,7 +29,63 @@ type UsageRecord struct {
 	BlockHeight   int64  `json:"block_height"`
 }
 
-// ValidateBasic performs basic validation
+// NewAPIKeyUsageStats creates a new API key usage stats
+func NewAPIKeyUsageStats(apiKeyID string) *APIKeyUsageStats {
+	return &APIKeyUsageStats{
+		ApiKeyId:          apiKeyID,
+		TotalRequests:     0,
+		TotalInputTokens:  0,
+		TotalOutputTokens: 0,
+		TotalTokens:       0,
+		TotalCost:         0,
+		LastUsedAt:        0,
+	}
+}
+
+// NewDailyUsageStats creates a new daily usage stats
+func NewDailyUsageStats(date, apiKeyID string) *DailyUsageStats {
+	return &DailyUsageStats{
+		Date:              date,
+		ApiKeyId:          apiKeyID,
+		TotalRequests:     0,
+		TotalInputTokens:  0,
+		TotalOutputTokens: 0,
+		TotalTokens:       0,
+		TotalCost:         0,
+	}
+}
+
+// NewUsageRecord creates a new usage record
+func NewUsageRecord(apiKeyID, serviceID string, requests, inputTokens, outputTokens, cost, blockHeight int64) *UsageRecord {
+	return &UsageRecord{
+		ID:            GenerateUsageRecordID(),
+		APIKeyID:      apiKeyID,
+		ServiceID:     serviceID,
+		RequestCount:  requests,
+		InputTokens:   inputTokens,
+		OutputTokens:  outputTokens,
+		TotalTokens:   inputTokens + outputTokens,
+		Cost:          cost,
+		Timestamp:     0, // Will be set by caller
+		BlockHeight:   blockHeight,
+	}
+}
+
+// GenerateUsageRecordID generates a unique usage record ID
+func GenerateUsageRecordID() string {
+	return fmt.Sprintf("usage_%d", time.Now().UnixNano())
+}
+
+// NewKeyRotationHistory creates a new key rotation history entry
+func NewKeyRotationHistory(apiKeyID, previousKeyHash, newKeyID, reason string) *KeyRotationHistory {
+	return &KeyRotationHistory{
+		APIKeyID:        apiKeyID,
+		PreviousKeyHash: previousKeyHash,
+		NewKeyID:        newKeyID,
+		Reason:          reason,
+		RotatedAt:       time.Now().Unix(),
+	}
+}
 func (ur UsageRecord) ValidateBasic() error {
 	if ur.APIKeyID == "" {
 		return fmt.Errorf("API key ID cannot be empty")

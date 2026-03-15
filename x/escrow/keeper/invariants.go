@@ -25,8 +25,8 @@ func (k Keeper) EscrowAmountsInvariant() sdk.Invariant {
 
 		escrows := k.GetAllEscrows(ctx)
 		for _, escrow := range escrows {
-			if !escrow.Amount.IsValid() || escrow.Amount.IsZero() {
-				invalidEscrows = append(invalidEscrows, escrow.ID)
+			if err := sdk.Coins(escrow.Amount).Validate(); err != nil || sdk.Coins(escrow.Amount).IsZero() {
+				invalidEscrows = append(invalidEscrows, escrow.Id)
 			}
 		}
 
@@ -54,13 +54,13 @@ func (k Keeper) EscrowStatusInvariant() sdk.Invariant {
 		escrows := k.GetAllEscrows(ctx)
 		for _, escrow := range escrows {
 			switch escrow.Status {
-			case types.EscrowStatusPending,
-				types.EscrowStatusCompleted,
-				types.EscrowStatusDisputed,
-				types.EscrowStatusRefunded:
+			case types.EscrowStatus_ESCROW_STATUS_PENDING,
+				types.EscrowStatus_ESCROW_STATUS_COMPLETED,
+				types.EscrowStatus_ESCROW_STATUS_DISPUTED,
+				types.EscrowStatus_ESCROW_STATUS_REFUNDED:
 				// Valid status
 			default:
-				invalidStatuses = append(invalidStatuses, fmt.Sprintf("%s:%s", escrow.ID, escrow.Status))
+				invalidStatuses = append(invalidStatuses, fmt.Sprintf("%s:%s", escrow.Id, escrow.Status))
 			}
 		}
 
@@ -89,7 +89,7 @@ func (k Keeper) EscrowExpirationInvariant() sdk.Invariant {
 		for _, escrow := range escrows {
 			// CreatedAt must be before ExpiresAt
 			if escrow.ExpiresAt <= escrow.CreatedAt {
-				invalidExpirations = append(invalidExpirations, escrow.ID)
+				invalidExpirations = append(invalidExpirations, escrow.Id)
 			}
 		}
 

@@ -20,9 +20,9 @@ func TestAPIKeyCreation(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create API key record
-	apiKey := types.NewAPIKey("key-1", types.ProviderOpenAI, encrypted, "owner1")
-	require.Equal(t, "key-1", apiKey.ID)
-	require.Equal(t, types.ProviderOpenAI, apiKey.Provider)
+	apiKey := types.NewAPIKey("key-1", types.Provider_PROVIDER_OPENAI, encrypted, "owner1")
+	require.Equal(t, "key-1", apiKey.Id)
+	require.Equal(t, types.Provider_PROVIDER_OPENAI, apiKey.Provider)
 	require.Equal(t, "owner1", apiKey.Owner)
 	require.True(t, apiKey.Active)
 	require.NotEmpty(t, apiKey.Hash)
@@ -44,24 +44,24 @@ func TestAPIKeyValidation(t *testing.T) {
 	encrypted, _ := kek.Encrypt([]byte("test"))
 
 	// Valid key
-	apiKey := types.NewAPIKey("key-1", types.ProviderOpenAI, encrypted, "owner1")
+	apiKey := types.NewAPIKey("key-1", types.Provider_PROVIDER_OPENAI, encrypted, "owner1")
 	require.NoError(t, apiKey.ValidateBasic())
 
 	// Invalid - missing ID
 	invalidKey := types.APIKey{
-		ID:           "",
-		Provider:     types.ProviderOpenAI,
+		Id:           "",
+		Provider:     types.Provider_PROVIDER_OPENAI,
 		EncryptedKey: encrypted,
 		Owner:        "owner1",
 	}
 	require.Error(t, invalidKey.ValidateBasic())
 
 	// Invalid - empty encrypted key
-	invalidKey2 := types.NewAPIKey("key-2", types.ProviderOpenAI, []byte{}, "owner1")
+	invalidKey2 := types.NewAPIKey("key-2", types.Provider_PROVIDER_OPENAI, []byte{}, "owner1")
 	require.Error(t, invalidKey2.ValidateBasic())
 
 	// Invalid - invalid provider
-	invalidKey3 := types.NewAPIKey("key-3", types.Provider("invalid"), encrypted, "owner1")
+	invalidKey3 := types.NewAPIKey("key-3", types.Provider_PROVIDER_UNSPECIFIED, encrypted, "owner1")
 	require.Error(t, invalidKey3.ValidateBasic())
 }
 
@@ -69,12 +69,12 @@ func TestAccessRules(t *testing.T) {
 	kek, _ := types.NewEncryptionKey()
 	encrypted, _ := kek.Encrypt([]byte("test"))
 
-	apiKey := types.NewAPIKey("key-1", types.ProviderOpenAI, encrypted, "owner1")
+	apiKey := types.NewAPIKey("key-1", types.Provider_PROVIDER_OPENAI, encrypted, "owner1")
 
 	// Add access rule
 	apiKey.AccessRules = []types.AccessRule{
 		{
-			ServiceID:   "service-1",
+			ServiceId:   "service-1",
 			RateLimit:   100,
 			MaxRequests: 1000,
 			PricePerReq: 100,
@@ -152,7 +152,7 @@ func TestAPIKeyWipe(t *testing.T) {
 	kek, _ := types.NewEncryptionKey()
 	encrypted, _ := kek.Encrypt([]byte("test"))
 
-	apiKey := types.NewAPIKey("key-1", types.ProviderOpenAI, encrypted, "owner1")
+	apiKey := types.NewAPIKey("key-1", types.Provider_PROVIDER_OPENAI, encrypted, "owner1")
 
 	// Verify key exists
 	require.NotEmpty(t, apiKey.EncryptedKey)

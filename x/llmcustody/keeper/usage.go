@@ -3,6 +3,7 @@ package keeper
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -102,7 +103,7 @@ func (k Keeper) updateAPIKeyStats(ctx sdk.Context, apiKeyID string, record *type
 		stats = *types.NewAPIKeyUsageStats(apiKeyID)
 	}
 
-	stats.AddRecord(record)
+	stats.AddRecord(*record)
 
 	value, err := json.Marshal(&stats)
 	if err != nil {
@@ -134,7 +135,8 @@ func (k Keeper) GetAPIKeyStats(ctx sdk.Context, apiKeyID string) (types.APIKeyUs
 // updateDailyStats updates daily usage statistics
 func (k Keeper) updateDailyStats(ctx sdk.Context, apiKeyID string, record *types.UsageRecord) error {
 	store := ctx.KVStore(k.storeKey)
-	date := record.Timestamp.Format("2006-01-02")
+	// Convert timestamp to date string
+	date := time.Unix(record.Timestamp, 0).Format("2006-01-02")
 	key := types.GetDailyStatsKey(date, apiKeyID)
 
 	var stats types.DailyUsageStats
@@ -147,7 +149,7 @@ func (k Keeper) updateDailyStats(ctx sdk.Context, apiKeyID string, record *types
 		stats = *types.NewDailyUsageStats(date, apiKeyID)
 	}
 
-	stats.AddRecord(record)
+	stats.AddRecord(*record)
 
 	value, err := json.Marshal(&stats)
 	if err != nil {
@@ -189,7 +191,7 @@ func (k Keeper) updateServiceStats(ctx sdk.Context, serviceID, apiKeyID string, 
 		}
 	} else {
 		stats = types.ServiceUsageStats{
-			ServiceID: serviceID,
+			ServiceId: serviceID,
 		}
 	}
 
@@ -240,7 +242,7 @@ func (k Keeper) RotateAPIKey(ctx sdk.Context, owner, apiKeyID string, newEncrypt
 	}
 
 	// Store old key ID and encrypted key
-	oldKeyID := apiKey.ID
+	oldKeyID := apiKey.Id
 	oldEncryptedKey := make([]byte, len(apiKey.EncryptedKey))
 	copy(oldEncryptedKey, apiKey.EncryptedKey)
 
@@ -259,7 +261,6 @@ func (k Keeper) RotateAPIKey(ctx sdk.Context, owner, apiKeyID string, newEncrypt
 	newAPIKey.CreatedAt = ctx.BlockTime().Unix()
 	newAPIKey.LastUsedAt = apiKey.LastUsedAt
 	newAPIKey.UsageCount = apiKey.UsageCount
-	newAPIKey.Version = apiKey.Version + 1
 
 	// Store new API key
 	if err := k.SetAPIKey(ctx, *newAPIKey); err != nil {
@@ -273,7 +274,7 @@ func (k Keeper) RotateAPIKey(ctx sdk.Context, owner, apiKeyID string, newEncrypt
 	}
 
 	// Store rotation history
-	rotation := types.NewKeyRotationHistory(apiKeyID, oldKeyID, newAPIKeyID, owner, reason)
+	rotation := types.NewKeyRotationHistory(apiKeyID, oldKeyID, newAPIKeyID, reason)
 	if err := k.SetKeyRotationHistory(ctx, *rotation); err != nil {
 		return "", fmt.Errorf("failed to store rotation history: %w", err)
 	}

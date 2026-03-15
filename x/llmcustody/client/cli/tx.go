@@ -302,7 +302,7 @@ func parseAccessRules(cmd *cobra.Command) ([]types.AccessRule, error) {
 		}
 
 		rule := types.AccessRule{
-			ServiceID: parts[0],
+			ServiceId: parts[0],
 			Allowed:   true,
 		}
 

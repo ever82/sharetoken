@@ -23,11 +23,11 @@ func TestNewEscrow(t *testing.T) {
 
 	escrow := types.NewEscrow(id, testRequester, testProvider, amount, duration)
 
-	require.Equal(t, id, escrow.ID)
+	require.Equal(t, id, escrow.Id)
 	require.Equal(t, testRequester, escrow.Requester)
 	require.Equal(t, testProvider, escrow.Provider)
-	require.True(t, escrow.Amount.IsEqual(amount))
-	require.Equal(t, types.EscrowStatusPending, escrow.Status)
+	require.True(t, sdk.Coins(escrow.Amount).IsEqual(amount))
+	require.Equal(t, types.EscrowStatus_ESCROW_STATUS_PENDING, escrow.Status)
 	require.False(t, escrow.IsExpired())
 	require.True(t, escrow.CanComplete())
 }
@@ -44,18 +44,18 @@ func TestEscrowValidation(t *testing.T) {
 				Requester: testRequester,
 				Provider:  testProvider,
 				Amount:    sdk.NewCoins(sdk.NewInt64Coin("ustt", 1000000)),
-				Status:    types.EscrowStatusPending,
+				Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 			},
 			wantErr: true,
 		},
 		{
 			name: "zero amount",
 			escrow: types.Escrow{
-				ID:        "escrow-1",
+				Id:        "escrow-1",
 				Requester: testRequester,
 				Provider:  testProvider,
 				Amount:    sdk.Coins{},
-				Status:    types.EscrowStatusPending,
+				Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 			},
 			wantErr: true,
 		},
@@ -77,18 +77,18 @@ func TestEscrowStatus(t *testing.T) {
 	escrow := types.NewEscrow("1", testRequester, testProvider, sdk.NewCoins(sdk.NewInt64Coin("ustt", 100)), time.Hour)
 
 	// Test initial status
-	require.Equal(t, types.EscrowStatusPending, escrow.Status)
+	require.Equal(t, types.EscrowStatus_ESCROW_STATUS_PENDING, escrow.Status)
 	require.True(t, escrow.CanComplete())
 	require.True(t, escrow.CanDispute())
 	require.False(t, escrow.CanRefund())
 
 	// Test disputed status
-	escrow.Status = types.EscrowStatusDisputed
+	escrow.Status = types.EscrowStatus_ESCROW_STATUS_DISPUTED
 	require.False(t, escrow.CanComplete())
 	require.False(t, escrow.CanDispute())
 
 	// Test completed status
-	escrow.Status = types.EscrowStatusCompleted
+	escrow.Status = types.EscrowStatus_ESCROW_STATUS_COMPLETED
 	require.False(t, escrow.CanComplete())
 	require.True(t, escrow.CanDispute()) // Can dispute after completion
 }
@@ -96,11 +96,11 @@ func TestEscrowStatus(t *testing.T) {
 func TestEscrowExpiration(t *testing.T) {
 	// Create an escrow that expired 1 hour ago
 	escrow := types.Escrow{
-		ID:        "expired-escrow",
+		Id:        "expired-escrow",
 		Requester: testRequester,
 		Provider:  testProvider,
 		Amount:    sdk.NewCoins(sdk.NewInt64Coin("ustt", 1000000)),
-		Status:    types.EscrowStatusPending,
+		Status:    types.EscrowStatus_ESCROW_STATUS_PENDING,
 		CreatedAt: time.Now().Add(-2 * time.Hour).Unix(),
 		ExpiresAt: time.Now().Add(-1 * time.Hour).Unix(),
 	}
@@ -143,8 +143,8 @@ func TestGenesis(t *testing.T) {
 	// Test with duplicate IDs
 	genesisWithDups := types.GenesisState{
 		Escrows: []types.Escrow{
-			{ID: "1", Requester: testRequester, Provider: testProvider, Amount: sdk.NewCoins(sdk.NewInt64Coin("ustt", 100)), Status: types.EscrowStatusPending},
-			{ID: "1", Requester: testRequester, Provider: testProvider, Amount: sdk.NewCoins(sdk.NewInt64Coin("ustt", 200)), Status: types.EscrowStatusPending},
+			{Id: "1", Requester: testRequester, Provider: testProvider, Amount: sdk.NewCoins(sdk.NewInt64Coin("ustt", 100)), Status: types.EscrowStatus_ESCROW_STATUS_PENDING},
+			{Id: "1", Requester: testRequester, Provider: testProvider, Amount: sdk.NewCoins(sdk.NewInt64Coin("ustt", 200)), Status: types.EscrowStatus_ESCROW_STATUS_PENDING},
 		},
 	}
 	err = types.ValidateGenesis(genesisWithDups)

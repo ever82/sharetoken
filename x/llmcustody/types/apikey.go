@@ -6,17 +6,26 @@ import (
 	"fmt"
 )
 
+// Provider constants for backward compatibility
+const (
+	ProviderOpenAI    = Provider_PROVIDER_OPENAI
+	ProviderAnthropic = Provider_PROVIDER_ANTHROPIC
+)
+
 // IsValidProvider checks if provider is valid
 func IsValidProvider(p string) bool {
-	return p == string(Provider_PROVIDER_OPENAI) || p == string(Provider_PROVIDER_ANTHROPIC)
+	return p == "openai" || p == "anthropic"
 }
 
 // ProviderFromString converts string to Provider
 func ProviderFromString(s string) Provider {
-	if s == string(Provider_PROVIDER_ANTHROPIC) {
+	if s == "anthropic" || s == "PROVIDER_ANTHROPIC" {
 		return Provider_PROVIDER_ANTHROPIC
 	}
-	return Provider_PROVIDER_OPENAI
+	if s == "openai" || s == "PROVIDER_OPENAI" {
+		return Provider_PROVIDER_OPENAI
+	}
+	return Provider_PROVIDER_UNSPECIFIED
 }
 
 // NewAPIKey creates a new API key record

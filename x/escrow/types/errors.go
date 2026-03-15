@@ -19,4 +19,6 @@ var (
 	ErrDisputeAlreadyExists = errors.Register(ModuleName, 11, "dispute already exists")
 	ErrEscrowNotDisputed    = errors.Register(ModuleName, 12, "escrow not disputed")
 	ErrInvalidAllocation    = errors.Register(ModuleName, 13, "invalid fund allocation")
+	ErrInvalidRequester     = errors.Register(ModuleName, 14, "invalid requester")
+	ErrInvalidProvider      = errors.Register(ModuleName, 15, "invalid provider")
 )

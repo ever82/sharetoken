@@ -13,18 +13,18 @@ func (k Keeper) SubmitRating(ctx sdk.Context, rating types.Rating) error {
 	if err := rating.Validate(); err != nil {
 		return fmt.Errorf("invalid rating: %w", err)
 	}
-	task, found := k.GetTask(ctx, rating.TaskID)
+	task, found := k.GetTask(ctx, rating.TaskId)
 	if !found {
-		return fmt.Errorf("task not found: %s", rating.TaskID)
+		return fmt.Errorf("task not found: %s", rating.TaskId)
 	}
 	if task.Status != types.TaskStatusCompleted {
 		return fmt.Errorf("task is not completed")
 	}
 
 	// Check if rater has already rated this task
-	existingRatings := k.GetRatingsByTask(ctx, rating.TaskID)
+	existingRatings := k.GetRatingsByTask(ctx, rating.TaskId)
 	for _, existing := range existingRatings {
-		if existing.RaterID == rating.RaterID {
+		if existing.RaterId == rating.RaterId {
 			return fmt.Errorf("rater has already submitted a rating for this task")
 		}
 	}
@@ -32,9 +32,9 @@ func (k Keeper) SubmitRating(ctx sdk.Context, rating types.Rating) error {
 	k.SetRating(ctx, rating)
 
 	// Update reputation
-	rep, found := k.GetReputation(ctx, rating.RatedID)
+	rep, found := k.GetReputation(ctx, rating.RatedId)
 	if !found {
-		rep = *types.NewReputation(rating.RatedID)
+		rep = *types.NewReputation(rating.RatedId)
 	}
 	rep.AddRating(&rating)
 	k.SetReputation(ctx, rep)

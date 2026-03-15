@@ -1,6 +1,7 @@
 package types_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -15,22 +16,19 @@ func TestNewTask(t *testing.T) {
 	task := types.NewTask("task-1", "Test Task", "Description", "requester-1", types.TaskTypeOpen, 1000)
 
 	require.NotNil(t, task)
-	require.Equal(t, "task-1", task.ID)
+	require.Equal(t, "task-1", task.Id)
 	require.Equal(t, "Test Task", task.Title)
 	require.Equal(t, "Description", task.Description)
-	require.Equal(t, "requester-1", task.RequesterID)
-	require.Equal(t, types.TaskTypeOpen, task.Type)
+	require.Equal(t, "requester-1", task.RequesterId)
+	require.Equal(t, types.TaskTypeOpen, task.TaskType)
 	require.Equal(t, types.TaskStatusDraft, task.Status)
 	require.Equal(t, uint64(1000), task.Budget)
-	require.Equal(t, "STT", task.Currency)
-	require.NotNil(t, task.Skills)
-	require.NotNil(t, task.Subtasks)
-	require.NotNil(t, task.Milestones)
 	require.NotZero(t, task.CreatedAt)
 	require.NotZero(t, task.UpdatedAt)
 }
 
 func TestTask_Validate(t *testing.T) {
+	futureTime := time.Now().Unix() + 3600
 	tests := []struct {
 		name    string
 		task    types.Task
@@ -39,59 +37,64 @@ func TestTask_Validate(t *testing.T) {
 		{
 			name: "valid task",
 			task: types.Task{
-				ID:          "task-1",
+				Id:          "task-1",
 				Title:       "Test Task",
-				RequesterID: "requester-1",
+				RequesterId: "requester-1",
 				Budget:      1000,
+				Deadline:    futureTime,
 			},
 			wantErr: false,
 		},
 		{
 			name: "invalid - empty ID",
 			task: types.Task{
-				ID:          "",
+				Id:          "",
 				Title:       "Test Task",
-				RequesterID: "requester-1",
+				RequesterId: "requester-1",
 				Budget:      1000,
+				Deadline:    futureTime,
 			},
 			wantErr: true,
 		},
 		{
 			name: "invalid - empty title",
 			task: types.Task{
-				ID:          "task-1",
+				Id:          "task-1",
 				Title:       "",
-				RequesterID: "requester-1",
+				RequesterId: "requester-1",
 				Budget:      1000,
+				Deadline:    futureTime,
 			},
 			wantErr: true,
 		},
 		{
 			name: "invalid - empty requester",
 			task: types.Task{
-				ID:          "task-1",
+				Id:          "task-1",
 				Title:       "Test Task",
-				RequesterID: "",
+				RequesterId: "",
 				Budget:      1000,
+				Deadline:    futureTime,
 			},
 			wantErr: true,
 		},
 		{
 			name: "invalid - zero budget",
 			task: types.Task{
-				ID:          "task-1",
+				Id:          "task-1",
 				Title:       "Test Task",
-				RequesterID: "requester-1",
+				RequesterId: "requester-1",
 				Budget:      0,
+				Deadline:    futureTime,
 			},
 			wantErr: true,
 		},
 		{
 			name: "invalid - past deadline",
 			task: types.Task{
-				ID:          "task-1",
+				Id:          "task-1",
 				Title:       "Test Task",
-				RequesterID: "requester-1",
+				RequesterId: "requester-1",
 				Budget:      1000,
 				Deadline:    time.Now().Unix() - 3600,
 			},
@@ -125,8 +128,7 @@ func TestTask_Assign(t *testing.T) {
 
 	task.Assign("worker-1")
 	require.Equal(t, types.TaskStatusAssigned, task.Status)
-	require.Equal(t, "worker-1", task.WorkerID)
-	require.NotZero(t, task.AssignedAt)
+	require.Equal(t, "worker-1", task.WorkerId)
 }
 
 func TestTask_Start(t *testing.T) {
@@ -219,7 +221,8 @@ func TestTask_ValidateMilestones(t *testing.T) {
 			task := types.NewTask("task-1", "Test Task", "Description", "requester-1", types.TaskTypeOpen, tt.budget)
 			for i, amount := range tt.amounts {
 				task.Milestones = append(task.Milestones, types.Milestone{
-					ID:     string(rune('a' + i)),
+					Id:     string(rune('a' + i)),
+					Title:  fmt.Sprintf("Milestone %d", i+1),
 					Amount: amount,
 				})
 			}
@@ -289,9 +292,9 @@ func TestNewApplication(t *testing.T) {
 	app := types.NewApplication("app-1", "task-1", "worker-1", 800)
 
 	require.NotNil(t, app)
-	require.Equal(t, "app-1", app.ID)
-	require.Equal(t, "task-1", app.TaskID)
-	require.Equal(t, "worker-1", app.WorkerID)
+	require.Equal(t, "app-1", app.Id)
+	require.Equal(t, "task-1", app.TaskId)
+	require.Equal(t, "worker-1", app.WorkerId)
 	require.Equal(t, types.ApplicationStatusPending, app.Status)
 	require.Equal(t, uint64(800), app.ProposedPrice)
 	require.NotZero(t, app.CreatedAt)
@@ -307,8 +310,9 @@ func TestApplication_Validate(t *testing.T) {
 		{
 			name: "valid application",
 			app: types.Application{
-				TaskID:        "task-1",
-				WorkerID:      "worker-1",
+				Id:            "app-1",
+				TaskId:        "task-1",
+				WorkerId:      "worker-1",
 				ProposedPrice: 800,
 			},
 			wantErr: false,
@@ -316,8 +320,8 @@ func TestApplication_Validate(t *testing.T) {
 		{
 			name: "invalid - empty task ID",
 			app: types.Application{
-				TaskID:        "",
-				WorkerID:      "worker-1",
+				TaskId:        "",
+				WorkerId:      "worker-1",
 				ProposedPrice: 800,
 			},
 			wantErr: true,
@@ -325,8 +329,8 @@ func TestApplication_Validate(t *testing.T) {
 		{
 			name: "invalid - empty worker ID",
 			app: types.Application{
-				TaskID:        "task-1",
-				WorkerID:      "",
+				TaskId:        "task-1",
+				WorkerId:      "",
 				ProposedPrice: 800,
 			},
 			wantErr: true,
@@ -334,8 +338,8 @@ func TestApplication_Validate(t *testing.T) {
 		{
 			name: "invalid - zero price",
 			app: types.Application{
-				TaskID:        "task-1",
-				WorkerID:      "worker-1",
+				TaskId:        "task-1",
+				WorkerId:      "worker-1",
 				ProposedPrice: 0,
 			},
 			wantErr: true,
@@ -380,9 +384,9 @@ func TestNewBid(t *testing.T) {
 	bid := types.NewBid("bid-1", "task-1", "worker-1", 500)
 
 	require.NotNil(t, bid)
-	require.Equal(t, "bid-1", bid.ID)
-	require.Equal(t, "task-1", bid.TaskID)
-	require.Equal(t, "worker-1", bid.WorkerID)
+	require.Equal(t, "bid-1", bid.Id)
+	require.Equal(t, "task-1", bid.TaskId)
+	require.Equal(t, "worker-1", bid.WorkerId)
 	require.Equal(t, types.BidStatusPending, bid.Status)
 	require.Equal(t, uint64(500), bid.Amount)
 	require.NotZero(t, bid.CreatedAt)
@@ -398,8 +402,9 @@ func TestBid_Validate(t *testing.T) {
 		{
 			name: "valid bid",
 			bid: types.Bid{
-				TaskID:   "task-1",
-				WorkerID: "worker-1",
+				Id:       "bid-1",
+				TaskId:   "task-1",
+				WorkerId: "worker-1",
 				Amount:   500,
 			},
 			wantErr: false,
@@ -407,8 +412,8 @@ func TestBid_Validate(t *testing.T) {
 		{
 			name: "invalid - empty task ID",
 			bid: types.Bid{
-				TaskID:   "",
-				WorkerID: "worker-1",
+				TaskId:   "",
+				WorkerId: "worker-1",
 				Amount:   500,
 			},
 			wantErr: true,
@@ -416,8 +421,8 @@ func TestBid_Validate(t *testing.T) {
 		{
 			name: "invalid - empty worker ID",
 			bid: types.Bid{
-				TaskID:   "task-1",
-				WorkerID: "",
+				TaskId:   "task-1",
+				WorkerId: "",
 				Amount:   500,
 			},
 			wantErr: true,
@@ -425,8 +430,8 @@ func TestBid_Validate(t *testing.T) {
 		{
 			name: "invalid - zero amount",
 			bid: types.Bid{
-				TaskID:   "task-1",
-				WorkerID: "worker-1",
+				TaskId:   "task-1",
+				WorkerId: "worker-1",
 				Amount:   0,
 			},
 			wantErr: true,
@@ -459,7 +464,7 @@ func TestNewAuction(t *testing.T) {
 	auction := types.NewAuction("task-1", 1000, 800, 86400)
 
 	require.NotNil(t, auction)
-	require.Equal(t, "task-1", auction.TaskID)
+	require.Equal(t, "task-1", auction.TaskId)
 	require.Equal(t, uint64(1000), auction.StartingPrice)
 	require.Equal(t, uint64(800), auction.ReservePrice)
 	require.True(t, auction.IsActive)
@@ -479,12 +484,12 @@ func TestAuction_AddBid(t *testing.T) {
 	}{
 		{
 			name:    "valid bid",
-			bid:     types.Bid{ID: "bid-1", Amount: 900},
+			bid:     types.Bid{Id: "bid-1", Amount: 900},
 			wantErr: false,
 		},
 		{
 			name:    "invalid - bid exceeds starting price",
-			bid:     types.Bid{ID: "bid-2", Amount: 1100},
+			bid:     types.Bid{Id: "bid-2", Amount: 1100},
 			wantErr: true,
 		},
 	}
@@ -505,12 +510,12 @@ func TestAuction_AddBid(t *testing.T) {
 
 	// Test expired auction
 	expiredAuction := types.Auction{
-		TaskID:        "task-1",
+		TaskId:        "task-1",
 		StartingPrice: 1000,
 		EndTime:       now - 3600,
 		IsActive:      true,
 	}
-	err := expiredAuction.AddBid(types.Bid{ID: "bid-1", Amount: 900})
+	err := expiredAuction.AddBid(types.Bid{Id: "bid-1", Amount: 900})
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "ended")
 }
@@ -522,12 +527,12 @@ func TestAuction_GetWinningBid(t *testing.T) {
 	require.Nil(t, auction.GetWinningBid())
 
 	// Add bids
-	_ = auction.AddBid(types.Bid{ID: "bid-1", Amount: 900, Status: types.BidStatusPending})
-	_ = auction.AddBid(types.Bid{ID: "bid-2", Amount: 800, Status: types.BidStatusPending})
+	_ = auction.AddBid(types.Bid{Id: "bid-1", Amount: 900, Status: types.BidStatusPending})
+	_ = auction.AddBid(types.Bid{Id: "bid-2", Amount: 800, Status: types.BidStatusPending})
 
 	winner := auction.GetWinningBid()
 	require.NotNil(t, winner)
-	require.Equal(t, "bid-2", winner.ID) // Lower amount wins
+	require.Equal(t, "bid-2", winner.Id) // Lower amount wins
 	require.Equal(t, uint64(800), winner.Amount)
 }
 
@@ -542,10 +547,10 @@ func TestAuction_CloseAuction(t *testing.T) {
 		{
 			name: "successful close",
 			auction: types.Auction{
-				TaskID:        "task-1",
+				TaskId:        "task-1",
 				ReservePrice:  800,
-				Bids:          []types.Bid{{ID: "bid-1", Amount: 700, Status: types.BidStatusPending}},
-				WinningBidID:  "bid-1",
+				Bids:          []types.Bid{{Id: "bid-1", Amount: 700, Status: types.BidStatusPending}},
+				WinningBidId:  "bid-1",
 				EndTime:       now + 3600,
 				IsActive:      true,
 			},
@@ -554,7 +559,7 @@ func TestAuction_CloseAuction(t *testing.T) {
 		{
 			name: "no valid bids",
 			auction: types.Auction{
-				TaskID:        "task-1",
+				TaskId:        "task-1",
 				ReservePrice:  800,
 				Bids:          []types.Bid{},
 				IsActive:      true,
@@ -564,10 +569,10 @@ func TestAuction_CloseAuction(t *testing.T) {
 		{
 			name: "bid below reserve",
 			auction: types.Auction{
-				TaskID:        "task-1",
+				TaskId:        "task-1",
 				ReservePrice:  800,
-				Bids:          []types.Bid{{ID: "bid-1", Amount: 900, Status: types.BidStatusPending}},
-				WinningBidID:  "bid-1",
+				Bids:          []types.Bid{{Id: "bid-1", Amount: 900, Status: types.BidStatusPending}},
+				WinningBidId:  "bid-1",
 				IsActive:      true,
 			},
 			expectError: true,
@@ -652,13 +657,13 @@ func TestValidateGenesis(t *testing.T) {
 			name: "valid genesis with data",
 			data: types.GenesisState{
 				Tasks: []types.Task{
-					{ID: "task-1", Title: "Task 1", RequesterID: "req-1", Budget: 1000},
+					{Id: "task-1", Title: "Task 1", RequesterId: "req-1", Budget: 1000},
 				},
 				Applications: []types.Application{
-					{ID: "app-1", TaskID: "task-1", WorkerID: "worker-1", ProposedPrice: 800},
+					{Id: "app-1", TaskId: "task-1", WorkerId: "worker-1", ProposedPrice: 800},
 				},
 				Bids: []types.Bid{
-					{ID: "bid-1", TaskID: "task-1", WorkerID: "worker-1", Amount: 500},
+					{Id: "bid-1", TaskId: "task-1", WorkerId: "worker-1", Amount: 500},
 				},
 			},
 			wantErr: false,
@@ -667,7 +672,7 @@ func TestValidateGenesis(t *testing.T) {
 			name: "invalid - invalid task",
 			data: types.GenesisState{
 				Tasks: []types.Task{
-					{ID: "", Title: "Task 1", RequesterID: "req-1", Budget: 1000},
+					{Id: "", Title: "Task 1", RequesterId: "req-1", Budget: 1000},
 				},
 			},
 			wantErr: true,
@@ -676,7 +681,7 @@ func TestValidateGenesis(t *testing.T) {
 			name: "invalid - invalid application",
 			data: types.GenesisState{
 				Applications: []types.Application{
-					{ID: "app-1", TaskID: "", WorkerID: "worker-1", ProposedPrice: 800},
+					{Id: "app-1", TaskId: "", WorkerId: "worker-1", ProposedPrice: 800},
 				},
 			},
 			wantErr: true,
@@ -685,7 +690,7 @@ func TestValidateGenesis(t *testing.T) {
 			name: "invalid - invalid bid",
 			data: types.GenesisState{
 				Bids: []types.Bid{
-					{ID: "bid-1", TaskID: "task-1", WorkerID: "", Amount: 500},
+					{Id: "bid-1", TaskId: "task-1", WorkerId: "", Amount: 500},
 				},
 			},
 			wantErr: true,

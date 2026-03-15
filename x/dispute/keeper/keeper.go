@@ -89,10 +89,10 @@ func (k *DisputeKeeper) AddEvidence(disputeID, submitter, evidenceType, content 
 	}
 
 	evidence := types.Evidence{
-		Type:        evidenceType,
-		Content:     content,
-		SubmittedBy: submitter,
-		Timestamp:   time.Now().Unix(),
+		EvidenceType: evidenceType,
+		Content:      content,
+		SubmittedBy:  submitter,
+		Timestamp:    time.Now().Unix(),
 	}
 
 	dispute.AddEvidence(evidence)
@@ -237,7 +237,7 @@ func (k *DisputeKeeper) CastVote(disputeID, voter, decision string) error {
 	vote := types.Vote{
 		Voter:     voter,
 		Decision:  decision,
-		Weight:    sdk.NewDec(weight),
+		Weight:    sdk.NewDec(weight).String(),
 		Timestamp: time.Now().Unix(),
 	}
 
