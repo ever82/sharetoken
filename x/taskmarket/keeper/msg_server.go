@@ -286,11 +286,10 @@ func (m msgServer) CloseAuction(ctx context.Context, msg *types.MsgCloseAuction)
 	auction, found := m.K.GetAuction(sdkCtx, msg.TaskId)
 	var winnerID string
 	if found && auction.WinningBidId != "" {
-		for _, bid := range auction.Bids {
-			if bid.Id == auction.WinningBidId {
-				winnerID = bid.WorkerId
-				break
-			}
+		// Get the winning bid directly from storage
+		winnerBid, bidFound := m.K.GetBid(sdkCtx, auction.WinningBidId)
+		if bidFound {
+			winnerID = winnerBid.WorkerId
 		}
 	}
 

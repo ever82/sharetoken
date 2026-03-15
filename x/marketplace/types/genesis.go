@@ -21,6 +21,9 @@ func ValidateGenesis(gs GenesisState) error {
 		if service.Provider == "" {
 			return ErrInvalidService.Wrapf("service provider cannot be empty for ID: %s", service.Id)
 		}
+		if service.Name == "" {
+			return ErrInvalidService.Wrapf("service name cannot be empty for ID: %s", service.Id)
+		}
 	}
 	return nil
 }

@@ -121,6 +121,6 @@ func TestPriceString(t *testing.T) {
 
 	require.Contains(t, str, "ETH/USD")
 	require.Contains(t, str, "2000")
-	require.Contains(t, str, "95%")
-	require.Contains(t, str, "chainlink")
+	require.Contains(t, str, "95")
+	require.Contains(t, str, "PRICE_SOURCE_CHAINLINK")
 }

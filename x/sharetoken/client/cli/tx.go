@@ -8,7 +8,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	// "github.com/cosmos/cosmos-sdk/client/flags"
-	"sharetoken/x/identity/types"
+	"sharetoken/x/sharetoken/types"
 )
 
 var (

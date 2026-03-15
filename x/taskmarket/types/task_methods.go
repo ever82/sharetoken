@@ -42,6 +42,11 @@ func (t *Task) WorkerID() string {
 	return t.WorkerId
 }
 
+// AddMilestone adds a milestone to the task
+func (t *Task) AddMilestone(milestone Milestone) {
+	t.Milestones = append(t.Milestones, milestone)
+}
+
 // Validate validates the task
 func (t *Task) Validate() error {
 	if t.Id == "" {
@@ -52,6 +57,9 @@ func (t *Task) Validate() error {
 	}
 	if t.RequesterId == "" {
 		return fmt.Errorf("requester ID is required")
+	}
+	if t.Budget == 0 {
+		return fmt.Errorf("budget must be greater than 0")
 	}
 	if t.Deadline <= time.Now().Unix() {
 		return fmt.Errorf("deadline must be in the future")
@@ -142,6 +150,7 @@ func (t *Task) AllMilestonesCompleted() bool {
 // Complete marks the task as completed
 func (t *Task) Complete() {
 	t.Status = TaskStatus_TASK_STATUS_COMPLETED
+	t.CompletedAt = time.Now().Unix()
 	t.UpdatedAt = time.Now().Unix()
 }
 
@@ -175,6 +184,15 @@ var MilestoneStatusPending = MilestoneStatus_MILESTONE_STATUS_PENDING
 // MilestoneStatusActive is a shorthand for active milestone status
 var MilestoneStatusActive = MilestoneStatus_MILESTONE_STATUS_ACTIVE
 
+// MilestoneStatusSubmitted is a shorthand for submitted milestone status
+var MilestoneStatusSubmitted = MilestoneStatus_MILESTONE_STATUS_SUBMITTED
+
+// MilestoneStatusApproved is a shorthand for approved milestone status
+var MilestoneStatusApproved = MilestoneStatus_MILESTONE_STATUS_APPROVED
+
+// MilestoneStatusPaid is a shorthand for paid milestone status
+var MilestoneStatusPaid = MilestoneStatus_MILESTONE_STATUS_PAID
+
 // NewApplication creates a new application
 func NewApplication(id, taskId, workerId string, proposedPrice uint64) *Application {
 	now := time.Now().Unix()
@@ -201,6 +219,167 @@ func NewBid(id, taskId, workerId string, amount uint64) *Bid {
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
+}
+
+// BidStatusPending is a shorthand for pending bid status
+var BidStatusPending = BidStatus_BID_STATUS_PENDING
+
+// BidStatusAccepted is a shorthand for accepted bid status
+var BidStatusAccepted = BidStatus_BID_STATUS_ACCEPTED
+
+// BidStatusRejected is a shorthand for rejected bid status
+var BidStatusRejected = BidStatus_BID_STATUS_REJECTED
+
+// BidStatusOutbid is a shorthand for outbid bid status
+var BidStatusOutbid = BidStatus_BID_STATUS_OUTBID
+
+// BidStatusWithdrawn is a shorthand for withdrawn bid status
+var BidStatusWithdrawn = BidStatus_BID_STATUS_WITHDRAWN
+
+// Validate validates a bid
+func (b Bid) Validate() error {
+	if b.Id == "" {
+		return fmt.Errorf("bid ID is required")
+	}
+	if b.TaskId == "" {
+		return fmt.Errorf("task ID is required")
+	}
+	if b.WorkerId == "" {
+		return fmt.Errorf("worker ID is required")
+	}
+	if b.Amount == 0 {
+		return fmt.Errorf("amount must be greater than 0")
+	}
+	return nil
+}
+
+// Accept marks the bid as accepted
+func (b *Bid) Accept() {
+	b.Status = BidStatus_BID_STATUS_ACCEPTED
+}
+
+// Reject marks the bid as rejected
+func (b *Bid) Reject() {
+	b.Status = BidStatus_BID_STATUS_REJECTED
+}
+
+// Withdraw marks the bid as withdrawn
+func (b *Bid) Withdraw() {
+	b.Status = BidStatus_BID_STATUS_WITHDRAWN
+}
+
+// IsLowerThan checks if this bid has a lower amount than another bid
+func (b *Bid) IsLowerThan(other *Bid) bool {
+	return b.Amount < other.Amount
+}
+
+// NewAuction creates a new auction
+func NewAuction(taskId string, startingPrice, reservePrice uint64, durationSec int64) *Auction {
+	now := time.Now().Unix()
+	return &Auction{
+		TaskId:        taskId,
+		StartingPrice: startingPrice,
+		ReservePrice:  reservePrice,
+		IsActive:      true,
+		Bids:          []Bid{},
+		EndTime:       now + durationSec,
+	}
+}
+
+// AddBid adds a bid to the auction
+func (a *Auction) AddBid(bid Bid) error {
+	if !a.IsActive {
+		return fmt.Errorf("auction is not active")
+	}
+	if time.Now().Unix() > a.EndTime {
+		return fmt.Errorf("auction has ended")
+	}
+	if bid.Amount > a.StartingPrice {
+		return fmt.Errorf("bid exceeds starting price")
+	}
+
+	// Mark existing higher bids as outbid
+	for i := range a.Bids {
+		if a.Bids[i].Amount > bid.Amount && a.Bids[i].Status == BidStatus_BID_STATUS_PENDING {
+			a.Bids[i].Status = BidStatus_BID_STATUS_OUTBID
+		}
+	}
+
+	a.Bids = append(a.Bids, bid)
+	return nil
+}
+
+// GetWinningBid returns the current winning bid (lowest amount)
+func (a *Auction) GetWinningBid() *Bid {
+	if len(a.Bids) == 0 {
+		return nil
+	}
+
+	var winner *Bid
+	for i := range a.Bids {
+		if a.Bids[i].Status == BidStatus_BID_STATUS_PENDING {
+			if winner == nil || a.Bids[i].Amount < winner.Amount {
+				winner = &a.Bids[i]
+			}
+		}
+	}
+	return winner
+}
+
+// CloseAuction closes the auction and returns the winning bid
+func (a *Auction) CloseAuction() (*Bid, error) {
+	if !a.IsActive {
+		return nil, fmt.Errorf("auction is not active")
+	}
+
+	winner := a.GetWinningBid()
+	if winner == nil {
+		return nil, fmt.Errorf("no valid bids")
+	}
+
+	if winner.Amount > a.ReservePrice {
+		return nil, fmt.Errorf("winning bid does not meet reserve price")
+	}
+
+	winner.Accept()
+	a.IsActive = false
+	a.WinningBidId = winner.Id
+
+	return winner, nil
+}
+
+// IsEnded checks if the auction has ended
+func (a *Auction) IsEnded() bool {
+	return !a.IsActive || time.Now().Unix() > a.EndTime
+}
+
+// GetTotalMilestoneAmount returns the total amount of all milestones
+func (t *Task) GetTotalMilestoneAmount() uint64 {
+	total := uint64(0)
+	for _, m := range t.Milestones {
+		total += m.Amount
+	}
+	return total
+}
+
+// GetCompletionPercentage returns the completion percentage based on milestones
+func (t *Task) GetCompletionPercentage() float64 {
+	if t.Status == TaskStatus_TASK_STATUS_COMPLETED {
+		return 100.0
+	}
+	if len(t.Milestones) == 0 {
+		return 0.0
+	}
+
+	completed := 0
+	for _, m := range t.Milestones {
+		if m.Status == MilestoneStatus_MILESTONE_STATUS_APPROVED ||
+			m.Status == MilestoneStatus_MILESTONE_STATUS_PAID {
+			completed++
+		}
+	}
+
+	return float64(completed) / float64(len(t.Milestones)) * 100.0
 }
 
 // NewRating creates a new rating

@@ -45,6 +45,15 @@ func ValidateGenesis(state GenesisState) error {
 		}
 	}
 
+	// Validate juror pool
+	seenJurors := make(map[string]bool)
+	for _, juror := range state.JurorPool {
+		if seenJurors[juror] {
+			return fmt.Errorf("duplicate juror: %s", juror)
+		}
+		seenJurors[juror] = true
+	}
+
 	return nil
 }
 

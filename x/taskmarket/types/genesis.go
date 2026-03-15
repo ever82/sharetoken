@@ -7,12 +7,12 @@ import (
 // DefaultGenesis returns default genesis state for the taskmarket module
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
-		Tasks:       []Task{},
+		Tasks:        []Task{},
 		Applications: []Application{},
-		Auctions:    []Auction{},
-		Bids:        []Bid{},
-		Ratings:     []Rating{},
-		Reputations: []Reputation{},
+		Auctions:     []Auction{},
+		Bids:         []Bid{},
+		Ratings:      []Rating{},
+		Reputations:  []Reputation{},
 	}
 }
 
@@ -40,6 +40,12 @@ func (gs *GenesisState) Validate() error {
 			return fmt.Errorf("duplicate application ID: %s", app.Id)
 		}
 		appIDs[app.Id] = true
+		if app.TaskId == "" {
+			return fmt.Errorf("application task ID cannot be empty")
+		}
+		if app.WorkerId == "" {
+			return fmt.Errorf("application worker ID cannot be empty")
+		}
 	}
 
 	// Validate bids
@@ -52,6 +58,12 @@ func (gs *GenesisState) Validate() error {
 			return fmt.Errorf("duplicate bid ID: %s", bid.Id)
 		}
 		bidIDs[bid.Id] = true
+		if bid.TaskId == "" {
+			return fmt.Errorf("bid task ID cannot be empty")
+		}
+		if bid.WorkerId == "" {
+			return fmt.Errorf("bid worker ID cannot be empty")
+		}
 	}
 
 	// Validate ratings

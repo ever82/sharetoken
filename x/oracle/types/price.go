@@ -26,6 +26,9 @@ const (
 
 	// PriceSourceManual is an alias for PriceSource_PRICE_SOURCE_MANUAL
 	PriceSourceManual = PriceSource_PRICE_SOURCE_MANUAL
+
+	// PriceSourceUnspecified is an alias for PriceSource_PRICE_SOURCE_UNSPECIFIED
+	PriceSourceUnspecified = PriceSource_PRICE_SOURCE_UNSPECIFIED
 )
 
 // NewPrice creates a new price instance
@@ -50,13 +53,13 @@ func (p *Price) IsStale(maxAge time.Duration) bool {
 // ValidateBasic performs basic validation of the price
 func (p Price) ValidateBasic() error {
 	if p.Symbol == "" {
-		return errors.New("price symbol cannot be empty")
+		return ErrInvalidSymbol.Wrap("price symbol cannot be empty")
 	}
 	if p.Price.IsNil() || p.Price.IsNegative() {
-		return errors.New("price must be positive")
+		return ErrInvalidPrice.Wrap("price must be positive")
 	}
 	if p.Confidence < 0 || p.Confidence > MaxConfidence {
-		return errors.New("confidence must be between 0 and 100")
+		return ErrLowConfidence.Wrap("confidence must be between 0 and 100")
 	}
 	if p.Source == PriceSource_PRICE_SOURCE_UNSPECIFIED {
 		return errors.New("price source must be specified")
@@ -74,4 +77,28 @@ func (p LLMPrice) ConvertToSTT(usdPrice sdk.Dec) (sdk.Dec, sdk.Dec) {
 	outputSTT := p.OutputPrice.Mul(usdPrice)
 
 	return inputSTT, outputSTT
+}
+
+// PriceSourceFromString converts a string to PriceSource
+func PriceSourceFromString(s string) PriceSource {
+	switch s {
+	case "chainlink":
+		return PriceSource_PRICE_SOURCE_CHAINLINK
+	case "manual":
+		return PriceSource_PRICE_SOURCE_MANUAL
+	default:
+		return PriceSource_PRICE_SOURCE_MANUAL
+	}
+}
+
+// PriceSourceToString converts PriceSource to a string
+func PriceSourceToString(s PriceSource) string {
+	switch s {
+	case PriceSource_PRICE_SOURCE_CHAINLINK:
+		return "chainlink"
+	case PriceSource_PRICE_SOURCE_MANUAL:
+		return "manual"
+	default:
+		return "manual"
+	}
 }

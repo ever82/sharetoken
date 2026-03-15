@@ -107,11 +107,13 @@ func (k Keeper) CloseAuction(ctx sdk.Context, taskID string) error {
 	auction.IsActive = false
 	// Find winner (simplified - just get the last bid)
 	bids := k.GetBidsByAuction(ctx, taskID)
-	if len(bids) > 0 {
-		winner := bids[len(bids)-1]
-		task.WorkerId = winner.WorkerId
-		task.Status = types.TaskStatus_TASK_STATUS_ASSIGNED
+	if len(bids) == 0 {
+		return fmt.Errorf("no bids for auction: %s", taskID)
 	}
+	winner := bids[len(bids)-1]
+	auction.WinningBidId = winner.Id
+	task.WorkerId = winner.WorkerId
+	task.Status = types.TaskStatus_TASK_STATUS_ASSIGNED
 
 	// Update new indexes
 	k.setTaskByWorker(ctx, task)

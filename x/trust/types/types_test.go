@@ -14,10 +14,10 @@ func TestNewMQScore(t *testing.T) {
 
 	require.NotNil(t, mq)
 	require.Equal(t, "address-1", mq.Address)
-	require.Equal(t, types.InitialMQ, mq.Score)
+	require.Equal(t, int32(100), mq.Score)
 	require.Equal(t, uint64(0), mq.Disputes)
 	require.Equal(t, uint64(0), mq.Consensus)
-	require.Equal(t, int64(0), mq.UpdatedAt)
+	require.NotZero(t, mq.UpdatedAt)
 }
 
 func TestMQScore_ValidateBasic(t *testing.T) {
@@ -263,8 +263,8 @@ func TestDefaultGenesis(t *testing.T) {
 	genesis := types.DefaultGenesis()
 
 	require.NotNil(t, genesis)
-	require.NotNil(t, genesis.MQScores)
-	require.Empty(t, genesis.MQScores)
+	require.NotNil(t, genesis.MqScores)
+	require.Empty(t, genesis.MqScores)
 }
 
 func TestValidateGenesis(t *testing.T) {
@@ -281,7 +281,7 @@ func TestValidateGenesis(t *testing.T) {
 		{
 			name: "valid genesis with MQ scores",
 			data: types.GenesisState{
-				MQScores: []types.MQScore{
+				MqScores: []types.MQScore{
 					{Address: "address-1", Score: 100},
 					{Address: "address-2", Score: 80},
 				},
@@ -291,7 +291,7 @@ func TestValidateGenesis(t *testing.T) {
 		{
 			name: "invalid - duplicate addresses",
 			data: types.GenesisState{
-				MQScores: []types.MQScore{
+				MqScores: []types.MQScore{
 					{Address: "address-1", Score: 100},
 					{Address: "address-1", Score: 80},
 				},
@@ -301,7 +301,7 @@ func TestValidateGenesis(t *testing.T) {
 		{
 			name: "invalid - invalid MQ score",
 			data: types.GenesisState{
-				MQScores: []types.MQScore{
+				MqScores: []types.MQScore{
 					{Address: "", Score: 100},
 				},
 			},
@@ -310,7 +310,7 @@ func TestValidateGenesis(t *testing.T) {
 		{
 			name: "invalid - score out of range",
 			data: types.GenesisState{
-				MQScores: []types.MQScore{
+				MqScores: []types.MQScore{
 					{Address: "address-1", Score: 150},
 				},
 			},

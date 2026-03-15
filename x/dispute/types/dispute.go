@@ -49,7 +49,9 @@ func (d *Dispute) AddVote(vote Vote) {
 
 // CalculateResult calculates the voting result
 func (d *Dispute) CalculateResult() VoteResult {
-	var requesterWeight, providerWeight, splitWeight sdk.Dec
+	requesterWeight := sdk.ZeroDec()
+	providerWeight := sdk.ZeroDec()
+	splitWeight := sdk.ZeroDec()
 
 	for _, vote := range d.Votes {
 		weight, err := sdk.NewDecFromStr(vote.Weight)

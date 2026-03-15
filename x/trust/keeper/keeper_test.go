@@ -15,7 +15,7 @@ func TestNewMQScore(t *testing.T) {
 	mq := types.NewMQScore(address)
 
 	require.Equal(t, address, mq.Address)
-	require.Equal(t, types.InitialMQ, mq.Score)
+	require.Equal(t, int32(100), mq.Score)
 	require.Equal(t, uint64(0), mq.Disputes)
 	require.Equal(t, uint64(0), mq.Consensus)
 }

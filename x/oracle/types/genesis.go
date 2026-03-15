@@ -35,6 +35,9 @@ func ValidateGenesis(gs GenesisState) error {
 		if price.Price.IsNil() || price.Price.IsNegative() {
 			return fmt.Errorf("invalid price for symbol: %s", price.Symbol)
 		}
+		if price.Confidence < 0 || price.Confidence > 100 {
+			return fmt.Errorf("invalid confidence for symbol %s: %d", price.Symbol, price.Confidence)
+		}
 	}
 	return nil
 }

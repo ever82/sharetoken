@@ -59,21 +59,16 @@ func TestMsgServer_CreateTask_Success_Open(t *testing.T) {
 		Creator:     creator,
 		Title:       "Test Task",
 		Description: "This is a test task",
-		TaskTypeVal: types.TaskTypeOpen,
-		Category:    types.CategoryDevelopment,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
-		Currency:    "STT",
 		Deadline:    9999999999, // Far future
-		Skills:      []string{"go", "blockchain"},
-		Subtasks:    []types.Subtask{},
-		Milestones:  []types.Milestone{},
 	}
 
 	resp, err := msgServer.CreateTask(ctx, msg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
-	require.NotEmpty(t, resp.TaskID)
-	require.Equal(t, "task-1", resp.TaskID) // First task at height 1
+	require.NotEmpty(t, resp.TaskId)
+	require.Equal(t, "task-1", resp.TaskId) // First task at height 1
 }
 
 func TestMsgServer_CreateTask_Success_Auction(t *testing.T) {
@@ -84,20 +79,15 @@ func TestMsgServer_CreateTask_Success_Auction(t *testing.T) {
 		Creator:     creator,
 		Title:       "Auction Task",
 		Description: "This is an auction task",
-		TaskTypeVal: types.TaskTypeAuction,
-		Category:    types.CategoryDesign,
+		TaskType:    types.TaskTypeAuction,
 		Budget:      5000,
-		Currency:    "STT",
 		Deadline:    9999999999, // Far future
-		Skills:      []string{"design", "ui"},
-		Subtasks:    []types.Subtask{},
-		Milestones:  []types.Milestone{},
 	}
 
 	resp, err := msgServer.CreateTask(ctx, msg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
-	require.NotEmpty(t, resp.TaskID)
+	require.NotEmpty(t, resp.TaskId)
 }
 
 func TestMsgServer_CreateTask_InvalidValidation(t *testing.T) {
@@ -109,7 +99,7 @@ func TestMsgServer_CreateTask_InvalidValidation(t *testing.T) {
 		Creator:     creator,
 		Title:       "",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
 	}
 
@@ -126,7 +116,7 @@ func TestMsgServer_CreateTask_ZeroBudget(t *testing.T) {
 		Creator:     creator,
 		Title:       "No Budget Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      0,
 	}
 
@@ -145,17 +135,18 @@ func TestMsgServer_UpdateTask_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Original Title",
 		Description: "Original Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// Update the task
 	updateMsg := &types.MsgUpdateTask{
 		Creator:     creator,
-		TaskID:      taskID,
+		TaskId:      taskID,
 		Title:       "Updated Title",
 		Description: "Updated Description",
 		Budget:      2000,
@@ -172,7 +163,7 @@ func TestMsgServer_UpdateTask_NotFound(t *testing.T) {
 
 	updateMsg := &types.MsgUpdateTask{
 		Creator: creator,
-		TaskID:  "non-existent-task",
+		TaskId:  "non-existent-task",
 		Title:   "New Title",
 	}
 
@@ -192,17 +183,18 @@ func TestMsgServer_UpdateTask_Unauthorized(t *testing.T) {
 		Creator:     creator,
 		Title:       "Original Title",
 		Description: "Original Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// Try to update with different creator
 	updateMsg := &types.MsgUpdateTask{
 		Creator: otherCreator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 		Title:   "Updated Title",
 	}
 
@@ -221,17 +213,18 @@ func TestMsgServer_UpdateTask_NotDraftOrOpen(t *testing.T) {
 		Creator:     creator,
 		Title:       "Task to Publish",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// Publish the task
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
@@ -240,7 +233,7 @@ func TestMsgServer_UpdateTask_NotDraftOrOpen(t *testing.T) {
 	// Note: The msg_server checks for draft OR open status, so this should succeed
 	updateMsg := &types.MsgUpdateTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 		Title:   "Updated Title",
 	}
 
@@ -259,17 +252,18 @@ func TestMsgServer_PublishTask_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Task to Publish",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// Publish the task
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 
 	resp, err := msgServer.PublishTask(ctx, publishMsg)
@@ -283,7 +277,7 @@ func TestMsgServer_PublishTask_NotFound(t *testing.T) {
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  "non-existent-task",
+		TaskId:  "non-existent-task",
 	}
 
 	resp, err := msgServer.PublishTask(ctx, publishMsg)
@@ -302,17 +296,18 @@ func TestMsgServer_PublishTask_Unauthorized(t *testing.T) {
 		Creator:     creator,
 		Title:       "Task to Publish",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// Try to publish with different creator
 	publishMsg := &types.MsgPublishTask{
 		Creator: otherCreator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 
 	resp, err := msgServer.PublishTask(ctx, publishMsg)
@@ -330,17 +325,18 @@ func TestMsgServer_PublishTask_NotDraft(t *testing.T) {
 		Creator:     creator,
 		Title:       "Task to Publish",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// Publish once
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
@@ -361,17 +357,18 @@ func TestMsgServer_PublishTask_AuctionCreatesAuction(t *testing.T) {
 		Creator:     creator,
 		Title:       "Auction Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeAuction,
+		TaskType:    types.TaskTypeAuction,
 		Budget:      5000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// Publish the auction task (should create auction)
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 
 	resp, err := msgServer.PublishTask(ctx, publishMsg)
@@ -389,17 +386,18 @@ func TestMsgServer_CancelTask_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Task to Cancel",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// Publish the task
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
@@ -407,7 +405,7 @@ func TestMsgServer_CancelTask_Success(t *testing.T) {
 	// Cancel the task
 	cancelMsg := &types.MsgCancelTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 
 	resp, err := msgServer.CancelTask(ctx, cancelMsg)
@@ -421,7 +419,7 @@ func TestMsgServer_CancelTask_NotFound(t *testing.T) {
 
 	cancelMsg := &types.MsgCancelTask{
 		Creator: creator,
-		TaskID:  "non-existent-task",
+		TaskId:  "non-existent-task",
 	}
 
 	resp, err := msgServer.CancelTask(ctx, cancelMsg)
@@ -440,17 +438,18 @@ func TestMsgServer_CancelTask_Unauthorized(t *testing.T) {
 		Creator:     creator,
 		Title:       "Task to Cancel",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// Try to cancel with different creator
 	cancelMsg := &types.MsgCancelTask{
 		Creator: otherCreator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 
 	resp, err := msgServer.CancelTask(ctx, cancelMsg)
@@ -476,24 +475,25 @@ func TestMsgServer_SubmitApplication_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Open Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Submit application
 	appMsg := &types.MsgSubmitApplication{
-		WorkerID:      worker,
-		TaskID:        taskID,
+		WorkerId:      worker,
+		TaskId:        taskID,
 		ProposedPrice: 900,
 		CoverLetter:   "I am experienced",
 	}
@@ -501,7 +501,7 @@ func TestMsgServer_SubmitApplication_Success(t *testing.T) {
 	resp, err := msgServer.SubmitApplication(ctx, appMsg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
-	require.NotEmpty(t, resp.ApplicationID)
+	require.NotEmpty(t, resp.ApplicationId)
 }
 
 func TestMsgServer_SubmitApplication_NotOpen(t *testing.T) {
@@ -514,17 +514,18 @@ func TestMsgServer_SubmitApplication_NotOpen(t *testing.T) {
 		Creator:     creator,
 		Title:       "Draft Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// Try to submit application
 	appMsg := &types.MsgSubmitApplication{
-		WorkerID:      worker,
-		TaskID:        taskID,
+		WorkerId:      worker,
+		TaskId:        taskID,
 		ProposedPrice: 900,
 	}
 
@@ -543,24 +544,25 @@ func TestMsgServer_SubmitApplication_Duplicate(t *testing.T) {
 		Creator:     creator,
 		Title:       "Open Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Submit first application
 	appMsg := &types.MsgSubmitApplication{
-		WorkerID:      worker,
-		TaskID:        taskID,
+		WorkerId:      worker,
+		TaskId:        taskID,
 		ProposedPrice: 900,
 	}
 	_, err = msgServer.SubmitApplication(ctx, appMsg)
@@ -582,24 +584,25 @@ func TestMsgServer_AcceptApplication_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Open Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Submit application
 	appMsg := &types.MsgSubmitApplication{
-		WorkerID:      worker,
-		TaskID:        taskID,
+		WorkerId:      worker,
+		TaskId:        taskID,
 		ProposedPrice: 900,
 	}
 	appResp, err := msgServer.SubmitApplication(ctx, appMsg)
@@ -607,8 +610,8 @@ func TestMsgServer_AcceptApplication_Success(t *testing.T) {
 
 	// Accept application
 	acceptMsg := &types.MsgAcceptApplication{
-		RequesterID:   creator,
-		ApplicationID: appResp.ApplicationID,
+		RequesterId:   creator,
+		ApplicationId: appResp.ApplicationId,
 	}
 
 	resp, err := msgServer.AcceptApplication(ctx, acceptMsg)
@@ -621,8 +624,8 @@ func TestMsgServer_AcceptApplication_NotFound(t *testing.T) {
 	creator := createTestAddress()
 
 	acceptMsg := &types.MsgAcceptApplication{
-		RequesterID:   creator,
-		ApplicationID: "non-existent-app",
+		RequesterId:   creator,
+		ApplicationId: "non-existent-app",
 	}
 
 	resp, err := msgServer.AcceptApplication(ctx, acceptMsg)
@@ -641,24 +644,25 @@ func TestMsgServer_RejectApplication_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Open Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Submit application
 	appMsg := &types.MsgSubmitApplication{
-		WorkerID:      worker,
-		TaskID:        taskID,
+		WorkerId:      worker,
+		TaskId:        taskID,
 		ProposedPrice: 900,
 	}
 	appResp, err := msgServer.SubmitApplication(ctx, appMsg)
@@ -666,8 +670,8 @@ func TestMsgServer_RejectApplication_Success(t *testing.T) {
 
 	// Reject application
 	rejectMsg := &types.MsgRejectApplication{
-		RequesterID:   creator,
-		ApplicationID: appResp.ApplicationID,
+		RequesterId:   creator,
+		ApplicationId: appResp.ApplicationId,
 		Reason:        "Not qualified",
 	}
 
@@ -681,8 +685,8 @@ func TestMsgServer_RejectApplication_NotFound(t *testing.T) {
 	creator := createTestAddress()
 
 	rejectMsg := &types.MsgRejectApplication{
-		RequesterID:   creator,
-		ApplicationID: "non-existent-app",
+		RequesterId:   creator,
+		ApplicationId: "non-existent-app",
 		Reason:        "Not qualified",
 	}
 
@@ -702,24 +706,25 @@ func TestMsgServer_SubmitBid_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Auction Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeAuction,
+		TaskType:    types.TaskTypeAuction,
 		Budget:      5000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Submit bid
 	bidMsg := &types.MsgSubmitBid{
-		WorkerID: worker,
-		TaskID:   taskID,
+		WorkerId: worker,
+		TaskId:   taskID,
 		Amount:   4000,
 		Message:  "I can do this",
 	}
@@ -727,7 +732,7 @@ func TestMsgServer_SubmitBid_Success(t *testing.T) {
 	resp, err := msgServer.SubmitBid(ctx, bidMsg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
-	require.NotEmpty(t, resp.BidID)
+	require.NotEmpty(t, resp.BidId)
 }
 
 func TestMsgServer_SubmitBid_NotAuction(t *testing.T) {
@@ -740,24 +745,25 @@ func TestMsgServer_SubmitBid_NotAuction(t *testing.T) {
 		Creator:     creator,
 		Title:       "Open Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Try to submit bid (should fail - not auction)
 	bidMsg := &types.MsgSubmitBid{
-		WorkerID: worker,
-		TaskID:   taskID,
+		WorkerId: worker,
+		TaskId:   taskID,
 		Amount:   900,
 	}
 
@@ -777,24 +783,25 @@ func TestMsgServer_CloseAuction_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Auction Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeAuction,
+		TaskType:    types.TaskTypeAuction,
 		Budget:      5000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Submit bid (must be <= reserve price which is budget/2 = 2500)
 	bidMsg := &types.MsgSubmitBid{
-		WorkerID: worker,
-		TaskID:   taskID,
+		WorkerId: worker,
+		TaskId:   taskID,
 		Amount:   2500,
 	}
 	_, err = msgServer.SubmitBid(ctx, bidMsg)
@@ -802,14 +809,14 @@ func TestMsgServer_CloseAuction_Success(t *testing.T) {
 
 	// Close auction
 	closeMsg := &types.MsgCloseAuction{
-		RequesterID: creator,
-		TaskID:      taskID,
+		RequesterId: creator,
+		TaskId:      taskID,
 	}
 
 	resp, err := msgServer.CloseAuction(ctx, closeMsg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
-	require.NotEmpty(t, resp.WinnerID)
+	require.NotEmpty(t, resp.WinnerId)
 }
 
 func TestMsgServer_CloseAuction_NoBids(t *testing.T) {
@@ -821,24 +828,25 @@ func TestMsgServer_CloseAuction_NoBids(t *testing.T) {
 		Creator:     creator,
 		Title:       "Auction Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeAuction,
+		TaskType:    types.TaskTypeAuction,
 		Budget:      5000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Close auction (should fail with no bids)
 	closeMsg := &types.MsgCloseAuction{
-		RequesterID: creator,
-		TaskID:      taskID,
+		RequesterId: creator,
+		TaskId:      taskID,
 	}
 
 	resp, err := msgServer.CloseAuction(ctx, closeMsg)
@@ -857,40 +865,41 @@ func TestMsgServer_StartTask_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Open Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Submit and accept application
 	appMsg := &types.MsgSubmitApplication{
-		WorkerID:      worker,
-		TaskID:        taskID,
+		WorkerId:      worker,
+		TaskId:        taskID,
 		ProposedPrice: 900,
 	}
 	appResp, err := msgServer.SubmitApplication(ctx, appMsg)
 	require.NoError(t, err)
 
 	acceptMsg := &types.MsgAcceptApplication{
-		RequesterID:   creator,
-		ApplicationID: appResp.ApplicationID,
+		RequesterId:   creator,
+		ApplicationId: appResp.ApplicationId,
 	}
 	_, err = msgServer.AcceptApplication(ctx, acceptMsg)
 	require.NoError(t, err)
 
 	// Start task
 	startMsg := &types.MsgStartTask{
-		WorkerID: worker,
-		TaskID:   taskID,
+		WorkerId: worker,
+		TaskId:   taskID,
 	}
 
 	resp, err := msgServer.StartTask(ctx, startMsg)
@@ -909,11 +918,12 @@ func TestMsgServer_SubmitMilestone_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Milestone Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 		Milestones: []types.Milestone{
 			{
-				ID:     "ms-1",
+				Id:     "ms-1",
 				Title:  "Phase 1",
 				Amount: 1000,
 				Order:  1,
@@ -923,44 +933,44 @@ func TestMsgServer_SubmitMilestone_Success(t *testing.T) {
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Submit and accept application
 	appMsg := &types.MsgSubmitApplication{
-		WorkerID:      worker,
-		TaskID:        taskID,
+		WorkerId:      worker,
+		TaskId:        taskID,
 		ProposedPrice: 900,
 	}
 	appResp, err := msgServer.SubmitApplication(ctx, appMsg)
 	require.NoError(t, err)
 
 	acceptMsg := &types.MsgAcceptApplication{
-		RequesterID:   creator,
-		ApplicationID: appResp.ApplicationID,
+		RequesterId:   creator,
+		ApplicationId: appResp.ApplicationId,
 	}
 	_, err = msgServer.AcceptApplication(ctx, acceptMsg)
 	require.NoError(t, err)
 
 	// Start task
 	startMsg := &types.MsgStartTask{
-		WorkerID: worker,
-		TaskID:   taskID,
+		WorkerId: worker,
+		TaskId:   taskID,
 	}
 	_, err = msgServer.StartTask(ctx, startMsg)
 	require.NoError(t, err)
 
 	// Submit milestone
 	submitMsg := &types.MsgSubmitMilestone{
-		WorkerID:     worker,
-		TaskID:       taskID,
-		MilestoneID:  "ms-1",
+		WorkerId:     worker,
+		TaskId:       taskID,
+		MilestoneId:  "ms-1",
 		Deliverables: "Completed work",
 	}
 
@@ -980,11 +990,12 @@ func TestMsgServer_ApproveMilestone_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Milestone Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 		Milestones: []types.Milestone{
 			{
-				ID:     "ms-1",
+				Id:     "ms-1",
 				Title:  "Phase 1",
 				Amount: 1000,
 				Order:  1,
@@ -994,44 +1005,44 @@ func TestMsgServer_ApproveMilestone_Success(t *testing.T) {
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Submit and accept application
 	appMsg := &types.MsgSubmitApplication{
-		WorkerID:      worker,
-		TaskID:        taskID,
+		WorkerId:      worker,
+		TaskId:        taskID,
 		ProposedPrice: 900,
 	}
 	appResp, err := msgServer.SubmitApplication(ctx, appMsg)
 	require.NoError(t, err)
 
 	acceptMsg := &types.MsgAcceptApplication{
-		RequesterID:   creator,
-		ApplicationID: appResp.ApplicationID,
+		RequesterId:   creator,
+		ApplicationId: appResp.ApplicationId,
 	}
 	_, err = msgServer.AcceptApplication(ctx, acceptMsg)
 	require.NoError(t, err)
 
 	// Start task
 	startMsg := &types.MsgStartTask{
-		WorkerID: worker,
-		TaskID:   taskID,
+		WorkerId: worker,
+		TaskId:   taskID,
 	}
 	_, err = msgServer.StartTask(ctx, startMsg)
 	require.NoError(t, err)
 
 	// Submit milestone
 	submitMsg := &types.MsgSubmitMilestone{
-		WorkerID:     worker,
-		TaskID:       taskID,
-		MilestoneID:  "ms-1",
+		WorkerId:     worker,
+		TaskId:       taskID,
+		MilestoneId:  "ms-1",
 		Deliverables: "Completed work",
 	}
 	_, err = msgServer.SubmitMilestone(ctx, submitMsg)
@@ -1039,9 +1050,9 @@ func TestMsgServer_ApproveMilestone_Success(t *testing.T) {
 
 	// Approve milestone
 	approveMsg := &types.MsgApproveMilestone{
-		RequesterID: creator,
-		TaskID:      taskID,
-		MilestoneID: "ms-1",
+		RequesterId: creator,
+		TaskId:      taskID,
+		MilestoneId: "ms-1",
 	}
 
 	resp, err := msgServer.ApproveMilestone(ctx, approveMsg)
@@ -1060,11 +1071,12 @@ func TestMsgServer_RejectMilestone_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Milestone Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 		Milestones: []types.Milestone{
 			{
-				ID:     "ms-1",
+				Id:     "ms-1",
 				Title:  "Phase 1",
 				Amount: 1000,
 				Order:  1,
@@ -1074,44 +1086,44 @@ func TestMsgServer_RejectMilestone_Success(t *testing.T) {
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Submit and accept application
 	appMsg := &types.MsgSubmitApplication{
-		WorkerID:      worker,
-		TaskID:        taskID,
+		WorkerId:      worker,
+		TaskId:        taskID,
 		ProposedPrice: 900,
 	}
 	appResp, err := msgServer.SubmitApplication(ctx, appMsg)
 	require.NoError(t, err)
 
 	acceptMsg := &types.MsgAcceptApplication{
-		RequesterID:   creator,
-		ApplicationID: appResp.ApplicationID,
+		RequesterId:   creator,
+		ApplicationId: appResp.ApplicationId,
 	}
 	_, err = msgServer.AcceptApplication(ctx, acceptMsg)
 	require.NoError(t, err)
 
 	// Start task
 	startMsg := &types.MsgStartTask{
-		WorkerID: worker,
-		TaskID:   taskID,
+		WorkerId: worker,
+		TaskId:   taskID,
 	}
 	_, err = msgServer.StartTask(ctx, startMsg)
 	require.NoError(t, err)
 
 	// Submit milestone
 	submitMsg := &types.MsgSubmitMilestone{
-		WorkerID:     worker,
-		TaskID:       taskID,
-		MilestoneID:  "ms-1",
+		WorkerId:     worker,
+		TaskId:       taskID,
+		MilestoneId:  "ms-1",
 		Deliverables: "Completed work",
 	}
 	_, err = msgServer.SubmitMilestone(ctx, submitMsg)
@@ -1119,9 +1131,9 @@ func TestMsgServer_RejectMilestone_Success(t *testing.T) {
 
 	// Reject milestone
 	rejectMsg := &types.MsgRejectMilestone{
-		RequesterID: creator,
-		TaskID:      taskID,
-		MilestoneID: "ms-1",
+		RequesterId: creator,
+		TaskId:      taskID,
+		MilestoneId: "ms-1",
 		Reason:      "Needs more work",
 	}
 
@@ -1141,11 +1153,12 @@ func TestMsgServer_SubmitRating_Success(t *testing.T) {
 		Creator:     creator,
 		Title:       "Task for Rating",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 		Milestones: []types.Milestone{
 			{
-				ID:     "ms-1",
+				Id:     "ms-1",
 				Title:  "Phase 1",
 				Amount: 1000,
 				Order:  1,
@@ -1155,63 +1168,63 @@ func TestMsgServer_SubmitRating_Success(t *testing.T) {
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Submit and accept application
 	appMsg := &types.MsgSubmitApplication{
-		WorkerID:      worker,
-		TaskID:        taskID,
+		WorkerId:      worker,
+		TaskId:        taskID,
 		ProposedPrice: 900,
 	}
 	appResp, err := msgServer.SubmitApplication(ctx, appMsg)
 	require.NoError(t, err)
 
 	acceptMsg := &types.MsgAcceptApplication{
-		RequesterID:   creator,
-		ApplicationID: appResp.ApplicationID,
+		RequesterId:   creator,
+		ApplicationId: appResp.ApplicationId,
 	}
 	_, err = msgServer.AcceptApplication(ctx, acceptMsg)
 	require.NoError(t, err)
 
 	// Start task
 	startMsg := &types.MsgStartTask{
-		WorkerID: worker,
-		TaskID:   taskID,
+		WorkerId: worker,
+		TaskId:   taskID,
 	}
 	_, err = msgServer.StartTask(ctx, startMsg)
 	require.NoError(t, err)
 
 	// Submit and approve milestone (completes task)
 	submitMsg := &types.MsgSubmitMilestone{
-		WorkerID:     worker,
-		TaskID:       taskID,
-		MilestoneID:  "ms-1",
+		WorkerId:     worker,
+		TaskId:       taskID,
+		MilestoneId:  "ms-1",
 		Deliverables: "Completed work",
 	}
 	_, err = msgServer.SubmitMilestone(ctx, submitMsg)
 	require.NoError(t, err)
 
 	approveMsg := &types.MsgApproveMilestone{
-		RequesterID: creator,
-		TaskID:      taskID,
-		MilestoneID: "ms-1",
+		RequesterId: creator,
+		TaskId:      taskID,
+		MilestoneId: "ms-1",
 	}
 	_, err = msgServer.ApproveMilestone(ctx, approveMsg)
 	require.NoError(t, err)
 
 	// Submit rating
 	ratingMsg := &types.MsgSubmitRating{
-		TaskID:  taskID,
-		RaterID: creator,
-		RatedID: worker,
-		Ratings: map[string]int{
+		TaskId:  taskID,
+		RaterId: creator,
+		RatedId: worker,
+		Ratings: map[string]int32{
 			string(types.DimensionQuality):         5,
 			string(types.DimensionCommunication):   4,
 			string(types.DimensionTimeliness):      5,
@@ -1223,7 +1236,7 @@ func TestMsgServer_SubmitRating_Success(t *testing.T) {
 	resp, err := msgServer.SubmitRating(ctx, ratingMsg)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
-	require.NotEmpty(t, resp.RatingID)
+	require.NotEmpty(t, resp.RatingId)
 }
 
 func TestMsgServer_SubmitRating_TaskNotCompleted(t *testing.T) {
@@ -1236,26 +1249,27 @@ func TestMsgServer_SubmitRating_TaskNotCompleted(t *testing.T) {
 		Creator:     creator,
 		Title:       "Incomplete Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// Try to submit rating
 	ratingMsg := &types.MsgSubmitRating{
-		TaskID:  taskID,
-		RaterID: creator,
-		RatedID: worker,
-		Ratings: map[string]int{
+		TaskId:  taskID,
+		RaterId: creator,
+		RatedId: worker,
+		Ratings: map[string]int32{
 			string(types.DimensionQuality): 5,
 		},
 		Comment: "Great work!",
@@ -1277,11 +1291,12 @@ func TestMsgServer_FullWorkflow_OpenTask(t *testing.T) {
 		Creator:     creator,
 		Title:       "Full Workflow Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeOpen,
+		TaskType:    types.TaskTypeOpen,
 		Budget:      1000,
+		Deadline:    9999999999,
 		Milestones: []types.Milestone{
 			{
-				ID:     "ms-1",
+				Id:     "ms-1",
 				Title:  "Phase 1",
 				Amount: 1000,
 				Order:  1,
@@ -1291,20 +1306,20 @@ func TestMsgServer_FullWorkflow_OpenTask(t *testing.T) {
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// 2. Publish task
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// 3. Submit application
 	appMsg := &types.MsgSubmitApplication{
-		WorkerID:      worker,
-		TaskID:        taskID,
+		WorkerId:      worker,
+		TaskId:        taskID,
 		ProposedPrice: 900,
 	}
 	appResp, err := msgServer.SubmitApplication(ctx, appMsg)
@@ -1312,25 +1327,25 @@ func TestMsgServer_FullWorkflow_OpenTask(t *testing.T) {
 
 	// 4. Accept application
 	acceptMsg := &types.MsgAcceptApplication{
-		RequesterID:   creator,
-		ApplicationID: appResp.ApplicationID,
+		RequesterId:   creator,
+		ApplicationId: appResp.ApplicationId,
 	}
 	_, err = msgServer.AcceptApplication(ctx, acceptMsg)
 	require.NoError(t, err)
 
 	// 5. Start task
 	startMsg := &types.MsgStartTask{
-		WorkerID: worker,
-		TaskID:   taskID,
+		WorkerId: worker,
+		TaskId:   taskID,
 	}
 	_, err = msgServer.StartTask(ctx, startMsg)
 	require.NoError(t, err)
 
 	// 6. Submit milestone
 	submitMsg := &types.MsgSubmitMilestone{
-		WorkerID:     worker,
-		TaskID:       taskID,
-		MilestoneID:  "ms-1",
+		WorkerId:     worker,
+		TaskId:       taskID,
+		MilestoneId:  "ms-1",
 		Deliverables: "Completed work",
 	}
 	_, err = msgServer.SubmitMilestone(ctx, submitMsg)
@@ -1338,26 +1353,26 @@ func TestMsgServer_FullWorkflow_OpenTask(t *testing.T) {
 
 	// 7. Approve milestone
 	approveMsg := &types.MsgApproveMilestone{
-		RequesterID: creator,
-		TaskID:      taskID,
-		MilestoneID: "ms-1",
+		RequesterId: creator,
+		TaskId:      taskID,
+		MilestoneId: "ms-1",
 	}
 	_, err = msgServer.ApproveMilestone(ctx, approveMsg)
 	require.NoError(t, err)
 
 	// 8. Submit rating
 	ratingMsg := &types.MsgSubmitRating{
-		TaskID:  taskID,
-		RaterID: creator,
-		RatedID: worker,
-		Ratings: map[string]int{
+		TaskId:  taskID,
+		RaterId: creator,
+		RatedId: worker,
+		Ratings: map[string]int32{
 			string(types.DimensionQuality): 5,
 		},
 		Comment: "Excellent work!",
 	}
 	ratingResp, err := msgServer.SubmitRating(ctx, ratingMsg)
 	require.NoError(t, err)
-	require.NotEmpty(t, ratingResp.RatingID)
+	require.NotEmpty(t, ratingResp.RatingId)
 }
 
 func TestMsgServer_FullWorkflow_AuctionTask(t *testing.T) {
@@ -1373,33 +1388,34 @@ func TestMsgServer_FullWorkflow_AuctionTask(t *testing.T) {
 		Creator:     creator,
 		Title:       "Auction Workflow Task",
 		Description: "Description",
-		TaskTypeVal: types.TaskTypeAuction,
+		TaskType:    types.TaskTypeAuction,
 		Budget:      5000,
+		Deadline:    9999999999,
 	}
 	createResp, err := msgServer.CreateTask(ctx, createMsg)
 	require.NoError(t, err)
-	taskID := createResp.TaskID
+	taskID := createResp.TaskId
 
 	// 2. Publish task (creates auction)
 	publishMsg := &types.MsgPublishTask{
 		Creator: creator,
-		TaskID:  taskID,
+		TaskId:  taskID,
 	}
 	_, err = msgServer.PublishTask(ctx, publishMsg)
 	require.NoError(t, err)
 
 	// 3. Submit bids (must be <= reserve price which is budget/2 = 2500)
 	bidMsg1 := &types.MsgSubmitBid{
-		WorkerID: worker1,
-		TaskID:   taskID,
+		WorkerId: worker1,
+		TaskId:   taskID,
 		Amount:   2500,
 	}
 	_, err = msgServer.SubmitBid(ctx, bidMsg1)
 	require.NoError(t, err)
 
 	bidMsg2 := &types.MsgSubmitBid{
-		WorkerID: worker2,
-		TaskID:   taskID,
+		WorkerId: worker2,
+		TaskId:   taskID,
 		Amount:   2400, // Lower bid wins
 	}
 	_, err = msgServer.SubmitBid(ctx, bidMsg2)
@@ -1407,19 +1423,19 @@ func TestMsgServer_FullWorkflow_AuctionTask(t *testing.T) {
 
 	// 4. Close auction
 	closeMsg := &types.MsgCloseAuction{
-		RequesterID: creator,
-		TaskID:      taskID,
+		RequesterId: creator,
+		TaskId:      taskID,
 	}
 	closeResp, err := msgServer.CloseAuction(ctx, closeMsg)
 	require.NoError(t, err)
-	require.NotEmpty(t, closeResp.WinnerID)
+	require.NotEmpty(t, closeResp.WinnerId)
 	// Note: The winner is the lowest bidder, but bid IDs may conflict due to same block height
 	// The key point is that an auction closed successfully with a winner
 
 	// 5. Start task
 	startMsg := &types.MsgStartTask{
-		WorkerID: closeResp.WinnerID,
-		TaskID:   taskID,
+		WorkerId: closeResp.WinnerId,
+		TaskId:   taskID,
 	}
 	_, err = msgServer.StartTask(ctx, startMsg)
 	require.NoError(t, err)

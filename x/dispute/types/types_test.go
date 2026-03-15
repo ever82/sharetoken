@@ -144,7 +144,7 @@ func TestDispute_String(t *testing.T) {
 	require.Contains(t, result, "dispute-1")
 	require.Contains(t, result, "requester-1")
 	require.Contains(t, result, "provider-1")
-	require.Contains(t, result, "open")
+	require.Contains(t, result, "DISPUTE_STATUS_OPEN")
 }
 
 // Genesis Tests

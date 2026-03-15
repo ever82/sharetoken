@@ -11,9 +11,16 @@ const (
 	TaskTypeAuction = TaskType_TASK_TYPE_AUCTION
 
 	// Application statuses
-	ApplicationStatusPending  = ApplicationStatus_APPLICATION_STATUS_PENDING
-	ApplicationStatusAccepted = ApplicationStatus_APPLICATION_STATUS_ACCEPTED
-	ApplicationStatusRejected = ApplicationStatus_APPLICATION_STATUS_REJECTED
+	ApplicationStatusPending   = ApplicationStatus_APPLICATION_STATUS_PENDING
+	ApplicationStatusAccepted  = ApplicationStatus_APPLICATION_STATUS_ACCEPTED
+	ApplicationStatusRejected  = ApplicationStatus_APPLICATION_STATUS_REJECTED
+	ApplicationStatusWithdrawn = ApplicationStatus_APPLICATION_STATUS_WITHDRAWN
+
+	// Rating dimensions
+	DimensionQuality         = "quality"
+	DimensionCommunication   = "communication"
+	DimensionTimeliness      = "timeliness"
+	DimensionProfessionalism = "professionalism"
 )
 
 // Validate validates an application
@@ -26,6 +33,9 @@ func (a Application) Validate() error {
 	}
 	if a.WorkerId == "" {
 		return errors.New("worker ID cannot be empty")
+	}
+	if a.ProposedPrice == 0 {
+		return errors.New("proposed price must be greater than 0")
 	}
 	return nil
 }

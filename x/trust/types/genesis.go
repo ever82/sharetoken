@@ -22,7 +22,7 @@ func ValidateGenesis(gs GenesisState) error {
 			return fmt.Errorf("duplicate MQ score for address: %s", score.Address)
 		}
 		seenAddresses[score.Address] = true
-		if score.Score < 0 || score.Score > 1000 {
+		if score.Score < 0 || score.Score > 100 {
 			return fmt.Errorf("MQ score out of range for address %s: %d", score.Address, score.Score)
 		}
 	}

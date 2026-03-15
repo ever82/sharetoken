@@ -18,7 +18,8 @@ func TestNewPrice(t *testing.T) {
 	require.True(t, price.Price.Equal(sdk.NewDec(10)))
 	require.Equal(t, types.PriceSourceChainlink, price.Source)
 	require.Equal(t, int32(95), price.Confidence)
-	require.NotZero(t, price.Timestamp)
+	// Timestamp is set to 0 by default (not automatically set)
+	require.Equal(t, int64(0), price.Timestamp)
 }
 
 func TestPrice_ValidateBasic(t *testing.T) {
@@ -34,6 +35,7 @@ func TestPrice_ValidateBasic(t *testing.T) {
 				Symbol:     "STT",
 				Price:      sdk.NewDec(10),
 				Confidence: 95,
+				Source:     types.PriceSourceChainlink,
 			},
 			wantErr: false,
 		},
@@ -43,6 +45,7 @@ func TestPrice_ValidateBasic(t *testing.T) {
 				Symbol:     "STT",
 				Price:      sdk.NewDec(0),
 				Confidence: 95,
+				Source:     types.PriceSourceChainlink,
 			},
 			wantErr: false,
 		},
@@ -52,6 +55,7 @@ func TestPrice_ValidateBasic(t *testing.T) {
 				Symbol:     "STT",
 				Price:      sdk.NewDec(10),
 				Confidence: 0,
+				Source:     types.PriceSourceChainlink,
 			},
 			wantErr: false,
 		},
@@ -61,6 +65,7 @@ func TestPrice_ValidateBasic(t *testing.T) {
 				Symbol:     "STT",
 				Price:      sdk.NewDec(10),
 				Confidence: 100,
+				Source:     types.PriceSourceChainlink,
 			},
 			wantErr: false,
 		},
@@ -70,6 +75,7 @@ func TestPrice_ValidateBasic(t *testing.T) {
 				Symbol:     "",
 				Price:      sdk.NewDec(10),
 				Confidence: 95,
+				Source:     types.PriceSourceChainlink,
 			},
 			wantErr: true,
 			errType: types.ErrInvalidSymbol,
@@ -80,6 +86,7 @@ func TestPrice_ValidateBasic(t *testing.T) {
 				Symbol:     "STT",
 				Price:      sdk.Dec{},
 				Confidence: 95,
+				Source:     types.PriceSourceChainlink,
 			},
 			wantErr: true,
 			errType: types.ErrInvalidPrice,
@@ -90,6 +97,7 @@ func TestPrice_ValidateBasic(t *testing.T) {
 				Symbol:     "STT",
 				Price:      sdk.NewDec(-10),
 				Confidence: 95,
+				Source:     types.PriceSourceChainlink,
 			},
 			wantErr: true,
 			errType: types.ErrInvalidPrice,
@@ -100,6 +108,7 @@ func TestPrice_ValidateBasic(t *testing.T) {
 				Symbol:     "STT",
 				Price:      sdk.NewDec(10),
 				Confidence: -1,
+				Source:     types.PriceSourceChainlink,
 			},
 			wantErr: true,
 			errType: types.ErrLowConfidence,
@@ -110,6 +119,7 @@ func TestPrice_ValidateBasic(t *testing.T) {
 				Symbol:     "STT",
 				Price:      sdk.NewDec(10),
 				Confidence: 101,
+				Source:     types.PriceSourceChainlink,
 			},
 			wantErr: true,
 			errType: types.ErrLowConfidence,
@@ -187,7 +197,7 @@ func TestPrice_String(t *testing.T) {
 	require.Contains(t, result, "STT")
 	require.Contains(t, result, "10")
 	require.Contains(t, result, "95")
-	require.Contains(t, result, "chainlink")
+	require.Contains(t, result, "PRICE_SOURCE_CHAINLINK")
 }
 
 func TestPriceSourceFromString(t *testing.T) {
@@ -285,7 +295,9 @@ func TestDefaultGenesis(t *testing.T) {
 
 	require.NotNil(t, genesis)
 	require.NotNil(t, genesis.Prices)
-	require.Empty(t, genesis.Prices)
+	// Default genesis now includes STT/USD price
+	require.Len(t, genesis.Prices, 1)
+	require.Equal(t, "STT/USD", genesis.Prices[0].Symbol)
 }
 
 func TestValidateGenesis(t *testing.T) {

@@ -58,10 +58,10 @@ func TestCalculateResult(t *testing.T) {
 
 	result := dispute.CalculateResult()
 	require.Equal(t, "requester", result.Decision)
-	require.True(t, result.RequesterVotes == "2")
-	require.True(t, result.ProviderVotes == "1")
-	require.True(t, result.SplitVotes == "1")
-	require.True(t, result.TotalWeight == "4")
+	require.Equal(t, "2.000000000000000000", result.RequesterVotes)
+	require.Equal(t, "1.000000000000000000", result.ProviderVotes)
+	require.Equal(t, "1.000000000000000000", result.SplitVotes)
+	require.Equal(t, "4.000000000000000000", result.TotalWeight)
 }
 
 func TestCalculateResultSplit(t *testing.T) {
